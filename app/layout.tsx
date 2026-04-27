@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Quicksand, Figtree } from "next/font/google";
 import "./globals.css";
+import "@/lib/env";
 
 const quicksand = Quicksand({
   subsets: ["latin"],
