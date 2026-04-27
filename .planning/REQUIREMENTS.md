@@ -187,13 +187,100 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| (populated by gsd-roadmapper) | — | Pending |
+| INFRA-01 | Phase 1 | Pending |
+| INFRA-02 | Phase 1 | Pending |
+| INFRA-03 | Phase 1 | Pending |
+| INFRA-04 | Phase 1 | Pending |
+| INFRA-05 | Phase 1 | Pending |
+| INFRA-06 | Phase 1 | Pending |
+| INFRA-07 | Phase 1 | Pending |
+| INFRA-08 | Phase 1 | Pending |
+| HERO-01 | Phase 2 | Pending |
+| HERO-02 | Phase 2 | Pending |
+| HERO-03 | Phase 2 | Pending |
+| HERO-04 | Phase 2 | Pending |
+| HERO-05 | Phase 2 | Pending |
+| HERO-06 | Phase 2 | Pending |
+| HERO-07 | Phase 2 | Pending |
+| MOB-01 | Phase 2 | Pending |
+| MOB-02 | Phase 2 | Pending |
+| MOB-03 | Phase 2 | Pending |
+| MOB-04 | Phase 2 | Pending |
+| FOLD-01 | Phase 2 | Pending |
+| FOLD-02 | Phase 2 | Pending |
+| FOLD-03 | Phase 2 | Pending |
+| FOLD-04 | Phase 2 | Pending |
+| PERF-01 | Phase 2 | Pending |
+| PERF-02 | Phase 2 | Pending |
+| PERF-03 | Phase 2 | Pending |
+| FORM-01 | Phase 3 | Pending |
+| FORM-02 | Phase 3 | Pending |
+| FORM-03 | Phase 3 | Pending |
+| FORM-04 | Phase 3 | Pending |
+| FORM-05 | Phase 3 | Pending |
+| FORM-06 | Phase 3 | Pending |
+| FORM-07 | Phase 3 | Pending |
+| FORM-08 | Phase 3 | Pending |
+| FORM-09 | Phase 3 | Pending |
+| POST-01 | Phase 3 | Pending |
+| POST-02 | Phase 3 | Pending |
+| POST-03 | Phase 3 | Pending |
+| POST-04 | Phase 3 | Pending |
+| SPAM-01 | Phase 3 | Pending |
+| SPAM-02 | Phase 3 | Pending |
+| EMAIL-01 | Phase 4 | Pending |
+| EMAIL-02 | Phase 4 | Pending |
+| EMAIL-03 | Phase 4 | Pending |
+| EMAIL-04 | Phase 4 | Pending |
+| EMAIL-05 | Phase 4 | Pending |
+| EMAIL-06 | Phase 4 | Pending |
+| EMAIL-07 | Phase 4 | Pending |
+| EMAIL-08 | Phase 4 | Pending |
+| EMAIL-09 | Phase 4 | Pending |
+| STORE-01 | Phase 4 | Pending |
+| STORE-02 | Phase 4 | Pending |
+| STORE-03 | Phase 4 | Pending |
+| STORE-04 | Phase 4 | Pending |
+| STORE-05 | Phase 4 | Pending |
+| SPAM-03 | Phase 4 | Pending |
+| SPAM-04 | Phase 4 | Pending |
+| LEGAL-01 | Phase 5 | Pending |
+| LEGAL-02 | Phase 5 | Pending |
+| LEGAL-03 | Phase 5 | Pending |
+| LEGAL-04 | Phase 5 | Pending |
+| LEGAL-05 | Phase 5 | Pending |
+| LEGAL-06 | Phase 5 | Pending |
+| LEGAL-07 | Phase 5 | Pending |
+| LEGAL-08 | Phase 5 | Pending |
+| SEO-01 | Phase 5 | Pending |
+| SEO-02 | Phase 5 | Pending |
+| SEO-03 | Phase 5 | Pending |
+| SEO-04 | Phase 5 | Pending |
+| SEO-05 | Phase 5 | Pending |
+| SEO-06 | Phase 5 | Pending |
+| SEO-07 | Phase 5 | Pending |
+| SEO-08 | Phase 5 | Pending |
+| ANLY-01 | Phase 5 | Pending |
+| ANLY-02 | Phase 5 | Pending |
+| ANLY-03 | Phase 5 | Pending |
+| ANLY-04 | Phase 5 | Pending |
+| ANLY-05 | Phase 5 | Pending |
+| ANLY-06 | Phase 5 | Pending |
+| DEPLOY-01 | Phase 6 | Pending |
+| DEPLOY-02 | Phase 6 | Pending |
+| DEPLOY-03 | Phase 6 | Pending |
+| DEPLOY-04 | Phase 6 | Pending |
+| DEPLOY-05 | Phase 6 | Pending |
+| DEPLOY-06 | Phase 6 | Pending |
+| DEPLOY-07 | Phase 6 | Pending |
+| DEPLOY-08 | Phase 6 | Pending |
+| DEPLOY-09 | Phase 6 | Pending |
 
 **Coverage:**
-- v1 requirements: 73 total
-- Mapped to phases: 0 (pending roadmap)
-- Unmapped: 73
+- v1 requirements: 88 total
+- Mapped to phases: 88 (100%)
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-04-27*
-*Last updated: 2026-04-27 after initial definition*
+*Last updated: 2026-04-27 after roadmap creation (88/88 mapped to 6 phases)*
