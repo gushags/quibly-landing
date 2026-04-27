@@ -31,12 +31,13 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. shadcn button/input/label/sonner/form components are installed and styled to Quibly tokens (no default shadcn neutral).
   4. The app crashes at boot with a helpful Zod error if any Resend/Upstash env var is missing — never on first signup.
   5. A `gitleaks` pre-commit hook blocks any attempt to commit a string matching `re_*` (Resend key) or other secret patterns.
-**Plans**: 5 plans
+**Plans**: 6 plans
   - [x] 01-01-PLAN.md — Scaffold + env validation foundation (package.json, configs, lib/utils, lib/env, .env.example)
   - [x] 01-02-PLAN.md — Brand tokens + fonts + mascot port (globals.css, layout.tsx, QuibsIcon, QuibsAvatar, raw SVG)
   - [x] 01-03-PLAN.md — shadcn UI components (button, input, label, sonner — form deferred to Phase 3)
   - [x] 01-04-PLAN.md — Linting + secrets toolchain (ESLint custom rule, husky, gitleaks)
   - [x] 01-05-PLAN.md — Smoke-test page + visual verification + Vercel link (autonomous: false)
+  - [ ] 01-06-PLAN.md — Gap closure: wire `@/lib/env` into `app/layout.tsx` so SC #4 (boot-crash on missing env) is observable from a production code path
 
 ### Phase 2: Static Landing Page (No Form)
 **Goal**: The full marketing surface — hero, "Why Quibly", founder voice, footer — rendered as pure server-component markup that proves Lighthouse mobile ≥90 before any client JavaScript ships.
@@ -107,7 +108,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Scaffold + Brand Token Parity | 0/5 | Not started | - |
+| 1. Scaffold + Brand Token Parity | 0/6 | Not started | - |
 | 2. Static Landing Page | 0/TBD | Not started | - |
 | 3. Email Capture Form (Stub Action) | 0/TBD | Not started | - |
 | 4. Resend Wiring + Bot Protection + Welcome Email | 0/TBD | Not started | - |
