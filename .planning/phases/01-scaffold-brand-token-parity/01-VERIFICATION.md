@@ -2,9 +2,10 @@
 phase: 01-scaffold-brand-token-parity
 verified: 2026-04-27T20:55:00Z
 re_verified: 2026-04-27T21:35:00Z
-status: human_needed
+status: passed
 score: 5/5 ROADMAP success criteria verified
-overrides_applied: 0
+overrides_applied: 1
+override_note: "User approved (2026-04-27) on the basis of the verifier-level husky-wrapper simulation; the real-`git commit` gitleaks block test remains tracked in 01-HUMAN-UAT.md as belt-and-suspenders confirmation, not a gate."
 re_verification:
   previous_status: gaps_found
   previous_score: 4/5
