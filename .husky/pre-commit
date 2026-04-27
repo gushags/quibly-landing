@@ -1,0 +1,14 @@
+#!/usr/bin/env sh
+
+# Pre-commit hook — D-14 + INFRA-08 success criterion.
+# Order matters: gitleaks runs FIRST so a secret leak blocks the commit
+# even if subsequent checks would have errored out for unrelated reasons.
+
+# 1. Block secret commits (Resend re_*, Upstash AYxA*, Upstash REST URLs).
+gitleaks protect --staged --redact -c .gitleaks.toml
+
+# 2. Type-check.
+npm run check
+
+# 3. Lint (includes the custom no-raw-process-env rule from Plan 01-04 Task 1).
+npm run lint
