@@ -33,8 +33,8 @@ Decimal phases appear between their surrounding integers in numeric order.
   5. A `gitleaks` pre-commit hook blocks any attempt to commit a string matching `re_*` (Resend key) or other secret patterns.
 **Plans**: 5 plans
   - [x] 01-01-PLAN.md — Scaffold + env validation foundation (package.json, configs, lib/utils, lib/env, .env.example)
-  - [ ] 01-02-PLAN.md — Brand tokens + fonts + mascot port (globals.css, layout.tsx, QuibsIcon, QuibsAvatar, raw SVG)
-  - [ ] 01-03-PLAN.md — shadcn UI components (button, input, label, sonner — form deferred to Phase 3)
+  - [x] 01-02-PLAN.md — Brand tokens + fonts + mascot port (globals.css, layout.tsx, QuibsIcon, QuibsAvatar, raw SVG)
+  - [x] 01-03-PLAN.md — shadcn UI components (button, input, label, sonner — form deferred to Phase 3)
   - [ ] 01-04-PLAN.md — Linting + secrets toolchain (ESLint custom rule, husky, gitleaks)
   - [ ] 01-05-PLAN.md — Smoke-test page + visual verification + Vercel link (autonomous: false)
 
