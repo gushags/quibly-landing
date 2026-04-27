@@ -14,7 +14,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **INFRA-03**: Quicksand (headings) + Figtree (body) loaded via `next/font/google` with `display: 'swap'`, variable axis, `subsets: ['latin']`
 - [ ] **INFRA-04**: Quibs Q-face mascot SVG available in `public/` and as a reusable React component
 - [ ] **INFRA-05**: shadcn/ui CLI v4 initialized with button, input, label, sonner, form components
-- [ ] **INFRA-06**: `lib/env.ts` Zod-validated environment variables (no raw `process.env` reads in app code)
+- [x] **INFRA-06**: `lib/env.ts` Zod-validated environment variables (no raw `process.env` reads in app code)
 - [ ] **INFRA-07**: `import 'server-only'` guard on `lib/resend.ts` and any module touching `RESEND_API_KEY`
 - [ ] **INFRA-08**: `gitleaks` pre-commit hook prevents secret commits
 
@@ -192,7 +192,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | INFRA-03 | Phase 1 | Pending |
 | INFRA-04 | Phase 1 | Pending |
 | INFRA-05 | Phase 1 | Pending |
-| INFRA-06 | Phase 1 | Pending |
+| INFRA-06 | Phase 1 | Complete |
 | INFRA-07 | Phase 1 | Pending |
 | INFRA-08 | Phase 1 | Pending |
 | HERO-01 | Phase 2 | Pending |

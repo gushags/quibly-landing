@@ -37,7 +37,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   - [x] 01-03-PLAN.md — shadcn UI components (button, input, label, sonner — form deferred to Phase 3)
   - [x] 01-04-PLAN.md — Linting + secrets toolchain (ESLint custom rule, husky, gitleaks)
   - [x] 01-05-PLAN.md — Smoke-test page + visual verification + Vercel link (autonomous: false)
-  - [ ] 01-06-PLAN.md — Gap closure: wire `@/lib/env` into `app/layout.tsx` so SC #4 (boot-crash on missing env) is observable from a production code path
+  - [x] 01-06-PLAN.md — Gap closure: wire `@/lib/env` into `app/layout.tsx` so SC #4 (boot-crash on missing env) is observable from a production code path
 
 ### Phase 2: Static Landing Page (No Form)
 **Goal**: The full marketing surface — hero, "Why Quibly", founder voice, footer — rendered as pure server-component markup that proves Lighthouse mobile ≥90 before any client JavaScript ships.
