@@ -1,0 +1,52 @@
+# Quibly Landing — gitleaks custom ruleset
+# Extends gitleaks' built-in default rules with patterns for the
+# specific secrets this repo will handle (Resend + Upstash, Phase 4).
+#
+# Reference: D-14 in 01-CONTEXT.md.
+# Pre-commit invocation: gitleaks protect --staged --redact -c .gitleaks.toml
+
+[extend]
+useDefault = true
+
+# Resend API keys: re_ + 20+ base62 chars
+# Verified empirically — Resend keys begin with "re_" prefix.
+[[rules]]
+id = "resend-api-key"
+description = "Resend API key"
+regex = '''re_[A-Za-z0-9]{20,}'''
+keywords = ["re_"]
+
+# Upstash REST API tokens: AYxA prefix + 30+ base64-url chars
+[[rules]]
+id = "upstash-rest-token"
+description = "Upstash REST API token"
+regex = '''AYxA[A-Za-z0-9_-]{30,}'''
+keywords = ["AYxA"]
+
+# Upstash REST URL host (catches accidental .env.local commits)
+[[rules]]
+id = "upstash-rest-url"
+description = "Upstash REST URL"
+regex = '''https://[a-z0-9-]+\.upstash\.io'''
+keywords = ["upstash.io"]
+
+# Allowlist: documentation files and the .env.example template
+# (the placeholder values in .env.example match our regex by length but
+#  are deliberately deterministic placeholders — never real secrets).
+[allowlist]
+description = "Documentation and example files — placeholders only"
+paths = [
+  '''(.+/)?\.env\.example$''',
+  '''(.+/)?\.gitleaks\.toml$''',
+  '''(.+/)?CLAUDE\.md$''',
+  '''(.+/)?README\.md$''',
+  '''(.+/)?\.planning/.*\.md$''',
+]
+# Also allowlist the literal placeholder strings used in .env.example
+# so an inline `cat .env.example | git apply` style edit cannot trick the
+# regex into thinking the placeholder is a real secret.
+regexes = [
+  '''re_xxxxxxxxxxxxxxxxxxxxx''',
+  '''AYxAxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx''',
+  '''your-instance\.upstash\.io''',
+]
