@@ -36,7 +36,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   - [x] 01-02-PLAN.md — Brand tokens + fonts + mascot port (globals.css, layout.tsx, QuibsIcon, QuibsAvatar, raw SVG)
   - [x] 01-03-PLAN.md — shadcn UI components (button, input, label, sonner — form deferred to Phase 3)
   - [x] 01-04-PLAN.md — Linting + secrets toolchain (ESLint custom rule, husky, gitleaks)
-  - [ ] 01-05-PLAN.md — Smoke-test page + visual verification + Vercel link (autonomous: false)
+  - [x] 01-05-PLAN.md — Smoke-test page + visual verification + Vercel link (autonomous: false)
 
 ### Phase 2: Static Landing Page (No Form)
 **Goal**: The full marketing surface — hero, "Why Quibly", founder voice, footer — rendered as pure server-component markup that proves Lighthouse mobile ≥90 before any client JavaScript ships.
