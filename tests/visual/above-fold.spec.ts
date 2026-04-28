@@ -28,7 +28,7 @@ test.describe("Phase 2 above-fold + tap-target invariants", () => {
     const h1 = page.locator("h1").first()
     const subHeadline = page.locator("section p").first() // first <p> inside any <section> = sub-headline
     const cta = page.locator('[data-slot="button"][data-size="hero"]').first()
-    const microcopy = page.locator("text=Launching Summer 2026")
+    const microcopy = page.locator("section").first().locator("text=Launching Summer 2026")
 
     for (const [name, locator] of [
       ["h1", h1],
