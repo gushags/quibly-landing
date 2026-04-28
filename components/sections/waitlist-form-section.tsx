@@ -43,6 +43,9 @@ export function WaitlistFormSection() {
   // prop to the Client Component. This is CD-02's "hidden input populated server-side"
   // implemented via the RSC-prop mechanism (RESEARCH.md Pitfall 2) rather than
   // computing it inside the Client Component, which would hydration-mismatch.
+  // The intentional per-request impurity is the whole point — every server render
+  // plants a fresh timestamp the time-trap can compare against.
+  // eslint-disable-next-line react-hooks/purity -- intentional per-request RSC value (Pitfall 2 / CD-02)
   const renderedAt = Date.now()
 
   return (
