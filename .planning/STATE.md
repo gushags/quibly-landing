@@ -90,6 +90,10 @@ Items acknowledged and carried forward as v2 / post-launch:
 | Optimization | V2-05: A/B testing infrastructure | v2 | Roadmap creation |
 | Optimization | V2-06: Internationalization | v2 | Roadmap creation |
 | Optimization | V2-07: Cloudflare Turnstile (signal-gated) | v2 | Roadmap creation |
+| CI Gate (Phase 02) | 02-05 Task 4: Generate `VERCEL_TOKEN` + add as GitHub repo secret | Pending follow-up PR session | Phase 02 execution |
+| CI Gate (Phase 02) | 02-05 Task 4: Configure D-34 branch protection on `main` (require `Lighthouse CI / lighthouse` status check) | Pending follow-up PR session | Phase 02 execution |
+| CI Gate (Phase 02) | 02-05 Task 4: Push branch + open PR to trigger workflow, confirm green run + merge enforcement | Pending follow-up PR session | Phase 02 execution |
+| CI Gate (Phase 02) | 02-05 Task 4 (optional): Install lighthouse-ci GitHub App + add `LHCI_GITHUB_APP_TOKEN` for richer PR annotations | Optional | Phase 02 execution |
 
 ## Session Continuity
 
