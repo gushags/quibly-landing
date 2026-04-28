@@ -4,12 +4,17 @@ import { expect, test } from "@playwright/test"
  * Above-the-fold composition assertion at 320×568 (concern #3 from cross-AI review).
  *
  * Validates:
- *   1. The hero <h1>, sub-headline <p>, disabled CTA <button>, and microcopy <p>
+ *   1. The hero <h1>, sub-headline <p>, hero CTA pill, and microcopy <p>
  *      all have a bounding-box `y + height <= 568` — i.e. fit above the fold.
  *   2. The hero <h1>'s painted area is GREATER than the sub-headline <p>'s painted area
  *      at 320px (defends LCP-as-H1 against the painted-area heuristic — concern #2).
  *   3. Footer <a> link bounding-box height is >= 48px (MOB-02 / D-32 — concern #4).
  *   4. Footer <a> links surface a visible focus ring on Tab navigation (concern #10).
+ *
+ * Phase 3 update (Plan 04, Rule 3 fix — Pitfall 9): hero CTA is now an
+ * <a href="#waitlist"> via <Button asChild> (D-01). The selector
+ * [data-slot="button"][data-size="hero"]:first switches to the tag-agnostic
+ * data-attribute selector + .first() to pick the hero pill in document order.
  *
  * Pre-requisite: `npm run dev` (or `npm run build && npm run start`) running at :3000.
  */
@@ -22,7 +27,7 @@ test.describe("Phase 2 above-fold + tap-target invariants", () => {
   test("hero essentials fit above the 320×568 fold", async ({ page }) => {
     const h1 = page.locator("h1").first()
     const subHeadline = page.locator("section p").first() // first <p> inside any <section> = sub-headline
-    const cta = page.locator('button[aria-disabled="true"]').first()
+    const cta = page.locator('[data-slot="button"][data-size="hero"]').first()
     const microcopy = page.locator("text=Launching Summer 2026")
 
     for (const [name, locator] of [

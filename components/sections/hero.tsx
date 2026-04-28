@@ -16,8 +16,12 @@ const SUB_HEADLINE =
  *   D-31 — placeholder CTA renders disabled (post-review); replaces no-op self-anchor.
  *   D-04 — neutral foreground heading typography, no per-token accent color.
  *
- * Phase 3 will replace the disabled CTA control with the form's real submit (copy
- * reverts to FORM-04 verbatim).
+ * Phase 3 flipped the disabled placeholder CTA back to a smooth-scroll anchor
+ * (<a href="#waitlist">) per Phase 3 D-01 — overrides Phase 2 D-31 for the
+ * hero only because the WaitlistFormSection now hosts a real form below the fold,
+ * making the anchor meaningful UX (cold visitor → form). asChild + Slot.Root
+ * preserves the visual pill identity (28px radius, teal bg, ~52px tall — Phase 2
+ * D-06 / D-07 lock) while the rendered DOM is <a> not <button>.
  */
 export function Hero() {
   return (
@@ -36,8 +40,8 @@ export function Hero() {
         {SUB_HEADLINE}
       </p>
       <div className="mt-4 flex flex-col items-center">
-        <Button size="hero" variant="default" type="button" aria-disabled="true">
-          Form coming soon
+        <Button asChild size="hero" variant="default">
+          <a href="#waitlist">Join the waitlist</a>
         </Button>
         <p className="mt-3 text-sm text-muted-foreground">Launching Summer 2026</p>
       </div>
