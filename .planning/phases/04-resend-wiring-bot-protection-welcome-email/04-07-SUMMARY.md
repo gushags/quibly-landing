@@ -116,20 +116,86 @@ is observed by both the component file and the test assertions — no
 
 ### Task 2 — Day-1 probes (Resend duplicate response shape + email.bounced subType values)
 
-**Status:** Pending founder action.
+**Status:** COMPLETE (2026-04-28).
 
 **Probe 1 — Resend duplicate response shape (5 min):**
-- Empirical `error.name`: _TBD_
-- Empirical `error.message`: _TBD_
-- Final `isDuplicateContactError()` body: _TBD_ (current shipped fallback matches
-  `/already (exists|subscribed)|duplicate/i.test(error.message ?? '')` — Plan 05)
-- `npm run test:unit -- join-waitlist-action` after probe-driven update: _TBD_
+
+**Empirical finding (overturned the documented assumption):** `resend.contacts.create({ audienceId, email, ... })` is **idempotent on email**. Submitting the same email twice returns success silently with the existing contact data — `error` is `null`, `data` is populated. **NO error is thrown on duplicate.**
+
+Evidence: two submissions of `probe-third-04-28@example.com` against the preview audience both logged:
+```
+[analytics] waitlist_signup { duplicate: false }
+```
+No `contacts_create_failed` console line appeared on the second submission. Resend Dashboard → preview audience showed exactly **1 row** for that email after both submissions.
+
+**Implication:** the prior `isDuplicateContactError()` helper was dead code. Every duplicate submission was firing a redundant welcome email.
+
+**Fix applied (commit `3c42a28`):** replaced the error-shape detector with a **get-then-create** pattern:
+
+```typescript
+const { data: existingContact, error: getError } = await resend.contacts.get({
+  audienceId,
+  email,
+})
+if (getError && !isContactNotFoundError(getError)) { /* fatal */ }
+const isDuplicate = !!existingContact && !getError
+if (!isDuplicate) {
+  await resend.contacts.create({ audienceId, email, unsubscribed: false, properties: { consent_version } })
+}
+```
+
+A second probe captured the empirical 404 shape from `contacts.get`:
+```
+{ name: 'not_found', statusCode: 404, message: 'Contact not found' }
+```
+
+New helper `isContactNotFoundError` matches that shape (name-first with statusCode fallback). Tests updated in commit `3bb6865` — `npm run test:unit` exits 0 with 53 tests passing (one new coverage test added for the new branch).
 
 **Probe 2 — email.bounced subType values (15 min):**
-- Documented `bounce.subType` values for `bounce.type === 'Permanent'`: _TBD_
-- Documented `bounce.subType` values for `bounce.type === 'Temporary'`: _TBD_
-- Did the handler need extension (e.g., to treat `Suppressed`/`MessageRejected`/`MailFromDomainNotVerified` as permanent)? _TBD_
-- `npm run test:unit -- webhook-handler` after handler update: _TBD_
+
+Sources read:
+- Webhook event docs: https://resend.com/docs/webhooks/emails/bounced
+- Bounce Types & Subtypes (Dashboard): https://resend.com/docs/dashboard/emails/email-bounces
+
+**Findings:**
+
+The webhook docs schema for `email.bounced.data.bounce` describes:
+- `type` (string) — examples: `Permanent`, `Temporary`
+- `subType` (string) — examples: `Suppressed`, `MessageRejected`
+- `message` (string) — Detailed bounce message from receiving server
+
+The docs explicitly say "e.g.," for both `type` and `subType` — the examples are not exhaustive enumerations.
+
+The Dashboard "Email Bounces" page enumerates a richer taxonomy:
+- `Permanent` (hard bounce):
+  - `General` — generic hard bounce
+  - `NoEmail` — recipient address not extractable
+- `Transient` (soft bounce):  ← **note: docs use `Transient` here, not `Temporary`**
+  - `General` — generic soft bounce
+  - `MailboxFull`
+  - `MessageTooLarge`
+  - `ContentRejected`
+  - `AttachmentRejected`
+- `Undetermined` — bounce message lacked enough information
+
+This Dashboard page mixes display-layer and payload-layer terminology and is **not** the contractual webhook payload reference. The webhook example uses `type: "Permanent"` and `subType: "Suppressed"` — neither of which appears in the Dashboard taxonomy verbatim. Net: the contractual values for the webhook payload `bounce.type` are documented as `Permanent` / `Temporary`; the rest is illustrative.
+
+**Decision: handler NOT extended.** Current logic — treat `bounce.type === 'Permanent'` as hard (mark unsubscribed), anything else as soft (log only) — matches the documented webhook contract. The richer Dashboard taxonomy is illustrative, not contractual. If real-world traffic surfaces `Transient`/`Suppressed`/etc. handling gaps post-launch, extend the handler then with empirical evidence.
+
+`npm run test:unit -- webhook-handler` continues to exit 0 with the existing 6 tests passing.
+
+### Bonus: Bug 2 — welcome email render failure
+
+While testing Probe 1, a second bug surfaced: `welcome_email_send_failed` was firing on every signup with:
+
+```
+Error: Failed to render React component. Make sure to install
+`@react-email/render` or `@react-email/components`.
+```
+
+Root cause: Resend's SDK does `await import("@react-email/render")` directly (`node_modules/resend/dist/index.cjs`) — it does NOT fall back to `@react-email/components` despite the misleading error message. The installed `@react-email/components@^1.0.12` does export a `render` function but Resend never reaches for it.
+
+**Fix applied (commit `3bba2cf`):** `npm install @react-email/render`. No code changes required; the SDK picks it up at runtime.
 
 ### Task 3 — Postal address sourced + wired to RESEND_FROM_POSTAL_ADDRESS (D-10)
 
