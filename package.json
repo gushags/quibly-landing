@@ -9,6 +9,7 @@
     "lint": "eslint",
     "check": "tsc --noEmit",
     "test:e2e": "playwright test",
+    "lh:ci": "lhci autorun --config=.lighthouserc.json",
     "prepare": "husky"
   },
   "dependencies": {
@@ -26,6 +27,7 @@
     "zod": "^4.0.0"
   },
   "devDependencies": {
+    "@lhci/cli": "^0.15.1",
     "@playwright/test": "^1.59.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
