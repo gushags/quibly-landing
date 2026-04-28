@@ -52,14 +52,33 @@ jobs:
       - name: Install Playwright browsers
         if: steps.playwright-cache.outputs.cache-hit != 'true'
         run: npx playwright install --with-deps chromium
+      # CR-01: lib/env.ts parses at module load and throws if any RESEND_*/UPSTASH_*
+      # var is missing — `next build` and `next start` both crash without these.
+      # Phase 3 doesn't exercise Resend/Upstash (stub action only), so these are
+      # syntactically-valid but non-functional placeholders sufficient for build +
+      # boot. Real values are wired in Phase 4 via Vercel/GitHub Actions secrets.
       - name: Build Next app
         run: npm run build
-      - name: Start Next server in background
-        run: npx next start &
-      - name: Wait for server
-        run: npx --yes wait-on http://localhost:3000 --timeout 30000
+        env:
+          RESEND_API_KEY: re_test_stub
+          RESEND_AUDIENCE_ID: aud_test_stub
+          RESEND_AUDIENCE_PREVIEW_ID: aud_test_preview_stub
+          RESEND_WEBHOOK_SECRET: whsec_test_stub
+          UPSTASH_REDIS_REST_URL: https://test.upstash.io
+          UPSTASH_REDIS_REST_TOKEN: test_token_stub
+      # CR-01: Playwright's `webServer` config (playwright.config.ts) boots
+      # `next start` and propagates startup failures to the test runner —
+      # replaces the prior `npx next start &` + `wait-on` pattern which masked
+      # background-process exits as step success.
       - name: Run Playwright tests
         run: npm run test:e2e
+        env:
+          RESEND_API_KEY: re_test_stub
+          RESEND_AUDIENCE_ID: aud_test_stub
+          RESEND_AUDIENCE_PREVIEW_ID: aud_test_preview_stub
+          RESEND_WEBHOOK_SECRET: whsec_test_stub
+          UPSTASH_REDIS_REST_URL: https://test.upstash.io
+          UPSTASH_REDIS_REST_TOKEN: test_token_stub
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
