@@ -65,7 +65,7 @@ Email clients strip external stylesheets; all spacing is declared inline.
 | Container max-width | 600px | Standard email-safe width |
 | Header strip height | 48px | Inherited from `marketing-app` WelcomeEmail pattern |
 | Content padding | 32px top/bottom, 24px left/right | Inherited from `marketing-app` WelcomeEmail pattern |
-| Paragraph margin-bottom | 12px | Readable paragraph rhythm at 14px body |
+| Paragraph margin-bottom | 16px | Readable paragraph rhythm at 14px body text |
 | HR margin | 24px top/bottom | Separates body from footer zone |
 
 ---
