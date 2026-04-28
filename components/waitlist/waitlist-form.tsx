@@ -53,18 +53,29 @@ export function WaitlistForm({ renderedAt }: { renderedAt: number }) {
 
   // D-12: server-error toast (status=error AND has message AND no fieldErrors).
   // Strict-Mode-safe: state === null on initial mount, guard fails, no toast.
-  // Each action resolution creates a new state object identity so the effect
-  // re-runs once per resolution (Pitfall 4).
+  // WR-01: track which state instance has been consumed to avoid double-toasting
+  // when the same error resolves twice in a row. useActionState returns a new
+  // object identity on every resolution even when the value is structurally
+  // identical, so a `[state]` dependency alone would fire on every retry.
+  const lastToastedStateRef = useRef<JoinWaitlistResult | null>(null)
   useEffect(() => {
+    if (state === lastToastedStateRef.current) return
     if (state?.status === 'error' && state.message && !state.fieldErrors) {
       toast.error(state.message)
+      lastToastedStateRef.current = state
     }
   }, [state])
 
   // CD-08: focus the success heading when transitioning to success.
+  // WR-01: guard against re-firing focus on every state resolution. The success
+  // branch unmounts the form today, so a re-fire is unobservable, but a future
+  // edit-and-resubmit variant would re-focus aggressively without this guard.
+  const focusedSuccessStateRef = useRef<JoinWaitlistResult | null>(null)
   useEffect(() => {
+    if (state === focusedSuccessStateRef.current) return
     if (state?.status === 'success' && successHeadingRef.current) {
       successHeadingRef.current.focus()
+      focusedSuccessStateRef.current = state
     }
   }, [state])
 
