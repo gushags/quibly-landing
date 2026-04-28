@@ -14,9 +14,16 @@ process.env.NEXT_PUBLIC_SITE_URL = 'https://test.useQuibly.com'
 // ─── Mocks ──────────────────────────────────────────────────────────────────
 
 // Mock the Resend SDK singleton (lib/resend.ts) so no real API calls are made.
+// Plan 04-07 Probe 1: contacts.create is idempotent on email — duplicate detection
+// happens via contacts.get (returns 404-shape error when contact does not exist).
+// Default `get` mock = "not found" → fresh signup path.
 vi.mock('@/lib/resend', () => ({
   resend: {
     contacts: {
+      get: vi.fn(async () => ({
+        data: null,
+        error: { name: 'not_found', statusCode: 404, message: 'Contact not found' },
+      })),
       create: vi.fn(async () => ({
         data: { id: 'contact_test_id', email: 'real@example.com', unsubscribed: false, createdAt: '' },
         error: null,
@@ -60,7 +67,7 @@ vi.mock('@/emails/WelcomeEmail', () => ({
 // ─── Dynamic imports (after mocks) ─────────────────────────────────────────
 
 let joinWaitlistAction: typeof import('@/app/actions/join-waitlist')['joinWaitlistAction']
-let resend: { contacts: { create: ReturnType<typeof vi.fn>; update: ReturnType<typeof vi.fn> }; emails: { send: ReturnType<typeof vi.fn> } }
+let resend: { contacts: { get: ReturnType<typeof vi.fn>; create: ReturnType<typeof vi.fn>; update: ReturnType<typeof vi.fn> }; emails: { send: ReturnType<typeof vi.fn> } }
 let rateLimitPerMinute: { limit: ReturnType<typeof vi.fn> }
 let rateLimitPerDay: { limit: ReturnType<typeof vi.fn> }
 let track: ReturnType<typeof vi.fn>
@@ -83,6 +90,11 @@ beforeAll(async () => {
 beforeEach(() => {
   vi.clearAllMocks()
   // Restore default mock returns after clearAllMocks resets implementations
+  // Default contacts.get = "not found" → fresh-signup path
+  vi.mocked(resend.contacts.get).mockResolvedValue({
+    data: null,
+    error: { name: 'not_found', statusCode: 404, message: 'Contact not found' },
+  } as never)
   vi.mocked(resend.contacts.create).mockResolvedValue({
     data: { id: 'contact_test_id', email: 'real@example.com', unsubscribed: false, createdAt: '' } as never,
     error: null,
@@ -303,10 +315,14 @@ describe('joinWaitlistAction (Phase 4 real pipeline)', () => {
     expect(sendArg.react.props.postalAddress.length).toBeGreaterThan(0)
   })
 
-  it('suppresses welcome email on duplicate signup but still tracks waitlist_signup with duplicate flag (D-05)', async () => {
-    vi.mocked(resend.contacts.create).mockResolvedValueOnce({
-      data: null,
-      error: { name: 'validation_error', message: 'Contact already exists' },
+  it('suppresses welcome email on duplicate signup (contacts.get returns existing contact) and tracks waitlist_signup with duplicate flag (D-05 / Probe 1)', async () => {
+    // Probe 1 finding: contacts.create is idempotent on email — duplicate detection
+    // moved to contacts.get. When the contact already exists, get() returns the contact
+    // and create() must NOT be called (avoids the redundant idempotent write) and the
+    // welcome email must NOT be sent (avoids re-confirmation spam).
+    vi.mocked(resend.contacts.get).mockResolvedValueOnce({
+      data: { id: 'existing_contact', email: 'dup@example.com', unsubscribed: false, createdAt: '' },
+      error: null,
     } as never)
     const r = await joinWaitlistAction(null, fd({
       email: 'dup@example.com',
@@ -314,14 +330,17 @@ describe('joinWaitlistAction (Phase 4 real pipeline)', () => {
       renderedAt: PAST_RENDERED_AT(),
     }))
     expect(r).toEqual({ status: 'success', duplicate: true })
+    expect(resend.contacts.create).not.toHaveBeenCalled()
     expect(resend.emails.send).not.toHaveBeenCalled()
     expect(track).toHaveBeenCalledWith('waitlist_signup', { duplicate: true })
   })
 
-  it('returns user-facing error when contacts.create fails with non-duplicate error (D-12)', async () => {
-    vi.mocked(resend.contacts.create).mockResolvedValueOnce({
+  it('returns user-facing error when contacts.get fails with non-404 error (Probe 1 / D-12)', async () => {
+    // Any non-404 error from contacts.get is treated as fatal — same handling as
+    // a previous-architecture contacts.create failure.
+    vi.mocked(resend.contacts.get).mockResolvedValueOnce({
       data: null,
-      error: { name: 'rate_limit_exceeded', message: 'Too many requests to Resend' },
+      error: { name: 'rate_limit_exceeded', statusCode: 429, message: 'Too many requests to Resend' },
     } as never)
     const r = await joinWaitlistAction(null, fd({
       email: 'real@example.com',
@@ -332,6 +351,26 @@ describe('joinWaitlistAction (Phase 4 real pipeline)', () => {
     if (r.status === 'error') {
       expect(r.message).toMatch(/something went wrong/i)
     }
+    expect(resend.contacts.create).not.toHaveBeenCalled()
+    expect(resend.emails.send).not.toHaveBeenCalled()
+  })
+
+  it('returns user-facing error when contacts.create fails on a fresh signup (D-12)', async () => {
+    // contacts.get → 404 (default), then contacts.create returns an error → fatal.
+    vi.mocked(resend.contacts.create).mockResolvedValueOnce({
+      data: null,
+      error: { name: 'validation_error', message: 'Invalid audience' },
+    } as never)
+    const r = await joinWaitlistAction(null, fd({
+      email: 'real@example.com',
+      hp_field: '',
+      renderedAt: PAST_RENDERED_AT(),
+    }))
+    expect(r.status).toBe('error')
+    if (r.status === 'error') {
+      expect(r.message).toMatch(/something went wrong/i)
+    }
+    expect(resend.emails.send).not.toHaveBeenCalled()
   })
 
   it('fires track(welcome_email_send_error) when fire-and-forget send rejects (EMAIL-08)', async () => {
