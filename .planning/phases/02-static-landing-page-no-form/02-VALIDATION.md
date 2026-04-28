@@ -1,10 +1,11 @@
 ---
 phase: 02
 slug: static-landing-page-no-form
-status: draft
-nyquist_compliant: false
+status: approved
+nyquist_compliant: true
 wave_0_complete: false
 created: 2026-04-27
+approved: 2026-04-27
 ---
 
 # Phase 02 — Validation Strategy
@@ -47,7 +48,7 @@ Source of truth: `02-RESEARCH.md` § Validation Architecture. Phase 2 has zero J
 | Wave 0 — `.github/workflows/lighthouse.yml` | PERF-01, PERF-02, PERF-03 | CI smoke | `actionlint .github/workflows/lighthouse.yml` exits 0 (or `gh workflow view lighthouse` parses) | ⬜ pending |
 | Hero / Wave 1 | HERO-01, HERO-02, HERO-03 | manual viewport | `next dev` + DevTools at 320×568 — verify headline, sub-headline, mascot, CTA above fold | ⬜ pending |
 | Hero / Wave 1 | HERO-04 (CTA placeholder) | manual viewport | DevTools — placeholder CTA visible above fold | ⬜ pending |
-| Hero / Wave 1 | HERO-05 (sub-headline ≥16px) | grep + manual | `grep "text-base\|text-\[16px" components/sections/hero.tsx` AND DevTools computed `font-size` ≥16px on mobile | ⬜ pending |
+| Hero / Wave 1 | HERO-05 (launch microcopy "Launching Summer 2026") | grep | `grep -F "Launching Summer 2026" components/sections/hero.tsx` returns 1+ matches | ⬜ pending |
 | Hero / Wave 1 | HERO-06 (LCP element is `<h1>`) | LHCI report | Open `largest-contentful-paint element` audit in LHCI HTML report — must reference `h1`, not the mascot | ⬜ pending |
 | Hero / Wave 1 | HERO-07 (motion-safe) | manual | macOS Reduce Motion ON → click anchor link → page jumps without smooth scroll | ⬜ pending |
 | Mobile / Wave 1 | MOB-01 (320→1440 scaling) | manual viewport | DevTools Device Mode at 320, 375, 768, 1440 — no horizontal scroll, no broken layout | ⬜ pending |
@@ -91,11 +92,11 @@ Source of truth: `02-RESEARCH.md` § Validation Architecture. Phase 2 has zero J
 
 ## Validation Sign-Off
 
-- [ ] All tasks have `<automated>` verify or Wave 0 dependencies (LHCI run + manual viewport doc)
-- [ ] Sampling continuity: typecheck/lint/build run after every commit; LHCI runs after Wave 1 and Wave 2
-- [ ] Wave 0 covers `.lighthouserc.json` + `.github/workflows/lighthouse.yml` + GitHub secret task
-- [ ] No watch-mode flags
-- [ ] Feedback latency < 60s for typecheck+lint+build; < 90s for local LHCI
-- [ ] `nyquist_compliant: true` set in frontmatter once planner finalizes per-task map
+- [x] All tasks have `<automated>` verify or Wave 0 dependencies (LHCI run + manual viewport doc)
+- [x] Sampling continuity: typecheck/lint/build run after every commit; LHCI runs after Wave 1 and Wave 2
+- [x] Wave 0 covers `.lighthouserc.json` + `.github/workflows/lighthouse.yml` + GitHub secret task (Plan 02-05)
+- [x] No watch-mode flags
+- [x] Feedback latency < 60s for typecheck+lint+build; < 90s for local LHCI
+- [x] `nyquist_compliant: true` set in frontmatter — finalized per the 5-plan per-task map
 
-**Approval:** pending
+**Approval:** approved 2026-04-27

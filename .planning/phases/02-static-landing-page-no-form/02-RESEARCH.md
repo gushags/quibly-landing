@@ -728,22 +728,22 @@ export function PlaceholderFormSection() {
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Lighthouse CI: Vercel Token for Preview URL**
+1. **Lighthouse CI: Vercel Token for Preview URL** — **(RESOLVED)**
    - What we know: `patrickedqvist/wait-for-vercel-preview` action requires a `VERCEL_TOKEN` secret. The project has a `.vercel/project.json` (confirmed by Phase 1), so `VERCEL_ORG_ID` and `VERCEL_PROJECT_ID` are available.
    - What's unclear: Whether the Vercel token is already stored as a GitHub secret (`VERCEL_TOKEN`) in this repo, or needs to be added.
-   - Recommendation: The CI workflow should document the required secrets. The planner should add a task to verify/add `VERCEL_TOKEN` as a GitHub secret before the CI gate can run. This is a one-time manual step.
+   - **Resolved by:** Plan 02-05 Task 4 (`type="checkpoint:human-verify"`) — explicitly walks the developer through fetching a token from vercel.com/account/tokens, adding it as `VERCEL_TOKEN` in GitHub repo Settings → Secrets, and confirming the CI run posts the LHCI report URL. Plan is `autonomous: false` so the wave halts until the secret is set.
 
-2. **CLS from gradient `<div>` absolute positioning**
+2. **CLS from gradient `<div>` absolute positioning** — **(RESOLVED)**
    - What we know: A `position: absolute` div inside a `relative` section should not contribute to CLS because it takes up no layout space.
    - What's unclear: Whether any edge-case paint timing in Next.js 16.2 could cause a reflow.
-   - Recommendation: Treat as LOW risk. The `isolate overflow-hidden` container bounds prevent layout shift. Verify with Lighthouse CLS trace after implementation.
+   - **Resolved by:** Treat as LOW risk and verify empirically. Plan 02-05's `.lighthouserc.json` enforces `cumulative-layout-shift: maxNumericValue: 0.1` at error level — if the gradient ever contributes to CLS in production, the gate fails the PR and forces a fix. No speculative mitigation needed up-front.
 
-3. **Figtree 900 weight**
+3. **Figtree 900 weight** — **(RESOLVED)**
    - What we know: CLAUDE.md mentions `weight: ['400','500','600','700','900']` for Figtree, but existing `layout.tsx` uses only 400–700 (matching marketing-app).
    - What's unclear: If CLAUDE.md intentionally specifies 900 for a planned Phase 3+ bold element.
-   - Recommendation: Keep 400–700 only (current `layout.tsx` is correct). Weight 900 is unused in Phase 2 and downloads unnecessary font data. Phase 3+ can add 900 if a design element requires extra-bold Figtree.
+   - **Resolved by:** Keep 400–700 only (current `layout.tsx` is correct). Phase 2 plans do NOT modify `app/layout.tsx`'s font weight subset. Weight 900 is unused in Phase 2 and downloads unnecessary font data. Phase 3+ can add 900 if a design element requires extra-bold Figtree.
 
 ---
 
