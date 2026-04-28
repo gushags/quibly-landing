@@ -73,9 +73,14 @@ export async function joinWaitlistAction(
   }
 
   // 3. Zod validation — server-side source of truth (FORM-03).
+  // WR-04: explicitly narrow `string | File | null` to string so a malformed
+  // multipart POST sending `email` as a file part rejects with the standard
+  // invalid-email message rather than echoing `"[object File]"` back to the
+  // client via submittedValues.
   // WR-03: trim before parse since z.email rejects surrounding whitespace
   // before any schema-level transform runs.
-  const rawEmail = String(formData.get('email') ?? '').trim()
+  const rawEmailField = formData.get('email')
+  const rawEmail = (typeof rawEmailField === 'string' ? rawEmailField : '').trim()
   const parsed = schema.safeParse({ email: rawEmail })
   if (!parsed.success) {
     const flat = z.flattenError(parsed.error)  // Zod 4 idiom — NOT .flatten()
