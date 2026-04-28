@@ -12,18 +12,17 @@ Convert visitors who land at `useQuibly.com` into a list of warm, opted-in waitl
 
 ### Validated
 
-(None yet — ship to validate)
+- [x] Reuse Quibly design tokens from `marketing-app`: teal (`#0D9488`) + amber (`#F59E0B`), Quicksand (headings) + Figtree (body), pill button radii (24px / 28px hero) — *Validated in Phase 2: tokens applied across every section; 28px hero pill verified at runtime by Playwright regression guard*
+- [x] Quibs Q-face mascot prominent on hero (carries personality without screenshots) — *Validated in Phase 2: 88×88 teal-gradient HeroMascot wrapper on hero, DOM-second after H1 to preserve LCP-as-H1*
+- [x] Below-the-fold "Why Quibly" section: 3 short text-only differentiator lines pulled from existing brand (Strategy-first / AI advisory board / Metrics-driven loop) — no screenshots needed — *Validated in Phase 2: 3-column FOLD-01 differentiator block shipped*
+- [x] Mobile-first responsive layout (~83% of waitlist traffic is mobile) — *Validated in Phase 2 for the marketing surface: 320×568 above-fold composition tested via Playwright; Lighthouse mobile perf 0.96 / CLS 0 / LCP element = `<h1>`*
 
 ### Active
 
-- [ ] Single-screen waitlist hero (Quibs Q-face mascot, tagline, 1–2 sentence elaboration, email field, pill CTA)
+- [ ] Single-screen waitlist hero (Quibs Q-face mascot, tagline, 1–2 sentence elaboration, email field, pill CTA) — *Phase 2 ships hero + mascot + tagline + placeholder pill CTA; the email field lands in Phase 3*
 - [ ] Email-only capture form (one field — single-field forms convert ~2–3× higher than multi-field)
-- [ ] Mobile-first responsive layout (~83% of waitlist traffic is mobile)
-- [ ] Reuse Quibly design tokens from `marketing-app`: teal (`#0D9488`) + amber (`#F59E0B`), Quicksand (headings) + Figtree (body), pill button radii (24px / 28px hero)
-- [ ] Quibs Q-face mascot prominent on hero (carries personality without screenshots)
 - [ ] Submit emails to Resend Audience (matches `marketing-app` stack)
 - [ ] Single opt-in: capture email → success state → automatic welcome email confirming waitlist spot
-- [ ] Below-the-fold "Why Quibly" section: 3 short text-only differentiator lines pulled from existing brand (Strategy-first / AI advisory board / Metrics-driven loop) — no screenshots needed
 - [ ] Live signup counter / "N people on the waitlist" social proof (once signups exist)
 - [ ] Footer with privacy policy + terms links
 - [ ] Privacy policy and terms pages (legal compliance for email collection — required before going live)
@@ -103,4 +102,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-27 after initialization*
+*Last updated: 2026-04-28 after Phase 2 (static-landing-page-no-form) completed — full RSC marketing surface live; Lighthouse mobile 0.96 / CLS 0 / LCP=`h1` verified locally; CI enforcement gate deferred to follow-up PR session.*
