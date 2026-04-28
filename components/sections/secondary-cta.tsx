@@ -3,11 +3,11 @@ import { Button } from "@/components/ui/button"
 /**
  * Bottom-of-page CTA (FOLD-03).
  *
- * Phase 2 (post-review D-31): renders as a disabled `button` with
- * aria-disabled. NO self-anchor to the waitlist section. Avoids the
- * no-op-scroll UX flagged in cross-AI review. Phase 3 replaces this with a
- * real anchor smooth-scroll back-pointer once the form is meaningfully far
- * above (several thousand pixels of content) so the scroll has a real target.
+ * Phase 3 (D-02): flipped to <Button asChild><a href="#waitlist">. The form lives
+ * several thousand pixels above (Hero → WaitlistFormSection → WhyQuibly → FounderVoice
+ * → here), so scrolling UP to #waitlist is meaningful UX for visitors who scrolled
+ * through the page and want to commit. Smooth-scroll behavior is provided by
+ * globals.css:96 (Phase 2 D-08); prefers-reduced-motion override at globals.css:100-106.
  *
  * Locked copy (D-12, UI-SPEC Copywriting Contract):
  *   - H2: "Ready to stop guessing at marketing?" (draft per D-28; founder edits in PR)
@@ -21,8 +21,8 @@ export function SecondaryCTA() {
           Ready to stop guessing at marketing?
         </h2>
         <div className="mt-8 flex justify-center">
-          <Button size="hero" variant="default" type="button" aria-disabled="true">
-            Don&apos;t miss launch — join the waitlist
+          <Button asChild size="hero" variant="default">
+            <a href="#waitlist">Don&apos;t miss launch — join the waitlist</a>
           </Button>
         </div>
       </div>
