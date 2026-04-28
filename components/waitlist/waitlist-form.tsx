@@ -70,12 +70,23 @@ export function WaitlistForm({ renderedAt }: { renderedAt: number }) {
   // WR-01: guard against re-firing focus on every state resolution. The success
   // branch unmounts the form today, so a re-fire is unobservable, but a future
   // edit-and-resubmit variant would re-focus aggressively without this guard.
+  // WR-05: defer focus to the next frame so the success block has been painted
+  // before the focus shift fires. Without rAF, on the boundary commit where the
+  // form unmounts and the success block mounts in the same React pass, the
+  // submit button can lose focus to <body> briefly — screen readers announce
+  // a blank state before the H3 — and on concurrent-mode the ref can still be
+  // null when the effect runs.
   const focusedSuccessStateRef = useRef<JoinWaitlistResult | null>(null)
   useEffect(() => {
     if (state === focusedSuccessStateRef.current) return
-    if (state?.status === 'success' && successHeadingRef.current) {
-      successHeadingRef.current.focus()
-      focusedSuccessStateRef.current = state
+    if (state?.status === 'success') {
+      const consumed = state
+      requestAnimationFrame(() => {
+        if (successHeadingRef.current) {
+          successHeadingRef.current.focus()
+          focusedSuccessStateRef.current = consumed
+        }
+      })
     }
   }, [state])
 
