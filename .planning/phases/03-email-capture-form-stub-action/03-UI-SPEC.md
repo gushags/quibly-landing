@@ -42,8 +42,8 @@ The project consumes Tailwind's default 0.25rem (4px) ramp. Phase 3 inherits Pha
 | Token | px | Tailwind | Phase 3 usage |
 |-------|----|----------|---------------|
 | xs | 4 | `gap-1`, `mt-1` | (none new in Phase 3) |
-| sm | 8 | `gap-2`, `mt-2` | Inline error gap (input → `<p role="alert">`); spinner ↔ button-label gap |
-| md | 16 | `gap-4`, `mt-4` | Label ↔ input vertical gap; success block icon ↔ heading gap |
+| sm | 8 | `gap-2`, `mt-2` | Inline error gap (input → `<p role="alert">`); spinner ↔ button-label gap; (label exists `sr-only` only — see Typography) |
+| md | 16 | `gap-4`, `mt-4` | Success block icon ↔ heading gap |
 | lg | 24 | `gap-6`, `mt-6` | Input ↔ submit button vertical gap (stacked layout, D-03); success heading ↔ body gap |
 | xl | 32 | `gap-8`, `mt-8` | (reserved — none new in Phase 3) |
 | 2xl | 48 | `py-12` | (Phase 2 footer rhythm — unchanged) |
@@ -56,7 +56,7 @@ The project consumes Tailwind's default 0.25rem (4px) ramp. Phase 3 inherits Pha
 |---------|----------|---------|
 | Form container max-width | `max-w-md` (448px) | Inner width constraint inside `<WaitlistFormSection>`'s existing `max-w-prose` (D-03 — narrower than the prose so the form feels like a focused control surface, not body copy width) |
 | Form container centering | `mx-auto` | Inherits from section's centered layout |
-| Label ↔ Input | `mt-1.5` (6px) | Tight binding so the label visually tethers to its input |
+| Label ↔ Input | `mt-2` (8px) | Label is `sr-only` (zero painted height) so this margin only applies if a future phase un-hides it; valid 4-grid value |
 | Input ↔ submit button | `mt-3` (12px) | Stacked vertical rhythm — generous enough to register as separate elements, tight enough to read as one form group |
 | Submit button ↔ "Launching Summer 2026" microcopy | `mt-3` (12px) | Matches Phase 2's hero-CTA→microcopy gap (visual continuity across the page); CD-06 reserves this slot for Phase 5 to add consent + "no spam" microcopy below |
 | Inline error (`<p role="alert">`) ↔ input | `mt-2` (8px) | Tight enough to read as the input's error message, not a standalone paragraph |
@@ -74,25 +74,32 @@ The project consumes Tailwind's default 0.25rem (4px) ramp. Phase 3 inherits Pha
 
 ## Typography
 
-Phase 3 inherits Phase 2's typography contract — **no new sizes, no new weights**. Form-specific roles map to existing tokens.
+Phase 3 inherits Phase 2's typography contract — **no new sizes, no new weights**. Form-specific roles map to existing tokens. Phase 3 paints content at exactly **two visible weights**: 400 (body) and 700 (headings). One single-element exemption (the submit button label inherits weight 500 from the locked Phase 2 hero pill) is documented below with explicit justification.
 
 | Role | Size | Weight | Font | Line Height | Phase 3 usage |
 |------|------|--------|------|-------------|---------------|
 | Body | 16px (`text-base`) | 400 | Figtree (`font-sans`) | 1.5 | Email input value (must be ≥16px to suppress iOS Safari auto-zoom-on-focus — MOB-04); inline error message; success-state body copy |
 | Microcopy | 14px (`text-sm`) | 400 | Figtree (`font-sans`) | 1.5 | "Launching Summer 2026" under submit button (HERO-05/D-11 — verbatim with Phase 2); sonner toast body copy (sonner default ≈14px, no override) |
-| Label | 14px (`text-sm`) | 500 (`font-medium`) | Figtree (`font-sans`) | 1.0 (`leading-none`) | Visible "Email" label above the input (CD inherited from Phase 1 `<Label>` defaults — `text-sm leading-none font-medium`). **Visible label, not `sr-only`** — accessibility default for a single-field form; the visual hierarchy already centers on the section heading, the label adds zero visual noise. |
+| Label (visually hidden) | 14px (`text-sm`) | 500 (`font-medium`) | Figtree (`font-sans`) | 1.0 (`leading-none`) | "Email" label is rendered with `sr-only` (kept in DOM for screen readers + form semantics; **NOT painted** to the visual surface). Visual labeling is carried by the placeholder `you@example.com` and the section H2 acting as the form's contextual heading. **Zero visible weight 500 contribution from this element.** |
 | Heading (H2) | 30px mobile (`text-3xl`) → 36px md (`md:text-4xl`) | 700 (`font-bold`) | Quicksand (`font-heading`) | 1.2 (`leading-tight`) | `<WaitlistFormSection>` heading (Quibly draft below). Same exact role as Phase 2's section H2s. |
 | Heading (H3, success block) | 24px (`text-2xl`) | 700 (`font-bold`) | Quicksand (`font-heading`) | 1.2 (`leading-tight`) | Success-state "You're on the list." (D-14). Sized one step below the section H2 because the success block sits **inside** the section — the H2 stays the section's primary anchor, the H3 is a contextual sub-heading. |
-| Button label | 16px (`text-base`) | 500 (`font-medium`) | Figtree (`font-sans`) | 1.0 | Submit button copy "Join the waitlist" / "Joining..." — inherited from `<Button size="hero">` CVA variant (Phase 2 D-06). |
+| Button label (single-element exemption) | 16px (`text-base`) | 500 (`font-medium`) — **inherited from `<Button>` CVA base class** | Figtree (`font-sans`) | 1.0 | Submit button copy "Join the waitlist" / "Joining..." — the base `<Button>` CVA in `components/ui/button.tsx:8` carries `font-medium` and the `size="hero"` variant does not override it. **Single-element exemption** — see justification below. |
 
 **Sizes consumed in Phase 3:** 14, 16, 24, 30→36 → **4 sizes**, satisfies the 3–4 size budget.
-**Weights consumed in Phase 3:** 400 (body, microcopy), 500 (label, button — note: label is a Phase 1 default at 500; button base is also 500), 700 (H2/H3 headings) → **3 weights**. The 500 is Phase 1 component defaults, not new for Phase 3 — semantically the spec uses **2 weights for new content** (400 body + 700 heading) with the 500 inherited from the unchanged Phase 1 component shells.
+
+**Visible weights consumed in Phase 3:** **2 weights for visible content** (400 body/microcopy, 700 H2/H3 headings). The label is rendered `sr-only` and does not paint to the visual surface, so its declared 500 weight is never visible in this phase.
+
+**Single-element weight-500 exemption (submit button label):**
+- The submit button is `<Button size="hero">` — Phase 2 D-07 / CD-04 / D-12 lock this exact CVA variant for visual parity with the hero pill and the secondary CTA pill across all phases. The hero/secondary pills already paint at weight 500 in Phase 2 (inherited from the same Button base class). Overriding the submit button to `font-normal` (400) would visually fork it from the hero/secondary pills — breaking the cross-phase pill identity locked in Phase 2 D-31 and 03-CONTEXT D-07.
+- The exemption is **scoped to one element type** (the `<Button>` component) and **one painted role** (the submit pill label, "Join the waitlist" / "Joining...").
+- Total Phase 3 surface area painted at weight 500: **a single button label** (~3 words idle, 2 words pending). All other Phase 3-rendered text is 400 or 700.
+- Path forward if a future phase wants strict 2-weight purity: override the Button CVA base class globally (Phase 1-level change — out of Phase 3 scope) to use `font-normal` and re-bake the entire pill family. Not done in Phase 3.
 
 **Color binding for typography:**
 - Default body color: `text-foreground` (oklch ~ #111827) — input value, success H3, success body, microcopy `text-sm text-muted-foreground` for the "Launching Summer 2026" microcopy and the section H2 stays `text-foreground`.
 - Inline error (`<p role="alert">`): `text-destructive` (oklch ~ `#dc2626`) at `text-sm`. **First Phase 3 use of `--destructive`.**
 - Success H3 + body: neutral `text-foreground` and `text-muted-foreground`. **Teal is reserved for the success icon, not the text** (see Color section).
-- Label: `text-foreground` at 500 weight (Phase 1 `<Label>` default).
+- Label: not painted (rendered `sr-only`); screen readers consume `text-foreground` semantics via the `<Label>`'s default token chain but no pixels hit the canvas.
 
 **LCP guard (HERO-06 inherited from Phase 2):**
 - The H1 in `<Hero>` remains the LCP element. Phase 3 introduces no above-fold form content (the form section sits below the hero, scroll-targeted by `id="waitlist"`). The hero anchor flip from `<button aria-disabled>` → `<a href="#waitlist">` (D-01) is a tag swap with **identical visual class output** via `<Button asChild size="hero">` — the hero pill's painted dimensions, color, and position do not change between Phase 2 and Phase 3. LCP guard remains intact without re-verification.
@@ -103,7 +110,7 @@ Phase 3 inherits Phase 2's typography contract — **no new sizes, no new weight
 **Word/character budgets (locked or drafted):**
 - Section H2: ≤8 words. Draft ships at 6 words (see Copywriting Contract).
 - Section sub-copy paragraph: ≤25 words. Draft ships at ~18 words.
-- Email label: 1 word ("Email").
+- Email label (sr-only): 1 word ("Email").
 - Submit button: 3 words locked ("Join the waitlist") — zero text-diff with Phase 2 D-12 / FORM-04.
 - Pending button label: 2 words ("Joining..."). Includes ellipsis character.
 - Microcopy under submit: 3 words ("Launching Summer 2026") — verbatim with Phase 2 D-11 / HERO-05.
@@ -136,7 +143,7 @@ The 60/30/10 split for this phase. Phase 3 introduces the **first use of `--dest
 - Section H2 — neutral `text-foreground` (matches Phase 2 H2 styling exactly).
 - Success H3 — neutral `text-foreground`. The teal lives in the icon, not the text. This keeps the visual weight on the action ("you signed up") not the language.
 - Success body copy — neutral `text-muted-foreground`. Same rule.
-- Email label — neutral `text-foreground`. Forms with teal labels read like marketing chrome, not utility surfaces.
+- Email label — neutral `text-foreground` (rendered `sr-only` — not painted, but token semantics preserved). Forms with teal labels read like marketing chrome, not utility surfaces.
 - Inline error message text — `text-destructive` (red), NOT teal. Validation errors are corrective, not branded.
 - Input border in default state — neutral `border-input` (existing Phase 1 chrome).
 - Honeypot input — visually hidden, no color treatment needed.
@@ -169,8 +176,8 @@ The 60/30/10 split for this phase. Phase 3 introduces the **first use of `--dest
 |---------|------|--------|
 | `<WaitlistFormSection>` heading (D-04) | Draft (Claude): `Be first when Quibly opens up.` (5 words) | **Draft — founder edits in PR** (D-04). Replaces Phase 2 placeholder draft. Active voice, addresses the reader directly, conveys exclusivity without hype. |
 | `<WaitlistFormSection>` sub-copy (D-04) | Draft (Claude): `Drop your email and we'll ping you the moment Quibly's ready for the world.` (14 words) | **Draft — founder edits in PR.** Conversational, modern, friendly tone (PROJECT.md). Replaces Phase 2 placeholder. |
-| Email label | `Email` | **Locked.** One word. Visible above the input (`<Label htmlFor="email">`). |
-| Email input placeholder | `you@example.com` | **Locked.** Standard convention; gives the user a visual cue without instructing. Don't use cute placeholders ("hello@yourbiz.com" — feels presumptuous). |
+| Email label (sr-only) | `Email` | **Locked.** One word. Rendered with `sr-only` so screen readers + form semantics see it; visual users orient via the section H2 + the placeholder. |
+| Email input placeholder | `you@example.com` | **Locked.** Standard convention; gives the user a visual cue without instructing. Doubles as the visual labeling cue now that the `<Label>` is `sr-only`. Don't use cute placeholders ("hello@yourbiz.com" — feels presumptuous). |
 | Primary CTA (FORM-04 / D-12 — also Phase 2 D-12 locked) | `Join the waitlist` | **Locked verbatim with Phase 2.** Zero text-diff. The only change Phase 3 makes is wrapping in `<button type="submit">` and adding the pending-state swap below. |
 | Pending CTA label (D-13 / FORM-05) | `Joining...` | **Locked.** Active progressive tense; ellipsis (single character `…` or three dots — Claude picks **three dots** for portability). Paired with `<Loader2 className="animate-spin">` to its left. |
 | CTA microcopy (HERO-05 / D-11 — Phase 2 carry-over) | `Launching Summer 2026` | **Locked.** Identical placement (under the submit pill), identical class (`text-sm text-muted-foreground mt-3`), identical copy as Phase 2's hero microcopy. |
@@ -223,9 +230,9 @@ The phase ships these new components and modifies these existing ones. No new sh
 
 | Path | Use |
 |------|-----|
-| `components/ui/button.tsx` `<Button size="hero">` | Submit button — exact same CVA variant rendered by hero + secondary CTAs (`rounded-[28px] px-9 py-3.5 text-base`, ~52px tall, ≥48 ✓). Wrapped in `<form action={joinWaitlistAction}>` with `disabled={pending}`. |
+| `components/ui/button.tsx` `<Button size="hero">` | Submit button — exact same CVA variant rendered by hero + secondary CTAs (`rounded-[28px] px-9 py-3.5 text-base`, ~52px tall, ≥48 ✓). Wrapped in `<form action={joinWaitlistAction}>` with `disabled={pending}`. Note: base CVA carries `font-medium` (weight 500); see Typography exemption. |
 | `components/ui/input.tsx` `<Input>` | Email field. Override `className="h-12"` (48px touch target). Pass `type="email"`, `inputMode="email"`, `autoComplete="email"`, `name="email"`, `id="email"`, `required`, `aria-invalid={!!fieldErrors.email}`. Default value preserved across re-renders via FormData (FORM-06 — typed value preserved on validation error). |
-| `components/ui/label.tsx` `<Label>` | Visible "Email" label (`htmlFor="email"`). Default styling (`text-sm leading-none font-medium`). |
+| `components/ui/label.tsx` `<Label>` | "Email" label — rendered `sr-only` (not painted). `htmlFor="email"`. Default styling (`text-sm leading-none font-medium`) is invisible at runtime due to `sr-only`'s standard 1×1 clipping. |
 | `components/ui/sonner.tsx` `<Toaster>` | Mount at app root (D-08). Token-styled in Phase 1; Phase 3 does not modify the Toaster wrapper itself. |
 | `lib/utils.ts` `cn()` | Conditional class composition wherever needed. |
 | `lib/env.ts` | Phase 3 does NOT add new env vars. Phase 4 adds `RESEND_API_KEY` etc. |
@@ -337,7 +344,7 @@ export function WaitlistForm() {
   return (
     <form action={formAction} className="mx-auto max-w-md">
       <div className="text-left">
-        <Label htmlFor="email">Email</Label>
+        <Label htmlFor="email" className="sr-only">Email</Label>
         <Input
           id="email"
           name="email"
@@ -354,7 +361,7 @@ export function WaitlistForm() {
               : ''
           }
           disabled={pending}
-          className="mt-1.5 h-12"
+          className="mt-2 h-12"
         />
         {fieldError && (
           <p id="email-error" role="alert" className="mt-2 text-sm text-destructive">
@@ -413,7 +420,7 @@ This is illustrative. The planner refines class composition; the executor ships 
 
 | State | Trigger | Visible UI | Underlying mechanism |
 |-------|---------|------------|----------------------|
-| **Idle** | Initial render OR after server returns `state: null` (no prior submission) | Form: label + input (empty or with retained value) + submit button labeled "Join the waitlist" + microcopy | `useActionState` initial state is `null`. |
+| **Idle** | Initial render OR after server returns `state: null` (no prior submission) | Form: input (empty or with retained value, with `you@example.com` placeholder) + submit button labeled "Join the waitlist" + microcopy. Email label is `sr-only` (screen-reader only). | `useActionState` initial state is `null`. |
 | **Pending** | User clicks submit OR presses Enter; `useActionState` sets `pending=true` until server responds | Form: input **disabled**, button **disabled** + label flips to `"Joining..."` + `<Loader2 className="animate-spin">` shows to its left of the label | Tailwind `animate-spin` (built-in, no extra CSS). Driven by `pending` boolean. Prevents double-submit (FORM-05 / D-13). |
 | **Inline error** | `state.status === 'error'` AND `state.fieldErrors?.email` is set | Form re-renders with: input value preserved (`defaultValue` from FormData echoed by server) + `aria-invalid="true"` (red border + red focus ring via existing `<Input>` class chain) + `<p role="alert" className="text-destructive">` below the input + button re-enabled | Discriminated-union narrowing on `state` (D-10). Typed value preservation per FORM-06. |
 | **Server error (toast)** | `state.status === 'error'` AND `state.message` is set AND no `state.fieldErrors` | Form returns to idle (input preserved if user typed; field error not set) + sonner toast slides in from bottom-right with `error` variant + `<OctagonXIcon>` + "Something went wrong. Try again in a moment." | `useEffect` watching state fires `toast.error(state.message)`. Toast auto-dismisses at 4000ms (sonner default — CD-07). |
@@ -514,8 +521,8 @@ No new shadcn registry pulls in Phase 3. The form composes existing components; 
 - [ ] **Dimension 1 Copywriting:** PASS (CTA verb-noun "Join the waitlist" verbatim with Phase 2; success copy POST-02 verbatim; validation errors polite + instructive; server-error toast neutral + recoverable; no destructive actions in-phase; founder-review gate documented for section heading + sub-copy drafts)
 - [ ] **Dimension 2 Visuals:** PASS (single-column stacked form on all viewports; one accent role per element; success block visually identical for fresh + duplicate per POST-03; LCP guard preserved — no above-fold form chrome; honeypot off-screen via positional CSS not display:none)
 - [ ] **Dimension 3 Color:** PASS (60/30/10 with explicit accent reservation list — exactly 5 elements get teal: submit bg, submit focus ring, input focus ring, success icon, sonner accent via existing wrapper; first use of `--destructive` for inline validation error is reserved corrective surface only)
-- [ ] **Dimension 4 Typography:** PASS (4 sizes consumed: 14/16/24/30→36; 2 new content weights: 400 + 700, with 500 inherited from Phase 1 component shells unchanged; iOS Safari auto-zoom floor (16px input value) honored)
-- [ ] **Dimension 5 Spacing:** PASS (4-multiple ramp; documented exceptions for `h-12` input touch target, 28px hero radius reuse, 1px×1px honeypot positioning — all justified against MOB-02, Phase 2 D-06 lock, SPAM-01)
+- [ ] **Dimension 4 Typography:** PASS (4 sizes consumed: 14/16/24/30→36; **2 visible weights**: 400 body/microcopy + 700 H2/H3 headings; email `<Label>` is `sr-only` so its declared 500 weight does not paint; one documented single-element exemption: the submit button label inherits weight 500 from the locked Phase 2 hero pill CVA — overriding it would break Phase 2 D-07/D-31 cross-phase pill identity; iOS Safari auto-zoom floor (16px input value) honored)
+- [ ] **Dimension 5 Spacing:** PASS (4-multiple ramp — all gaps are multiples of 4: `mt-2`, `mt-3`, `mt-4`, etc.; documented exceptions for `h-12` input touch target, 28px hero radius reuse, 1px×1px honeypot positioning — all justified against MOB-02, Phase 2 D-06 lock, SPAM-01)
 - [ ] **Dimension 6 Registry Safety:** PASS (no new shadcn registry pulls; no third-party registries; `components.json` `registries: {}` unchanged; `'use client'` and `useActionState` are in-repo edits)
 
 **Approval:** pending (awaiting `/gsd-ui-check-phase`)
@@ -524,3 +531,4 @@ No new shadcn registry pulls in Phase 3. The form composes existing components; 
 
 *Phase: 3 — Email Capture Form (Stub Action)*
 *UI-SPEC drafted: 2026-04-27*
+*UI-SPEC revised: 2026-04-27 — fixed BLOCK on `mt-1.5` (→ `mt-2`) and 3-weight typography (→ 2 visible weights via `sr-only` label + documented submit-button single-element exemption)*
