@@ -93,8 +93,8 @@ Decimal phases appear between their surrounding integers in numeric order.
   - [x] 04-02-PLAN.md — lib/analytics.ts shim + lib/unsubscribe-token.ts HMAC + Vitest token round-trip (Wave 1, parallel with 04-01)
   - [x] 04-03-PLAN.md — lib/resend.ts singleton + lib/rate-limit.ts two-limiter ladder (Wave 2, depends on 04-01)
   - [x] 04-04-PLAN.md — emails/WelcomeEmail.tsx React Email template (D-01 locked voice) (Wave 2, depends on 04-01)
-  - [ ] 04-05-PLAN.md — app/actions/join-waitlist.ts body swap to real Resend pipeline + Vitest mock migration (Wave 3)
-  - [ ] 04-06-PLAN.md — app/api/webhooks/resend/route.ts (svix verify + D-08 dispatch) + app/unsubscribe/route.ts (RFC 8058) + Vitest coverage (Wave 3)
+  - [x] 04-05-PLAN.md — app/actions/join-waitlist.ts body swap to real Resend pipeline + Vitest mock migration (Wave 3)
+  - [x] 04-06-PLAN.md — app/api/webhooks/resend/route.ts (svix verify + D-08 dispatch) + app/unsubscribe/route.ts (RFC 8058) + Vitest coverage (Wave 3)
   - [ ] 04-07-PLAN.md — Playwright spec migration (3 deletions + 1 modification) + 6 manual checkpoints (day-1 probes, postal address D-10, mail-tester, inbox tests, webhook registration, CSV round-trip) (Wave 4, autonomous: false)
 
 ### Phase 5: Legal + SEO + Analytics
