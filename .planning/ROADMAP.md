@@ -89,10 +89,10 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. A bounce or spam-complaint event from Resend's webhook reaches our route handler, is logged, and marks the contact unsubscribed; failed welcome-email sends produce both a server log and a `track('welcome_email_send_error')` event.
   5. The "Quibly Waitlist (Preview)" audience receives all PR-preview signups (production audience untouched), and a CSV export round-trip (audience → CSV → re-import) is validated end-to-end.
 **Plans**: 7 plans
-  - [ ] 04-01-PLAN.md — Wave 0 deps + env extension (RESEND_FROM_POSTAL_ADDRESS, NEXT_PUBLIC_SITE_URL) + lib/disposable-domains.ts (SPAM-04) (Wave 1)
-  - [ ] 04-02-PLAN.md — lib/analytics.ts shim + lib/unsubscribe-token.ts HMAC + Vitest token round-trip (Wave 1, parallel with 04-01)
-  - [ ] 04-03-PLAN.md — lib/resend.ts singleton + lib/rate-limit.ts two-limiter ladder (Wave 2, depends on 04-01)
-  - [ ] 04-04-PLAN.md — emails/WelcomeEmail.tsx React Email template (D-01 locked voice) (Wave 2, depends on 04-01)
+  - [x] 04-01-PLAN.md — Wave 0 deps + env extension (RESEND_FROM_POSTAL_ADDRESS, NEXT_PUBLIC_SITE_URL) + lib/disposable-domains.ts (SPAM-04) (Wave 1)
+  - [x] 04-02-PLAN.md — lib/analytics.ts shim + lib/unsubscribe-token.ts HMAC + Vitest token round-trip (Wave 1, parallel with 04-01)
+  - [x] 04-03-PLAN.md — lib/resend.ts singleton + lib/rate-limit.ts two-limiter ladder (Wave 2, depends on 04-01)
+  - [x] 04-04-PLAN.md — emails/WelcomeEmail.tsx React Email template (D-01 locked voice) (Wave 2, depends on 04-01)
   - [ ] 04-05-PLAN.md — app/actions/join-waitlist.ts body swap to real Resend pipeline + Vitest mock migration (Wave 3)
   - [ ] 04-06-PLAN.md — app/api/webhooks/resend/route.ts (svix verify + D-08 dispatch) + app/unsubscribe/route.ts (RFC 8058) + Vitest coverage (Wave 3)
   - [ ] 04-07-PLAN.md — Playwright spec migration (3 deletions + 1 modification) + 6 manual checkpoints (day-1 probes, postal address D-10, mail-tester, inbox tests, webhook registration, CSV round-trip) (Wave 4, autonomous: false)
