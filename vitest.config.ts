@@ -7,6 +7,8 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './'),
+      // server-only throws in non-server contexts — provide a no-op for vitest
+      'server-only': path.resolve(__dirname, './__mocks__/server-only.js'),
     },
   },
   test: {
