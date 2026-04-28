@@ -1,4 +1,4 @@
-import { WaitlistForm } from "@/components/waitlist/waitlist-form"
+import { WaitlistForm } from '@/components/waitlist/waitlist-form';
 
 /**
  * D-06: Waitlist form section stays an RSC (NOT a Client Component) — composition
@@ -34,7 +34,7 @@ import { WaitlistForm } from "@/components/waitlist/waitlist-form"
  *
  * Locked copy (D-04 — DRAFT, founder reviews/edits in PR):
  *   - H2: "Be first when Quibly opens up." (5 words, conversational, addresses the reader)
- *   - Sub-copy: "Drop your email and we'll ping you the moment Quibly's ready for the world."
+ *   - Sub-copy: "Drop your email and we'll ping you the moment Quibly's ready."
  *     (14 words, friendly upstart tone per PROJECT.md)
  */
 export function WaitlistFormSection() {
@@ -46,19 +46,20 @@ export function WaitlistFormSection() {
   // The intentional per-request impurity is the whole point — every server render
   // plants a fresh timestamp the time-trap can compare against.
   // eslint-disable-next-line react-hooks/purity -- intentional per-request RSC value (Pitfall 2 / CD-02)
-  const renderedAt = Date.now()
+  const renderedAt = Date.now();
 
   return (
-    <section id="waitlist" className="scroll-mt-16 py-16 md:py-24">
-      <div className="mx-auto max-w-prose px-6 text-center">
-        <h2 className="mb-4 font-heading text-3xl font-bold leading-tight text-foreground md:text-4xl">
+    <section id='waitlist' className='scroll-mt-16 py-16 md:py-24'>
+      <div className='mx-auto max-w-prose px-6 text-center'>
+        <h2 className='mb-4 font-heading text-3xl font-bold leading-tight text-foreground md:text-4xl'>
           Be first when Quibly opens up.
         </h2>
-        <p className="mb-8 font-sans text-base text-muted-foreground">
-          Drop your email and we&apos;ll ping you the moment Quibly&apos;s ready for the world.
+        <p className='mb-8 font-sans text-base text-muted-foreground'>
+          Drop your email and we&apos;ll ping you the moment Quibly&apos;s
+          ready.
         </p>
         <WaitlistForm renderedAt={renderedAt} />
       </div>
     </section>
-  )
+  );
 }
