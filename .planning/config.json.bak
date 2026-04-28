@@ -45,9 +45,5 @@
   },
   "graphify": {
     "enabled": false
-  },
-  "resolve_model_ids": true,
-  "model_overrides": {
-    "gsd-planner": "claude-opus-4-7"
   }
 }
