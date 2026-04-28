@@ -29,7 +29,18 @@ test.describe("Phase 3 form — idempotent (POST-04)", () => {
     await page.goto("/#waitlist")
   })
 
-  test("rapid double-click during pending state results in one success transition (POST-04)", async ({ page }) => {
+  test("rapid double-click during pending state results in one Server Action dispatch (POST-04)", async ({ page }) => {
+    // CR-04: count Server Action POSTs to the page route. The Next 16 Server
+    // Action protocol POSTs to the same URL (here `/`) with a special
+    // `Next-Action` header; counting POSTs to `/` is the load-bearing signal
+    // that exactly one action dispatched despite the rapid double-click.
+    let actionPostCount = 0
+    page.on('request', (req) => {
+      if (req.method() !== 'POST') return
+      const url = new URL(req.url())
+      if (url.pathname === '/') actionPostCount += 1
+    })
+
     await page.fill('input[name="email"]', 'slow@example.com')
     // SPAM-02 time-trap bypass — see file JSDoc.
     await page.evaluate(() => {
@@ -45,32 +56,37 @@ test.describe("Phase 3 form — idempotent (POST-04)", () => {
     // Wait for the button to become disabled (pending=true)
     await expect(submit).toBeDisabled({ timeout: 1000 })
 
-    // Second rapid click attempt — should be a no-op because button is disabled.
-    // Use { force: true } to ensure Playwright doesn't auto-skip the click on disabled.
-    // We expect this to either throw (force-click disabled) or simply do nothing.
-    // Using try/catch to capture either outcome.
-    let secondClickFailed = false
+    // Second rapid click — REAL click, not `trial: true`. We use `force: true`
+    // to bypass Playwright's actionability check (the disabled button) so the
+    // click is genuinely dispatched at the DOM. The POST-04 contract is that
+    // the disabled prop blocks the form submission — verified below by the
+    // network request count, not by whether the click "succeeded".
+    let secondClickError: Error | null = null
     try {
-      await submit.click({ trial: true, timeout: 500 })
-    } catch {
-      secondClickFailed = true
+      await submit.click({ force: true, timeout: 500, noWaitAfter: true })
+    } catch (e) {
+      secondClickError = e as Error
     }
-    // Either the click is rejected by Playwright's actionability check (button disabled),
-    // OR the click "succeeds" but does nothing because the button is disabled.
-    // EITHER outcome is acceptable for POST-04.
 
     // Wait for the first action to complete (~1500ms total)
     await firstClick
 
     // Final state: success block visible (one and only one success transition)
     const status = page.locator('[role="status"]')
-    await expect(status, "success block must render exactly once after rapid double-submit (POST-04)").toBeVisible({ timeout: 3000 })
-    await expect(status, "success block count must be exactly 1").toHaveCount(1)
+    await expect(status, "success block must render after rapid double-submit (POST-04)").toBeVisible({ timeout: 3000 })
+
+    // LOAD-BEARING: exactly one Server Action POST despite the double-click.
+    // If a regression removes `disabled={pending}` from the button, the second
+    // click would queue a second action and this assertion fails.
+    expect(
+      actionPostCount,
+      "POST-04: only one Server Action dispatch despite rapid double-click",
+    ).toBe(1)
 
     // Inline error must NOT be present (we submitted a valid stub email)
     await expect(page.locator('p[role="alert"]')).toHaveCount(0)
 
-    // Sanity log
-    console.log(`POST-04 outcome: secondClickFailed=${secondClickFailed} (acceptable either way; what matters is final success block count = 1)`)
+    // Sanity log — secondClickError is informational, not load-bearing.
+    console.log(`POST-04 outcome: actionPostCount=${actionPostCount}, secondClickError=${secondClickError?.message ?? 'none'}`)
   })
 })
