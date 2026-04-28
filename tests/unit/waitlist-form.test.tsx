@@ -56,12 +56,17 @@ describe('<WaitlistForm>', () => {
     expect(input).not.toBeDisabled()
   })
 
-  it('honeypot input is present, named "website", and off-screen positioned (SPAM-01 / CD-01)', () => {
+  it('honeypot input is present, named "hp_field", off-screen positioned, and password-manager-ignored (SPAM-01 / CD-01 / WR-02)', () => {
     const { container } = render(<WaitlistForm renderedAt={PAST_RENDERED_AT} />)
-    const honeypot = container.querySelector('input[name="website"]') as HTMLInputElement
+    const honeypot = container.querySelector('input[name="hp_field"]') as HTMLInputElement
     expect(honeypot).not.toBeNull()
     expect(honeypot.tabIndex).toBe(-1)
     expect(honeypot.getAttribute('aria-hidden')).toBe('true')
+    // WR-02: password-manager opt-outs so 1Password / Bitwarden / LastPass do
+    // not auto-fill the honeypot for real users.
+    expect(honeypot.hasAttribute('data-1p-ignore')).toBe(true)
+    expect(honeypot.hasAttribute('data-bwignore')).toBe(true)
+    expect(honeypot.getAttribute('data-lpignore')).toBe('true')
     // Off-screen via inline style (NOT display:none — SPAM-01 mandate)
     expect(honeypot.style.position).toBe('absolute')
     expect(honeypot.style.left).toBe('-9999px')

@@ -144,16 +144,24 @@ export function WaitlistForm({ renderedAt }: { renderedAt: number }) {
         )}
       </div>
 
-      {/* Honeypot — off-screen via inline style (NOT Tailwind, NOT display:none — SPAM-01 / CD-01) */}
-      <label htmlFor="website" className="sr-only">Website</label>
+      {/* Honeypot — off-screen via inline style (NOT Tailwind, NOT display:none — SPAM-01 / CD-01).
+          WR-02: name is `hp_field` (not `website`) because major password managers
+          (1Password, Bitwarden, LastPass) auto-fill identity-vault `website`/`url`
+          values regardless of `autoComplete="off"`, silently dropping real users
+          into the honeypot's silent-success branch. The data-*-ignore attrs are
+          additional belt-and-suspenders against the same managers. */}
+      <label htmlFor="hp_field" className="sr-only">Leave this field empty</label>
       <input
-        id="website"
-        name="website"
+        id="hp_field"
+        name="hp_field"
         type="text"
         tabIndex={-1}
         autoComplete="off"
         defaultValue=""
         aria-hidden="true"
+        data-1p-ignore
+        data-bwignore
+        data-lpignore="true"
         style={{
           position: 'absolute',
           left: '-9999px',

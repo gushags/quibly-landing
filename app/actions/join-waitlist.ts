@@ -52,8 +52,11 @@ export async function joinWaitlistAction(
   _prevState: JoinWaitlistResult | null,
   formData: FormData,
 ): Promise<JoinWaitlistResult> {
-  // 1. Honeypot — silent success (SPAM-01 / D-15). Bot fills `website`; user never sees it.
-  if (formData.get('website')) {
+  // 1. Honeypot — silent success (SPAM-01 / D-15). Bot fills `hp_field`; user never sees it.
+  // WR-02: field is `hp_field` (not `website`) because password managers auto-fill
+  // identity-vault `website`/`url` values regardless of autoComplete="off",
+  // silently dropping real users into this branch.
+  if (formData.get('hp_field')) {
     return { status: 'success' }
   }
 

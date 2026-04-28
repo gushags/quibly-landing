@@ -30,7 +30,7 @@ describe('joinWaitlistAction (Phase 3 stub)', () => {
   it('returns silent success when honeypot is filled (SPAM-01 / D-15)', async () => {
     const r = await joinWaitlistAction(null, fd({
       email: 'real@example.com',
-      website: 'https://bot.example.com',
+      hp_field: 'https://bot.example.com',
       renderedAt: PAST_RENDERED_AT(),
     }))
     expect(r).toEqual({ status: 'success' })
@@ -39,7 +39,7 @@ describe('joinWaitlistAction (Phase 3 stub)', () => {
   it('returns silent success when submitted faster than 2s (SPAM-02 / D-15)', async () => {
     const r = await joinWaitlistAction(null, fd({
       email: 'real@example.com',
-      website: '',
+      hp_field: '',
       renderedAt: String(Date.now()),
     }))
     expect(r).toEqual({ status: 'success' })
@@ -48,7 +48,7 @@ describe('joinWaitlistAction (Phase 3 stub)', () => {
   it('returns fieldErrors and echoes typed value on invalid email (FORM-03 + FORM-06)', async () => {
     const r = await joinWaitlistAction(null, fd({
       email: 'not-an-email',
-      website: '',
+      hp_field: '',
       renderedAt: PAST_RENDERED_AT(),
     }))
     expect(r.status).toBe('error')
@@ -61,7 +61,7 @@ describe('joinWaitlistAction (Phase 3 stub)', () => {
   it('returns fieldErrors when email is empty (FORM-03)', async () => {
     const r = await joinWaitlistAction(null, fd({
       email: '',
-      website: '',
+      hp_field: '',
       renderedAt: PAST_RENDERED_AT(),
     }))
     expect(r.status).toBe('error')
@@ -73,7 +73,7 @@ describe('joinWaitlistAction (Phase 3 stub)', () => {
   it('returns success+duplicate for dup@example.com (POST-03 — state.duplicate flag, never read by UI; D-11 stub trigger)', async () => {
     const r = await joinWaitlistAction(null, fd({
       email: 'dup@example.com',
-      website: '',
+      hp_field: '',
       renderedAt: PAST_RENDERED_AT(),
     }))
     expect(r).toEqual({ status: 'success', duplicate: true })
@@ -82,7 +82,7 @@ describe('joinWaitlistAction (Phase 3 stub)', () => {
   it('returns error with toast message for err@example.com (D-12 sonner routing; D-11 stub trigger)', async () => {
     const r = await joinWaitlistAction(null, fd({
       email: 'err@example.com',
-      website: '',
+      hp_field: '',
       renderedAt: PAST_RENDERED_AT(),
     }))
     expect(r.status).toBe('error')
@@ -96,7 +96,7 @@ describe('joinWaitlistAction (Phase 3 stub)', () => {
     const t0 = performance.now()
     const r = await joinWaitlistAction(null, fd({
       email: 'slow@example.com',
-      website: '',
+      hp_field: '',
       renderedAt: PAST_RENDERED_AT(),
     }))
     const dt = performance.now() - t0
@@ -107,7 +107,7 @@ describe('joinWaitlistAction (Phase 3 stub)', () => {
   it('plain valid email returns success (POST-04 stub semantics — every accepted submit is success; D-11 default branch)', async () => {
     const r = await joinWaitlistAction(null, fd({
       email: 'real@example.com',
-      website: '',
+      hp_field: '',
       renderedAt: PAST_RENDERED_AT(),
     }))
     expect(r).toEqual({ status: 'success' })
