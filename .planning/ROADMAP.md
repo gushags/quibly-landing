@@ -50,7 +50,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. Lighthouse mobile performance ≥90, CLS <0.1, with no render-blocking third-party scripts on first paint — verified in CI on every PR.
   5. Users with `prefers-reduced-motion: reduce` see no decorative motion; the page works identically without animation.
 **Plans**: 6 plans
-  - [ ] 02-01-PLAN.md — Foundation: Button `size="hero"` CVA variant + `prefers-reduced-motion` smooth-scroll override
+  - [x] 02-01-PLAN.md — Foundation: Button `size="hero"` CVA variant + `prefers-reduced-motion` smooth-scroll override
   - [ ] 02-02-PLAN.md — Hero + HeroMascot + PlaceholderFormSection (D-30 spacing tightening, D-31 disabled-button CTA)
   - [ ] 02-03-PLAN.md — WhyQuibly + FounderVoice + SecondaryCTA + Footer (D-31 disabled secondary CTA, D-32 footer ≥48px tap targets)
   - [ ] 02-04-PLAN.md — Page composition + Playwright above-fold/LCP/tap-target/focus-visible spec + manual viewport sweep checkpoint
