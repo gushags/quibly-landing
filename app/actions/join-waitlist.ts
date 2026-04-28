@@ -198,7 +198,7 @@ export async function joinWaitlistAction(
     // aborted-send patterns appear, swap to waitUntil() per CONTEXT deferred items.
     resend.emails
       .send({
-        from: 'Jeff @ Quibly <hello@useQuibly.com>',
+        from: 'Jeff @ Quibly <hello@usequibly.com>',
         to: email,
         subject: "You're on the Quibly list",
         react: WelcomeEmail({
@@ -206,7 +206,7 @@ export async function joinWaitlistAction(
           postalAddress: env.RESEND_FROM_POSTAL_ADDRESS,
         }),
         headers: {
-          'List-Unsubscribe': `<${unsubscribeUrl}>, <mailto:unsubscribe@useQuibly.com>`,
+          'List-Unsubscribe': `<${unsubscribeUrl}>, <mailto:unsubscribe@usequibly.com>`,
           'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
         },
       })

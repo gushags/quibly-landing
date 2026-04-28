@@ -272,12 +272,12 @@ describe('joinWaitlistAction (Phase 4 real pipeline)', () => {
       headers: Record<string, string>
       react: { props: { postalAddress: string; unsubscribeUrl: string } }
     }
-    expect(sendArg.from).toBe('Jeff @ Quibly <hello@useQuibly.com>')
+    expect(sendArg.from).toBe('Jeff @ Quibly <hello@usequibly.com>')
     expect(sendArg.to).toBe('real@example.com')
     expect(sendArg.subject).toBe("You're on the Quibly list")
     expect(sendArg.headers['List-Unsubscribe-Post']).toBe('List-Unsubscribe=One-Click')
     expect(sendArg.headers['List-Unsubscribe']).toMatch(/<https?:\/\/[^>]+\/unsubscribe\?t=[^>]+>/)
-    expect(sendArg.headers['List-Unsubscribe']).toContain('<mailto:unsubscribe@useQuibly.com>')
+    expect(sendArg.headers['List-Unsubscribe']).toContain('<mailto:unsubscribe@usequibly.com>')
     // Belt-and-suspenders: react arg carries postalAddress (covered in detail by the next test)
     expect(sendArg.react.props.postalAddress).toBeTruthy()
   })
