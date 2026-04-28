@@ -4,12 +4,21 @@ import {
   Head,
   Hr,
   Html,
+  Img,
   Link,
   Preview,
   Section,
   Text,
 } from '@react-email/components'
 import * as React from 'react'
+
+/**
+ * Content-ID used for the inline wordmark attachment. The action body in
+ * `app/actions/join-waitlist.ts` attaches `public/email/wordmark.png` with
+ * this CID; the `<Img src="cid:..." />` below resolves to the embedded
+ * binary at render time. Exported so the action and template stay in sync.
+ */
+export const WORDMARK_CID = 'wordmark@quibly'
 
 /**
  * Phase 4 — Welcome email (EMAIL-07).
@@ -50,9 +59,19 @@ export function WelcomeEmail({
       </Preview>
       <Body style={main}>
         <Container style={container}>
-          {/* Teal header strip — UI-SPEC #0D9488, 48px height */}
+          {/* Teal header strip — UI-SPEC #0D9488, 48px height. The wordmark
+              is rendered as an inline-attached PNG (Quicksand 600, white on
+              transparent) so brand typography survives Gmail/Outlook stripping
+              of @font-face rules. The action body attaches the PNG with
+              contentId === WORDMARK_CID. */}
           <Section style={header}>
-            <Text style={headerText}>Quibly</Text>
+            <Img
+              src={`cid:${WORDMARK_CID}`}
+              alt="Quibly"
+              width="160"
+              height="40"
+              style={wordmark}
+            />
           </Section>
 
           {/* D-01 locked body copy — DO NOT paraphrase */}
@@ -127,17 +146,17 @@ const container: React.CSSProperties = {
 
 const header: React.CSSProperties = {
   height: '48px',
-  padding: '0 24px',
+  padding: '4px 24px',
   backgroundColor: '#0D9488',
   textAlign: 'center',
 }
 
-const headerText: React.CSSProperties = {
-  color: '#ffffff',
-  fontSize: '16px',
-  fontWeight: 600,
-  lineHeight: '48px',
-  margin: 0,
+const wordmark: React.CSSProperties = {
+  display: 'inline-block',
+  margin: '0 auto',
+  // Image is rendered at 480x120 (3x retina), displayed at 160x40
+  width: '160px',
+  height: '40px',
 }
 
 const content: React.CSSProperties = {

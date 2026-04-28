@@ -62,7 +62,19 @@ vi.mock('@/emails/WelcomeEmail', () => ({
     type: 'WelcomeEmailMock',
     props,
   })),
+  WORDMARK_CID: 'wordmark@quibly',
 }))
+
+// Mock fs/promises.readFile so the action can fetch the wordmark PNG without
+// actually hitting disk in unit tests. importOriginal preserves other exports
+// (writeFile, mkdir, etc.) that vitest itself uses internally.
+vi.mock('node:fs/promises', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('node:fs/promises')>()
+  return {
+    ...actual,
+    readFile: vi.fn(async () => Buffer.from('mock-wordmark-png-bytes')),
+  }
+})
 
 // ─── Dynamic imports (after mocks) ─────────────────────────────────────────
 
@@ -271,6 +283,7 @@ describe('joinWaitlistAction (Phase 4 real pipeline)', () => {
       subject: string
       headers: Record<string, string>
       react: { props: { postalAddress: string; unsubscribeUrl: string } }
+      attachments: Array<{ filename: string; content: Buffer; contentId: string }>
     }
     expect(sendArg.from).toBe('Quibly <hello@usequibly.com>')
     expect(sendArg.to).toBe('real@example.com')
@@ -280,6 +293,11 @@ describe('joinWaitlistAction (Phase 4 real pipeline)', () => {
     expect(sendArg.headers['List-Unsubscribe']).toContain('<mailto:unsubscribe@usequibly.com>')
     // Belt-and-suspenders: react arg carries postalAddress (covered in detail by the next test)
     expect(sendArg.react.props.postalAddress).toBeTruthy()
+    // Inline wordmark attachment — referenced from WelcomeEmail.tsx as cid:wordmark@quibly
+    expect(sendArg.attachments).toHaveLength(1)
+    expect(sendArg.attachments[0].filename).toBe('wordmark.png')
+    expect(sendArg.attachments[0].contentId).toBe('wordmark@quibly')
+    expect(Buffer.isBuffer(sendArg.attachments[0].content)).toBe(true)
   })
 
   it('passes non-empty postalAddress to WelcomeEmail (EMAIL-05 CAN-SPAM)', async () => {

@@ -1,5 +1,7 @@
 'use server'
 
+import { readFile } from 'node:fs/promises'
+import { join } from 'node:path'
 import { z } from 'zod'
 import { headers } from 'next/headers'
 import { env } from '@/lib/env'
@@ -7,7 +9,7 @@ import { resend } from '@/lib/resend'
 import { rateLimitPerMinute, rateLimitPerDay } from '@/lib/rate-limit'
 import { isDisposableDomain } from '@/lib/disposable-domains'
 import { track } from '@/lib/analytics'
-import WelcomeEmail from '@/emails/WelcomeEmail'
+import WelcomeEmail, { WORDMARK_CID } from '@/emails/WelcomeEmail'
 import { generateToken } from '@/lib/unsubscribe-token'
 
 /**
@@ -196,6 +198,12 @@ export async function joinWaitlistAction(
     // CD-09: fire-and-forget — NOT awaited. .catch() handles EMAIL-08 observability.
     // The Promise typically resolves within the request lifecycle on Vercel; if
     // aborted-send patterns appear, swap to waitUntil() per CONTEXT deferred items.
+    // Inline-attached wordmark PNG. Referenced from WelcomeEmail.tsx via cid:
+    // (RFC 2392) — embedded in the email body, no external image fetch, works
+    // in Gmail/Outlook/Apple Mail with images-on or images-off.
+    const wordmarkPath = join(process.cwd(), 'public', 'email', 'wordmark.png')
+    const wordmark = await readFile(wordmarkPath)
+
     resend.emails
       .send({
         from: 'Quibly <hello@usequibly.com>',
@@ -209,6 +217,13 @@ export async function joinWaitlistAction(
           'List-Unsubscribe': `<${unsubscribeUrl}>, <mailto:unsubscribe@usequibly.com>`,
           'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
         },
+        attachments: [
+          {
+            filename: 'wordmark.png',
+            content: wordmark,
+            contentId: WORDMARK_CID,
+          },
+        ],
       })
       .catch((err) => {
         console.error('welcome_email_send_failed', { email, err })
