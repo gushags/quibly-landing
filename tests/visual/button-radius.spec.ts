@@ -9,13 +9,16 @@ import { expect, test } from "@playwright/test"
  *   - tailwind-merge (if a future Tailwind upgrade changes conflict resolution)
  *   - the consuming components (if a caller adds className="rounded-full" post-hoc)
  *
- * Phase 2 has THREE rendered <Button size="hero"> instances on `/`:
- *   1. Hero CTA        (components/sections/hero.tsx — "Form coming soon")
- *   2. Placeholder CTA (components/sections/placeholder-form-section.tsx)
- *   3. Secondary CTA   (components/sections/secondary-cta.tsx)
+ * Phase 3 ships THREE rendered <Button size="hero"> instances on `/`:
+ *   1. Hero CTA            (<a href="#waitlist"> via <Button asChild> — D-01)
+ *   2. Form submit         (<button type="submit"> in <WaitlistForm> — D-07)
+ *   3. Secondary CTA       (<a href="#waitlist"> via <Button asChild> — D-02)
  *
- * Per D-31 all three are <button type="button" aria-disabled="true"> with no href.
- * The selector button[aria-disabled="true"] matches all three.
+ * Mix of <a> and <button> tags requires a tag-agnostic selector. We use
+ * [data-slot="button"][data-size="hero"] (set in components/ui/button.tsx:59-61
+ * regardless of asChild value).
+ *
+ * If a future phase adds a 4th hero pill or removes one, update the count assertion.
  *
  * Pre-requisite: `npm run dev` (or `npm run build && npm run start`) running at :3000.
  */
@@ -28,15 +31,22 @@ test.describe("Phase 2 hero button radius (D-06 / 28px lock)", () => {
   })
 
   test("every <Button size=\"hero\"> instance computes border-radius: 28px", async ({ page }) => {
-    const heroButtons = page.locator('button[aria-disabled="true"]')
+    // Phase 3 update (Pitfall 9): hero + secondary CTAs are now <a> elements via
+    // <Button asChild>; the form's submit is a <button>. The data-slot + data-size
+    // attribute selector is tag-agnostic and matches all <Button size="hero">
+    // instances regardless of rendered tag (button.tsx:59-61 sets these on all
+    // variants). Was: the Phase 2 disabled-button attribute selector.
+    const heroButtons = page.locator('[data-slot="button"][data-size="hero"]')
 
-    // Phase 2 ships exactly three disabled hero buttons.
-    // Phase 3 will reduce this to one (the form's submit) — at that time this assertion's
-    // expected count will need to update.
+    // Phase 3 ships exactly THREE hero pills on the idle page:
+    //   1. Hero CTA            (<a href="#waitlist"> via asChild — D-01)
+    //   2. Secondary CTA       (<a href="#waitlist"> via asChild — D-02)
+    //   3. Form submit button  (<button type="submit"> in <WaitlistForm> — D-07)
+    // Mix of <a> and <button> tags is exactly why we use the data-slot selector.
     const count = await heroButtons.count()
     expect(
       count,
-      `Phase 2 should render exactly 3 disabled hero <button> instances; found ${count}`,
+      `Phase 3 should render exactly 3 <Button size="hero"> instances (hero anchor + secondary anchor + form submit); found ${count}`,
     ).toBe(3)
 
     for (let i = 0; i < count; i++) {
@@ -57,7 +67,7 @@ test.describe("Phase 2 hero button radius (D-06 / 28px lock)", () => {
     // Sanity check: the 28px radius is paired with py-3.5 (14px top + 14px bottom)
     // and text-base (~24px line-height). Total height should be >= 48px.
     // If a future change drops py-3.5, this catches the resulting <48px regression.
-    const heroCta = page.locator('button[aria-disabled="true"]').first()
+    const heroCta = page.locator('[data-slot="button"][data-size="hero"]').first()
     const box = await heroCta.boundingBox()
     expect(box).not.toBeNull()
     if (!box) return
