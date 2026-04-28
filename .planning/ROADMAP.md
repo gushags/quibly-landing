@@ -71,7 +71,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 7 plans
   - [x] 03-01-PLAN.md — Test infrastructure: Vitest+RTL+happy-dom install, configs, Playwright multi-project extension, .github/workflows/test.yml (Wave 1)
   - [x] 03-02-PLAN.md — Server Action stub at app/actions/join-waitlist.ts: real Zod + honeypot + time-trap; stub branches via deterministic email patterns; Vitest unit suite covering 8 branches (Wave 2)
-  - [ ] 03-03-PLAN.md — WaitlistForm Client Component, section rename (CD-07), Toaster mount, page wiring, RTL render-time tests (Wave 3)
+  - [x] 03-03-PLAN.md — WaitlistForm Client Component, section rename (CD-07), Toaster mount, page wiring, RTL render-time tests (Wave 3)
   - [x] 03-04-PLAN.md — Hero + Secondary CTA anchor flips (D-01/D-02 — overrides Phase 2 D-31); Phase 2 button-radius spec selector update (Pitfall 9) (Wave 1, parallel with 03-01)
   - [ ] 03-05-PLAN.md — Playwright e2e form specs (FORM-05/06/07, POST-01/02/03/04, D-01/D-02, D-12) — 7 spec files, ~12 tests (Wave 4)
   - [ ] 03-06-PLAN.md — No-JS Playwright spec (FORM-08 graceful degradation acceptance) (Wave 4)
