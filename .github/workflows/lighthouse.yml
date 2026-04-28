@@ -8,6 +8,16 @@ on:
   pull_request:
     branches: [main]
 
+# Least-privilege token: workflow only reads source + posts LHCI status checks.
+# Without this block, the runner inherits the repo default permissions, which
+# unnecessarily broadens the supply-chain blast radius if either pinned action
+# (treosh/lighthouse-ci-action, patrickedqvist/wait-for-vercel-preview) is
+# compromised.
+permissions:
+  contents: read
+  pull-requests: write
+  statuses: write
+
 jobs:
   lighthouse:
     runs-on: ubuntu-latest
