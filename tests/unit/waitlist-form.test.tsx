@@ -1,5 +1,15 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
+
+// Mock the Server Action + its type export so lib/env.ts never loads in this RTL
+// test environment. Phase 4 wires real Resend deps at module load; this component
+// test only exercises render-time DOM invariants, not action submission behavior
+// (that's covered by Playwright e2e). The JoinWaitlistResult type is re-exported
+// for the component to type-check correctly.
+vi.mock('@/app/actions/join-waitlist', () => ({
+  joinWaitlistAction: vi.fn(async () => ({ status: 'success' as const })),
+}))
+
 import { WaitlistForm } from '@/components/waitlist/waitlist-form'
 
 /**
