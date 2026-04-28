@@ -272,7 +272,7 @@ describe('joinWaitlistAction (Phase 4 real pipeline)', () => {
       headers: Record<string, string>
       react: { props: { postalAddress: string; unsubscribeUrl: string } }
     }
-    expect(sendArg.from).toBe('Jeff @ Quibly <hello@usequibly.com>')
+    expect(sendArg.from).toBe('Quibly <hello@usequibly.com>')
     expect(sendArg.to).toBe('real@example.com')
     expect(sendArg.subject).toBe("You're on the Quibly list")
     expect(sendArg.headers['List-Unsubscribe-Post']).toBe('List-Unsubscribe=One-Click')
