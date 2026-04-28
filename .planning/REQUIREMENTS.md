@@ -44,7 +44,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **FORM-05**: Visible loading state during submit (button disabled + spinner)
 - [ ] **FORM-06**: Inline error messaging preserves typed value
 - [ ] **FORM-07**: Native `<form>` element supports Enter-key submit
-- [ ] **FORM-08**: `<noscript>` fallback so the form remains submittable without JS
+- [ ] **FORM-08**: Form remains submittable without JavaScript via framework-native progressive enhancement (Next.js `<form action={serverAction}>` + React 19 `useActionState` thread the action result into the no-JS server render — empirically confirmed Phase 3 Plan 06; supersedes earlier `<noscript>` literal wording per CONTEXT D-16)
 - [ ] **FORM-09**: `useActionState` binds the Client Component form to the Server Action
 
 ### Post-Submit Experience
