@@ -1,0 +1,68 @@
+# Source: RESEARCH.md §Pattern 5 (lines 617–677). Two parallel jobs to keep PR feedback under 3 min.
+# D-18: both test layers required as PR gates — these two job names become the required status checks
+# on `main` branch protection. Status check names (mirror Phase 2 D-34 pattern):
+#   - "Tests / vitest"      → branch protection required-status-check (D-18)
+#   - "Tests / playwright"  → branch protection required-status-check (D-18)
+# Adding these two names to main's branch protection is a manual GitHub UI step
+# — see Plan 03-07 Task 1 (autonomous: false checkpoint).
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  vitest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: npm
+      - run: npm ci
+      - run: npx tsc --noEmit
+      - run: npm run lint
+      - run: npm run test:unit
+
+  playwright:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: npm
+      - run: npm ci
+      - name: Get installed Playwright version
+        id: playwright-version
+        run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
+      - name: Install Playwright browsers
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium
+      - name: Build Next app
+        run: npm run build
+      - name: Start Next server in background
+        run: npx next start &
+      - name: Wait for server
+        run: npx --yes wait-on http://localhost:3000 --timeout 30000
+      - name: Run Playwright tests
+        run: npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
