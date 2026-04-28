@@ -1,7 +1,7 @@
 ---
 phase: 2
 reviewers: [gemini, codex]
-reviewed_at: 2026-04-27T18:14:00Z
+reviewed_at: 2026-04-27T18:18:00Z
 plans_reviewed:
   - 02-01-PLAN.md
   - 02-02-PLAN.md
@@ -9,140 +9,119 @@ plans_reviewed:
   - 02-04-PLAN.md
   - 02-05-PLAN.md
 self_skipped: claude (running inside Claude Code CLI)
+note: Re-run of /gsd-review --phase 2 --all (overwrites the prior 18:14 review). Same plans, same reviewers, fresh output.
 ---
 
 # Cross-AI Plan Review — Phase 2: Static Landing Page (No Form)
 
 ## Gemini Review
 
-This review evaluates the Phase 2 implementation plans for the Quibly Landing project against the provided requirements and technical constraints.
+This review evaluates the implementation plans for **Phase 2: Static Landing Page (No Form)**. The architecture prioritizes performance (Lighthouse ≥90), accessibility, and a "zero-JS" RSC approach to ensure a fast, stable pre-launch presence.
 
 ---
 
-### Plan 02-01: Foundation — Button `size="hero"` variant + `prefers-reduced-motion` override
+### Plan 02-01: Foundation — Button `size="hero"` variant + `prefers-reduced-motion`
 
-**Summary**: A surgical plan to prepare the design system and global styles for Phase 2. It introduces the specific pill-style CTA variant required for the landing page and ensures accessibility compliance for users with motion sensitivities.
+**Summary**: A surgical, low-risk foundation plan that extends the existing design system tokens (CVA) and sets the global accessibility baseline for motion.
 
-**Strengths**:
-- **Surgical Additions**: Zero impact on existing logic; additive-only approach minimizes regression risk.
-- **Accessibility-First**: Proactively handles `prefers-reduced-motion` at the base layer.
-- **CVA Best Practices**: Correctly utilizes shadcn's `buttonVariants` pattern rather than creating a one-off component.
-
-**Concerns**:
-- **`tailwind-merge` Conflict (LOW)**: The plan assumes `rounded-[28px]` will override `rounded-full`. While `tw-merge` is designed for this, if `rounded-full` is hardcoded in the component's `className` rather than the CVA base, the override behavior depends on the order of arguments passed to `cn()`.
-- **Media Query Placement (LOW)**: Standard practice for v4 is to keep `@media` queries within the utility or component definitions, though placing it in `@layer base` is acceptable for a "global" behavior.
-
-**Suggestions**:
-- Verify that `rounded-full` is indeed in the `buttonVariants` base string. If it is in the component's `className` prop within `button.tsx`, ensure `size` variants are passed correctly through `cn()`.
-
-**Risk Assessment: LOW**. The changes are purely stylistic and follow established project patterns.
+*   **Strengths**:
+    *   Directly addresses D-06 and D-23 without modifying the core shadcn logic.
+    *   Uses `@layer base` for the motion override, ensuring it respects Tailwind's cascade.
+*   **Concerns**:
+    *   **LOW**: Tailwind Merge Reliance. The plan assumes `rounded-full` (base) will be overridden by `rounded-[28px]` (variant). While `twMerge` handles this, if the base CVA string is modified later to use a different utility, the override might become brittle.
+*   **Suggestions**:
+    *   Explicitly check the generated class order in the manual verification step to ensure `rounded-[28px]` appears after `rounded-full` in the final DOM string.
+*   **Risk Assessment**: **LOW**. Simple additive changes with clear verification steps.
 
 ---
 
 ### Plan 02-02: Hero + HeroMascot + PlaceholderFormSection
 
-**Summary**: Implements the core above-the-fold experience. It utilizes a clever DOM-reordering trick to ensure the H1 is the LCP element while maintaining the visual mascot-first design. It also establishes the `#waitlist` anchor seam for Phase 3.
+**Summary**: Implements the "meat" of the landing page using a clever DOM-reversal technique to guarantee the H1 as the LCP element while maintaining the desired visual hierarchy.
 
-**Strengths**:
-- **SEO/Perf Alignment**: The `flex-col-reverse` pattern is a high-signal engineering choice to force H1 as LCP (HERO-06).
-- **Asset Hygiene**: `HeroMascot` is appropriately scoped as a section-local RSC, avoiding design system bloat.
-- **Future-Proofing**: The `PlaceholderFormSection` establishes the `id="waitlist"` ID now, ensuring Phase 3 integration is a "swap-in" operation.
-
-**Concerns**:
-- **Mobile Fold Height (HIGH)**: The requirement is headline + subheadline + mascot + CTA above the fold at **320×568**.
-  - *Math*: `py-16` (128px) + Mascot (88px) + Gap (24px) + Headline (~120px) + Subheadline (~80px) + Gap (24px) + CTA (52px) + Microcopy (24px) = **540px**.
-  - Mobile Safari/Chrome viewports at 568px height usually only have **~460px–480px** of usable height after browser chrome. This plan will likely result in the CTA being cut off or requiring a scroll.
-- **Gradient Identity (LOW)**: The radial gradient in `Hero` uses hardcoded OKLCH values. Ensure these match the Phase 1 tokens if they were intended to be brand-linked.
-
-**Suggestions**:
-- Reduce mobile vertical padding on the Hero section (e.g., `py-10` or `py-12`) to recover vertical space for the 320px viewport.
-- Consider moving the background gradient to a global utility or a more reusable `BackgroundGlow` component if other pages are planned.
-
-**Risk Assessment: MEDIUM**. The visual requirement for "no scroll at 320x568" is at high risk of failure due to vertical stack height and browser chrome.
+*   **Strengths**:
+    *   **LCP Guard**: Using `flex-col-reverse` on the H1/Mascot container is a sophisticated way to satisfy HERO-06 (H1 as LCP) while keeping the mascot visually at the top.
+    *   **Clean Separation**: Moving `HeroMascot` to its own file keeps the main `Hero` component readable.
+    *   **RSC Purity**: Strictly adheres to the zero-client-JS requirement.
+*   **Concerns**:
+    *   **MEDIUM**: Viewport Math. At 320x568 (iPhone SE-style), the cumulative height of `py-16` (64px top/bottom), mascot (88px), H1 (approx 120px), sub-headline (64px), and CTA (52px) plus gaps (24px) totals ~476px. This fits, but `py-24` on tablets/desktop might push content too far down if not careful.
+    *   **LOW**: No-op Anchor. The CTA inside `PlaceholderFormSection` linking to `#waitlist` (itself) is slightly confusing UX, though technically compliant with the placeholder requirement.
+*   **Suggestions**:
+    *   In `hero-mascot.tsx`, ensure the gradient colors (oklch or hex) match the design system teal exactly to avoid "off-brand" gradients.
+    *   Consider adding `loading="eager"` and `priority` if the mascot was an `Image`, but since it's an SVG-based RSC, it should be fine.
+*   **Risk Assessment**: **LOW**. The LCP strategy is sound and the RSC implementation is standard.
 
 ---
 
 ### Plan 02-03: WhyQuibly + FounderVoice + SecondaryCTA + Footer
 
-**Summary**: Completes the below-the-fold content using pure RSC markup. The plan adheres strictly to the locked design decisions regarding icon stroke widths, grid layouts, and minimal footer presentation.
+**Summary**: Completes the below-the-fold narrative. It emphasizes content structure and accessibility via ARIA-hidden separators.
 
-**Strengths**:
-- **Semantic HTML**: Proper use of `<footer/>`, `aria-hidden` on icons, and middot separators.
-- **Copy Accuracy**: Directly implements the "founder voice" and "secondary CTA" requirements without over-engineering with client-side state.
-- **Icon Consistency**: Adheres to the specific `strokeWidth={1.75}` requirement which distinguishes the brand's aesthetic.
-
-**Concerns**:
-- **Footer Links (LOW)**: Linking to `/privacy` and `/terms` (which 404) is correct per plan, but ensure `next.config.ts` or a custom 404 page is ready to handle this professionally if a user clicks them during the preview.
-- **Icon Sizing (LOW)**: Ensure Lucide icons in `WhyQuibly` have a consistent `size={24}` (or similar) to avoid layout shifts if they load at different times (though they are bundled SVG strings).
-
-**Suggestions**:
-- Wrap the footer links in a `nav` or ensure the flex-gap is sufficient for a 48px touch target (MOB-02). Currently, `gap-3` (12px) with `px-1` padding might be tight for mobile accessibility.
-
-**Risk Assessment: LOW**. Straightforward implementation of static content.
+*   **Strengths**:
+    *   **Icon Consistency**: Locking `strokeWidth={1.75}` across all Lucide icons ensures a professional, custom-designed feel rather than a "stock" look.
+    *   **Accessibility**: Proper use of `aria-hidden="true"` for decorative middots in the footer.
+    *   **Grid Logic**: Simple `md:grid-cols-3` handles the responsive transition for "Why Quibly" perfectly.
+*   **Concerns**:
+    *   **LOW**: 404 Links. Linking to `/privacy` and `/terms` which don't exist yet is acceptable for Phase 2, but could trigger broken link checkers if added to CI later.
+*   **Suggestions**:
+    *   Ensure the "Why Quibly" icons use `text-primary` to maintain the Teal brand accent.
+*   **Risk Assessment**: **LOW**. Purely presentational components.
 
 ---
 
-### Plan 02-04: Page Composition + Manual Verification
+### Plan 02-04: Page Composition + Manual Viewport Verification
 
-**Summary**: Aggregates all sections into the main entry point and establishes a "Human-in-the-loop" verification gate. This is the critical quality control step before CI.
+**Summary**: The integration step. It moves the project from individual "parts" to a cohesive application and includes a critical human-in-the-loop verification.
 
-**Strengths**:
-- **Compositional Simplicity**: `app/page.tsx` remains a clean manifest of sections.
-- **Comprehensive Verification**: The list of manual checks (LCP identity, viewport scaling, reduced motion) is exhaustive and covers the highest-risk requirements.
-
-**Concerns**:
-- **Scroll Margin (MEDIUM)**: `PlaceholderFormSection` has `scroll-mt-16`. If the page has no fixed header (none is mentioned), this might create an odd gap when jumping to `#waitlist`.
-- **Fragment usage (LOW)**: The use of `<main>` and `<Footer>` outside the main container is correct for semantic structure.
-
-**Suggestions**:
-- Add a check for "Over-scroll behavior" on mobile to ensure the radial gradients don't "clip" awkwardly during bounce.
-
-**Risk Assessment: LOW**. This plan is a coordination effort with no logic of its own.
+*   **Strengths**:
+    *   **Composition**: Uses a clean, flat structure in `app/page.tsx`.
+    *   **Exhaustive Checklist**: The manual verification covers the most likely failure points (320px viewport and LCP identity).
+*   **Concerns**:
+    *   **MEDIUM**: Blocking Workflow. The "Wait for approved" prompt is necessary but can be a bottleneck if the developer is running this in a semi-automated environment.
+*   **Suggestions**:
+    *   Add a check for "Layout Shift" during the manual scroll test to catch any obvious issues before the automated Lighthouse check.
+*   **Risk Assessment**: **LOW**. Standard composition.
 
 ---
 
 ### Plan 02-05: Lighthouse CI Gate
 
-**Summary**: Implements automated enforcement of performance and layout stability. This is the most critical plan for satisfying the project's technical "Success Criteria."
+**Summary**: Provides the "teeth" for the performance requirements. Automating Lighthouse in CI is the only way to ensure the mobile performance baseline (≥90) isn't eroded by future PRs.
 
-**Strengths**:
-- **CI Enforcement**: Moving from "vibe-check" to "exit-code check" for Performance >= 90 is excellent.
-- **Vercel Integration**: Using `wait-for-vercel-preview` ensures the CI runs against the actual production-like build rather than a local dev server.
-- **Strict CLS Assertion**: A `maxNumericValue: 0.1` assertion directly enforces the core requirement.
-
-**Concerns**:
-- **Local LHCI Complexity (MEDIUM)**: Running `npm run start &` in the background can be flaky in CI environments if the process doesn't start fast enough.
-- **Github Action Timeout (LOW)**: `max_timeout: 300` is generous, but the wait-for-vercel-preview can sometimes exceed this if Vercel is having a slow build day.
-
-**Suggestions**:
-- In Task 2, use `npx wait-on http://localhost:3000` before running LHCI to ensure the server is ready.
-- Ensure the GitHub Action is configured to "Fail on error" so that PRs cannot be merged if Lighthouse scores drop.
-
-**Risk Assessment: MEDIUM**. CI configuration is notoriously prone to "it works on my machine" failures during initial setup.
+*   **Strengths**:
+    *   **Rigorous Assertions**: Setting `performance: error` at 0.90 and `cls: error` at 0.1 is a strong enforcement of project goals.
+    *   **Real-world Testing**: Running against Vercel preview URLs is much more accurate than local `next dev` runs.
+*   **Concerns**:
+    *   **HIGH**: Vercel Token Security. The plan mentions creating a token but doesn't explicitly warn against committing it. (Note: The prompt instructions say *never* to commit secrets, but it's a critical point for this plan).
+    *   **MEDIUM**: Flakiness. Lighthouse scores can vary by 5-10% on shared CI runners. Setting a 0.90 threshold might cause "green-room" failures where a perfectly good PR fails because the GitHub Action runner was under heavy load.
+*   **Suggestions**:
+    *   Change `numberOfRuns` to 5 to average out CI noise.
+    *   Ensure the `wait-for-vercel-preview` action is configured with a sufficient timeout to allow for Next.js cold starts.
+*   **Risk Assessment**: **MEDIUM**. The technical setup is correct, but CI flakiness and secret management are common pitfalls.
 
 ---
 
 ### Phase-Level Review
 
-**Cross-Plan Consistency**: The plan set is highly cohesive. The "Foundation" (01) enables the "Sections" (02, 03), which are composed in the "Page" (04), and finally validated by the "CI" (05). The use of the `#waitlist` anchor as a thread through all plans is well-executed.
+#### Cross-Plan Consistency
+The plans are highly consistent. The naming conventions (`hero-mascot.tsx`, `why-quibly.tsx`) and the shared use of the `hero` button variant demonstrate a unified architectural vision. The "Wave" approach correctly sequences dependencies (Foundation -> Components -> Composition -> Verification).
 
-**Goal Achievement**:
-- **Criterion 1 (320px Fold)**: **RISK**. As noted in Plan 02-02, the vertical stack is very tall for a 320x568 device.
-- **Criterion 2 (Scaling)**: **LIKELY**. Tailwind's responsive prefixes are correctly applied throughout.
-- **Criterion 3 (Below Fold)**: **SUCCESS**. Covered extensively by 02-03.
-- **Criterion 4 (Lighthouse)**: **SUCCESS**. Plan 02-05 provides the necessary automation.
-- **Criterion 5 (Reduced Motion)**: **SUCCESS**. Covered in 02-01.
+#### Goal Achievement
+Execution of these 5 plans will successfully satisfy all 18 Phase 2 requirements.
+*   **PERF-01..03**: Guaranteed by Plan 02-05.
+*   **HERO-01..07**: Specifically addressed by the `flex-col-reverse` LCP guard and the specific button variants.
+*   **Zero-JS**: All components are implemented as RSCs by default (no `'use client'`).
 
-**Top 3 Risks**:
-1. **Vertical Space (320px Viewport)**: The hero content will likely require scrolling on small devices, violating the "above the fold" requirement.
-2. **LCP Misidentification**: While the DOM order is correct, a slow-loading font or a heavy gradient paint could still delay the H1 paint-time enough for Lighthouse to flag the Mascot if the Mascot paints instantly.
-3. **CI Flakiness**: The Lighthouse CI gate depends on external Vercel previews which can introduce latency or non-deterministic failures in the PR pipeline.
+#### Top 3 Risks
+1.  **CI Flakiness (Plan 02-05)**: The 0.90 Lighthouse threshold on GitHub Actions runners may be brittle.
+2.  **320px Height Overflow**: While the math works, any slight increase in padding or font-size will push the CTA below the fold on an iPhone SE.
+3.  **Tailwind Merge Collision**: If the `button.tsx` base styles are modified, the `rounded-[28px]` variant might not win the merge as expected.
 
-**Missing Elements**:
-- **Favicon/Metadata**: The plan doesn't mention updating `app/layout.tsx` metadata (Title, Description, Favicon) which is critical for the SEO score in Lighthouse.
-- **Image Optimization**: While the Mascot is a CSS/Icon combo, any future use of `next/image` should be pre-emptively discussed to maintain the `CLS < 0.1` goal.
+#### Missing Items
+*   **Metadata**: `app/page.tsx` should export a `Metadata` object (SEO title/description) to satisfy the "pre-launch surface" goal.
+*   **Favicons/Manifest**: While perhaps Phase 1, ensuring the QuibsIcon is used as a favicon would improve the "Static Landing Page" polish.
 
-**Final Verdict**: Executing these plans will result in a high-quality, high-performance landing page. The only significant concern is the 320px viewport "fold" constraint, which should be mitigated by tightening vertical spacing in Plan 02-02.
+**Overall Verdict**: The plans are **EXCELLENT**. They are surgical, leverage modern Next.js patterns, and prioritize the specific performance constraints of the project. Proceed with execution.
 
 ---
 
@@ -150,215 +129,214 @@ This review evaluates the Phase 2 implementation plans for the Quibly Landing pr
 
 ### Plan 02-01 — Foundation
 
-**Summary**
-Good, tightly scoped foundation work. The reduced-motion override is correct and low risk. The `size="hero"` variant is directionally right, but the plan relies on class-merging behavior that should be proven once in code/tests, not only manually.
+#### Summary
+This is a clean, minimal foundation change and mostly correct. The `size="hero"` variant and reduced-motion smooth-scroll override are aligned with locked decisions, but the plan relies on runtime class merging behavior without an explicit regression guard.
 
-**Strengths**
-- Minimal, additive edits to shared primitives.
-- Uses CSS media query for `prefers-reduced-motion` with zero client JS.
-- Keeps smooth-scroll default while honoring reduced-motion users.
-- Introduces reusable CTA size token (`hero`) for Phase 2 and Phase 3 continuity.
+#### Strengths
+- Very small, additive scope in only two existing files.
+- Matches D-06 exactly (`rounded-[28px]` pill requirement).
+- `prefers-reduced-motion` handling is CSS-only and keeps Phase 2 zero-client-JS.
+- Includes practical verification steps (`check/lint/build` + grep).
 
-**Concerns**
-- [MEDIUM] `rounded-[28px]` overriding base `rounded-full` depends on `tailwind-merge` grouping behavior and class order through `cva` + `cn`; if order changes later, radius can silently regress.
-- [LOW] Acceptance is mostly manual grep/checks; no regression guard for border-radius value.
+#### Concerns
+- `LOW`: `rounded-full` vs `rounded-[28px]` depends on `tailwind-merge` conflict resolution and class ordering in CVA output.
+- `LOW`: No explicit guard (test/snapshot) to prevent future refactors from silently dropping `size="hero"` behavior.
 
-**Suggestions**
-- Add a tiny unit assertion on `buttonVariants({ size: "hero" })` output (or snapshot) to ensure `rounded-[28px]` survives.
-- Add a visual/DOM check in CI (Playwright or simple computed-style test) for CTA border radius on homepage.
-- Keep the reduced-motion override exactly as proposed; it is correct.
+#### Suggestions
+- Add a tiny unit/snapshot test for `buttonVariants({ size: "hero" })` to assert `rounded-[28px]` wins.
+- Add one visual assertion in PR checklist: computed `border-radius: 28px` on hero CTA in built app, not only dev.
 
-**Risk Assessment**
-**LOW-MEDIUM** — small scope, but one silent styling regression vector exists without an automated guard.
+#### Risk Assessment
+**LOW** — scoped and technically sound, with only minor regression-risk if class composition changes later.
 
 ---
 
 ### Plan 02-02 — Hero + HeroMascot + PlaceholderFormSection
 
-**Summary**
-Architecture is strong: pure RSC, clean section boundaries, and the H1-first DOM pattern is the right way to bias LCP toward the headline. Main risk is layout math on 320×568; current spacing likely makes "all required hero elements above fold" fail on small mobile.
+#### Summary
+Good component decomposition and strong alignment with locked architecture (RSC-only, dedicated mascot wrapper, H1-first DOM). The biggest risk is layout math: current spacing likely fails the strict "all hero essentials above fold at 320×568" requirement.
 
-**Strengths**
-- Correct LCP-guard strategy: H1 appears before mascot in DOM, visual order handled by `flex-col-reverse`.
-- `HeroMascot` extracted as a local wrapper, matching locked decision to avoid extending global avatar size config.
-- No client components; good Phase 2 purity.
-- Anchor seam (`id="waitlist"`) is explicitly established for Phase 3 replacement.
+#### Strengths
+- Correctly preserves zero `'use client'`.
+- Correct LCP-guard intent: H1 first in DOM, mascot second, visual flip via `flex-col-reverse`.
+- Mascot implementation respects D-02 (new local wrapper, 88px tokenized shape).
+- Placeholder section correctly establishes `id="waitlist"` seam for Phase 3 replacement.
 
-**Concerns**
-- [HIGH] 320×568 above-fold target is likely missed with `py-16`, `gap-6`, `mt-4`, `mt-6`, and extra launch microcopy line; vertical stack is too tall.
-- [MEDIUM] LCP can still be non-H1 in edge cases (unexpected wrapping/layout shifts, font timing), though current sizing strongly favors H1.
-- [LOW-MEDIUM] Placeholder section CTA linking to `#waitlist` from inside `#waitlist` is a no-op interaction; not fatal, but it can feel broken.
-- [HIGH] If requirement "all interactive elements ≥48px" is strict, this plan is fine for hero CTA but does not cover later small links in footer (cross-plan dependency risk).
-- [HIGH] If "body text ≥16px on mobile" is strict, planned `text-sm` usage (in this and other plans) may violate criteria.
+#### Concerns
+- `HIGH`: `py-16 md:py-24` + current vertical gaps likely overflow 320×568; success criterion #1 is at risk.
+- `HIGH`: LCP may become sub-headline `<p>` (large multi-line block) rather than H1; plan only guards against mascot, not other text candidates.
+- `MEDIUM`: Placeholder section button linking to `#waitlist` inside same section is effectively a no-op and can feel broken/confusing.
+- `MEDIUM`: No explicit approach to ensure hero remains above fold with browser chrome/real mobile viewport constraints.
+- `LOW`: Hardcoded "Launching Summer 2026" may age quickly.
 
-**Suggestions**
-- Reduce mobile hero vertical budget aggressively: e.g. `py-6`/`py-8` on base, tighter gaps, possibly move launch microcopy below fold or hide at smallest breakpoint.
-- Explicitly verify fold-fit with a deterministic screenshot check at 320×568 (not only manual eyeballing).
-- Keep H1 as the largest element in viewport; avoid oversized mascot/shadow/background effects that could compete.
-- For the placeholder CTA no-op, either:
-  - replace with non-link button-style text (`aria-disabled="true"`), or
-  - point to a meaningful anchor (if allowed), while preserving Phase 3 seam.
+#### Suggestions
+- Tighten mobile hero spacing aggressively: reduce vertical paddings/gaps, compress microcopy spacing, and tune line lengths for 320px.
+- Add explicit mobile-first fold budget in plan (px budget for each block) and verify in real device emulation.
+- Reduce sub-headline width/length on mobile (or move below fold at smallest viewport) if needed to keep H1 as likely LCP.
+- For placeholder CTA, either remove the self-anchor button in Phase 2 or make intent explicit (e.g., "Form coming soon") to avoid no-op behavior.
 
-**Risk Assessment**
-**MEDIUM-HIGH** — core structure is good, but fold-fit and strict success criteria compliance are at real risk.
+#### Risk Assessment
+**HIGH** — strong structure, but current spacing/content choices make success criterion #1 and LCP identity materially uncertain.
 
 ---
 
 ### Plan 02-03 — WhyQuibly + FounderVoice + SecondaryCTA + Footer
 
-**Summary**
-Component split and content constraints are clean and aligned to locked decisions. Biggest issue is compliance drift against mobile usability criteria: footer links and small text sizing likely violate the stated minimums.
+#### Summary
+This plan is mostly coherent and avoids over-engineering. However, it under-specifies touch-target compliance and introduces predictable UX/a11y issues in footer links and temporary 404 destinations.
 
-**Strengths**
-- Correct section decomposition and clear ownership.
-- Uses locked icon set/stroke width and avoids unnecessary shadcn Card abstraction.
-- Founder block and footer simplicity match scope (no over-engineering).
-- Footer accessibility detail (`aria-hidden` middots) is a good touch.
+#### Strengths
+- Clean section isolation and matches locked content/design constraints.
+- Correct icon choices and stroke settings per D-13.
+- Founder block respects the intentionally minimal format (no avatar/blockquote/byline).
+- Footer uses simple semantic structure and `aria-hidden` separators correctly.
 
-**Concerns**
-- [HIGH] Footer link tap targets (`px-1 py-2`, `text-sm`) likely do not meet ≥48px interactive-height requirement.
-- [HIGH] `text-sm` in footer (and possibly other body copy) may violate "body text ≥16px on mobile."
-- [MEDIUM] `/privacy` and `/terms` intentional 404s are acceptable per decision, but still user-visible broken links (trust/UX cost).
-- [LOW] Hardcoded copy and year reduce future i18n/content flexibility (probably acceptable for Phase 2).
+#### Concerns
+- `HIGH`: Footer links (`text-sm`, `py-2`) are likely below the project's "all interactive elements >=48px" requirement.
+- `MEDIUM`: `/privacy` and `/terms` 404 by design can still degrade trust and QA perception during pre-launch.
+- `LOW`: No explicit keyboard-focus/visible-focus acceptance checks listed for footer links and CTA anchors.
+- `LOW`: Copy is hardcoded English-only with no i18n strategy (acceptable for now, but untracked).
 
-**Suggestions**
-- Enforce mobile minimums explicitly:
-  - use `min-h-12` / `h-12` on all link-like controls,
-  - set body copy to `text-base` on mobile; only reduce at larger breakpoints if needed.
-- Add a small checklist/test for touch-target sizing in PR validation.
-- Consider temporary stub pages for `/privacy` and `/terms` to avoid dead-end UX, even if full legal pages come later.
+#### Suggestions
+- Increase footer link hit areas to guaranteed 48px min height (`min-h-12 inline-flex items-center`).
+- Add explicit focus-visible style check to manual verification list.
+- Consider temporary non-404 legal placeholders or a short interim policy page if pre-launch credibility matters.
 
-**Risk Assessment**
-**MEDIUM** — structurally solid, but likely misses explicit mobile/touch/text success constraints unless adjusted.
+#### Risk Assessment
+**MEDIUM** — section design is solid, but touch-target compliance and temporary 404 behavior can violate stated UX constraints.
 
 ---
 
 ### Plan 02-04 — Page Composition + Manual Verification
 
-**Summary**
-Composition order and dependencies are sensible. The major gap is that key acceptance conditions are verified manually only; this is vulnerable to drift and reviewer inconsistency.
+#### Summary
+Composition is straightforward and correctly keeps everything server-rendered. The human checkpoint is useful, but too much of the critical acceptance criteria depends on manual inspection without reproducible automated guardrails.
 
-**Strengths**
-- Clean RSC composition, no extra logic.
-- Good dependency ordering across waves.
-- Human checkpoint includes the right high-value validations (viewport, LCP identity, reduced motion, a11y spot checks).
+#### Strengths
+- Clear dependency ordering and thin composition layer in `app/page.tsx`.
+- Preserves clean Phase 2→3 seam (`id="waitlist"` wrapper survives body replacement).
+- Manual checks explicitly include key areas (320 viewport, LCP identity, reduced motion).
 
-**Concerns**
-- [MEDIUM-HIGH] Manual-only verification for fold fit and LCP identity is brittle; repeated PR confidence is low.
-- [MEDIUM] "LCP element = h1" checked in DevTools can differ from CI/runtime conditions.
-- [LOW] HALT/approval workflow can slow throughput if not tightly integrated with team process.
+#### Concerns
+- `HIGH`: Manual-only fold/LCP verification is brittle and easy to regress.
+- `MEDIUM`: Section order puts `PlaceholderFormSection` immediately after hero, which may affect below-fold narrative pacing if hero gets compressed for 320.
+- `LOW`: Checkpoint "type approved" is process-fragile without artifact capture (screenshots/metrics).
 
-**Suggestions**
-- Add automated viewport screenshot/assertion at 320×568 for required above-fold elements.
-- Add scripted Lighthouse run in CI for PRs before merge (Plan 02-05 does part of this; tie it directly to required checks).
-- Keep manual checkpoint, but only as secondary confirmation after automated gates.
+#### Suggestions
+- Add at least one automated viewport assertion (Playwright) for 320×568 "hero essentials visible without scroll."
+- Record Lighthouse JSON artifact or screenshot evidence in PR for LCP element identity.
+- Add explicit acceptance checklist item for interactive target sizes across all anchors, not just buttons.
 
-**Risk Assessment**
-**MEDIUM** — good orchestration, insufficient automation for hard success criteria.
+#### Risk Assessment
+**MEDIUM** — composition is fine; the risk is verification quality and long-term regressions.
 
 ---
 
 ### Plan 02-05 — Lighthouse CI Gate
 
-**Summary**
-This is the right direction and largely matches locked decision D-29. The largest risk is governance: workflow presence alone does not block merges unless branch protection requires the check.
+#### Summary
+This is directionally correct and necessary, but it does not fully guarantee "hard gate" behavior on merge by itself. The CI design is good, yet enforcement details and workflow reliability need tightening.
 
-**Strengths**
-- Uses LHCI with explicit `performance` and `CLS` error-level assertions matching success criteria.
-- Runs against preview deployment, which reflects production-like conditions.
-- Multiple runs (`numberOfRuns: 3`) reduces single-run noise.
-- Good addition of local checkpoint before CI rollout.
+#### Strengths
+- Uses the right tooling family (`@lhci/cli` + GitHub Action + Vercel preview wait).
+- Includes required performance and CLS assertions at error level.
+- Targets mobile preset and multi-run sampling.
 
-**Concerns**
-- [HIGH] No explicit branch-protection requirement in scope; CI may be advisory and non-blocking.
-- [MEDIUM] `render-blocking-resources` is warning-level despite success criterion language ("no render-blocking third-party scripts"); not enforced as fail.
-- [MEDIUM] Preview wait and external integration can be flaky; false negatives/positives possible.
-- [LOW-MEDIUM] Temporary public report upload may expose preview metadata; usually acceptable but worth acknowledging.
+#### Concerns
+- `HIGH`: Workflow execution does not automatically block merges unless branch protection marks this check as required.
+- `MEDIUM`: `render-blocking-resources` set to `warn` conflicts with strict wording "no render-blocking third-party scripts."
+- `MEDIUM`: Reliance on manual Vercel token setup is an operational footgun if not documented/enforced.
+- `LOW`: `temporary-public-storage` is fine for short-term, but not ideal for long-lived auditability.
 
-**Suggestions**
-- Make GitHub branch protection configuration explicit deliverable: require Lighthouse job status on `main` PRs.
-- Promote `render-blocking-resources` to error if it is truly a hard requirement.
-- Add retry/backoff around preview readiness, and pin action versions carefully.
-- Document required secrets and failure modes in repo `README`/`CONTRIBUTING`.
+#### Suggestions
+- Explicitly require branch protection: make Lighthouse check a required status on `main`.
+- Promote `render-blocking-resources` to `error` if truly hard requirement.
+- Add workflow doc snippet for required secrets and expected check names.
+- Persist reports as CI artifacts for easier PR debugging.
 
-**Risk Assessment**
-**MEDIUM-HIGH** — technically strong gate, but merge-blocking is not guaranteed without branch protection.
+#### Risk Assessment
+**MEDIUM** — technically strong, but merge-gate enforcement is incomplete unless repo settings are updated.
 
 ---
 
 ### Phase-Level Review
 
-**Cross-plan consistency**
-The plan graph is coherent and dependency ordering is sound. The Phase 2→3 seam (`id="waitlist"` wrapper retained, inner body replaced later) is mostly clean, though the current placeholder self-link creates minor UX awkwardness.
+#### Cross-plan consistency
+The graph is mostly coherent: 02-01 foundation, 02-02/03 parallel sections, 02-04 compose, 02-05 enforce performance. The Phase 2→3 seam (`#waitlist` wrapper contract) is conceptually clean, but the placeholder self-anchor behavior is awkward and should be tightened.
 
-**Goal achievement (5 success criteria)**
-Executing all 5 plans will likely satisfy most architecture/perf goals, but not reliably all criteria as written without adjustments:
-- Criterion 1 (320×568 above-fold with required hero elements): at risk due to vertical spacing budget.
-- Criterion 2 (≥48px interactive + ≥16px body text): at risk due to footer/text-sm patterns.
-- Criterion 3 (below-fold sections): likely satisfied.
-- Criterion 4 (CI-verified perf/CLS): partially satisfied unless branch protection makes checks required.
-- Criterion 5 (reduced motion): satisfied for smooth scroll; no decorative motion present.
+#### Goal achievement
+Not guaranteed as written. The largest blockers are:
+1. 320×568 above-fold constraint is likely missed with current hero spacing/content.
+2. LCP identity may be non-H1 (especially sub-headline) despite mascot guard.
+3. CI may run but not truly block merges without branch protection configuration.
 
-**Top 3 phase risks**
-1. Hard mobile-fit requirement at 320×568 fails due to hero spacing/content stack height.
-2. Accessibility/mobile usability constraints (48px targets, 16px body text) are violated in footer/copy styles.
-3. Lighthouse workflow may not actually gate merges without required status checks in branch protection.
+#### Top 3 phase risks
+1. **Above-fold failure at 320×568** due to vertical spacing/content budget (`HIGH`).
+2. **LCP element mismatch** (H1 not guaranteed largest/earliest meaningful paint) (`HIGH`).
+3. **Non-enforced CI gate** if GitHub required checks aren't configured (`HIGH`).
 
-**Anything missing**
-- Explicit branch-protection setup as a deliverable for true CI enforcement.
-- Automated viewport/assertion test for 320×568 above-fold composition.
-- Automated/style-level guard for CTA `28px` radius and mobile tap-target/text-size constraints.
-- Clear decision on placeholder self-link behavior to avoid shipping a perceived broken control.
+#### Missing from the plan set
+- Automated viewport assertion for success criterion #1 (currently manual only).
+- Explicit interactive target-size verification for all links/buttons (footer likely fails).
+- Explicit branch-protection step to make Lighthouse checks merge-blocking.
+- A small regression guard for `size="hero"` class behavior (CVA/tailwind-merge dependency).
 
 ---
 
 ## Consensus Summary
 
-Both reviewers find the plan-graph structurally sound — the wave dependencies, the LCP-guard pattern (DOM-first H1 + `flex-col-reverse`), the section-local `<HeroMascot>` boundary, and the cross-phase `id="waitlist"` anchor are all called out as correct. The biggest disagreement is severity assignment, not direction; both flag the same handful of soft spots.
+This is the second cross-AI review of the same Phase 2 plan set (the first ran two minutes earlier with the same reviewers). Both runs converge on the same handful of soft spots; the second pass strengthens conviction that these are real risks, not noise. Notably, **Codex flagged a NEW HIGH-severity concern this run** that the first pass and Gemini missed: **the sub-headline `<p>`, not the mascot, may be the actual LCP candidate** — this is the most important new signal.
 
 ### Agreed Strengths
 
-- **Surgical, additive Plan 02-01** — minimal risk to existing primitives; correct `prefers-reduced-motion` handling with zero client JS.
-- **LCP-guard via `flex-col-reverse` + DOM-first H1** — both reviewers explicitly endorse this as the right way to bias LCP toward the headline.
-- **`<HeroMascot>` as a section-local RSC** — avoids polluting `<QuibsAvatar>`'s SIZE_CONFIG with hero-only tokens.
-- **Cross-phase `id="waitlist"` seam** — explicitly enables Phase 3 swap-in without re-architecting.
-- **Pure RSC posture** — zero `'use client'` directives, no client-side state, no third-party scripts.
-- **Lucide stroke-width 1.75 + `aria-hidden` middots** — a11y details are correctly handled.
-- **LHCI + Vercel preview integration** — running against a real preview URL (not localhost) is the right choice; multi-run median reduces noise.
+- **Foundation plan (02-01)** is small, additive, and correct. Reduced-motion handling is CSS-only and zero-JS.
+- **LCP-guard via `flex-col-reverse` + DOM-first H1** — both reviewers endorse the strategy.
+- **`<HeroMascot>` as a section-local RSC** — correct boundary, avoids polluting `<QuibsAvatar>` SIZE_CONFIG.
+- **`#waitlist` cross-phase anchor seam** — clean handoff from Phase 2 to Phase 3.
+- **Pure RSC posture** — zero `'use client'` directives across the entire phase tree.
+- **Lucide stroke-width 1.75 + `aria-hidden` middots** — a11y details correct.
+- **LHCI + Vercel preview integration** — error-level performance + CLS assertions, multi-run median, mobile preset.
 
 ### Agreed Concerns (highest priority — both reviewers raised, both rated HIGH or MEDIUM)
 
-1. **HIGH — 320×568 above-fold fold-fit is at real risk.** Both reviewers independently did the height math and concluded the current `py-16` + gaps + microcopy stack pushes the vertical budget over the usable viewport (after browser chrome) on a 320×568 device. **Codex pushes for `py-6/py-8` on mobile + tighter gaps; Gemini suggests `py-10/py-12`.** Either way, Plan 02-02's spacing needs to be tightened on the smallest breakpoint, and SC #1 verification needs to be more rigorous than D-07's optimistic budget math.
+1. **HIGH/HIGH — 320×568 above-fold fold-fit at risk.** Both reviewers independently re-derived the math from D-07 and reached the same conclusion as the prior review: `py-16` + gaps + microcopy stack is too tall after browser chrome. Codex marks this HIGH; Gemini softens to MEDIUM but agrees the budget is fragile.
 
-2. **MEDIUM — `tailwind-merge` `rounded-full` (base) vs `rounded-[28px]` (variant) is a silent-regression vector.** Both reviewers note that the override depends on class order through `cva` + `cn()`. If the order ever changes, the hero pill silently becomes a stadium shape (`rounded-full`) instead of the design-system-locked 28px corners. Mitigation: add an automated guard — a unit assertion on `buttonVariants({ size: "hero" })` output, or a Playwright computed-style check for `border-radius: 28px` on the homepage CTA.
+2. **HIGH (Codex) — LCP candidate may not be the H1 even with `flex-col-reverse`.** **NEW SIGNAL THIS PASS.** Codex calls out that Lighthouse picks LCP by *largest content area*, not just DOM order — and on a 320px viewport the sub-headline `<p>` (24-word multi-line text in `max-w-prose`) may end up with a larger painted area than the wrapped H1. The plan only guards against the mascot taking LCP; it does not guard against the sub-headline winning. This is materially different from the previous review's framing and worth taking seriously.
 
-3. **MEDIUM-HIGH — manual-only verification for hard requirements is brittle.** Plan 02-04's checkpoint relies on developer eyeballing for fold-fit, LCP identity, and reduced-motion. Repeated PR confidence is low. **Codex specifically recommends an automated viewport-screenshot assertion at 320×568.** Plan 02-05's LHCI catches performance/CLS but not above-fold composition.
+3. **MEDIUM/MEDIUM — `tailwind-merge` `rounded-full` vs `rounded-[28px]` is a silent-regression vector.** Both reviewers want an automated guard (snapshot test on `buttonVariants({ size: "hero" })`, or Playwright computed-style assertion). Severity downgraded from prior review's framing because Gemini called it LOW this round, but the recommended mitigation is identical.
 
-4. **MEDIUM-HIGH — CI gate may be advisory unless branch protection requires it.** Plan 02-05 wires the workflow but does NOT put GitHub branch-protection rule "require Lighthouse CI status on PR to main" in scope. Both reviewers flag this as the difference between "we have a gate" and "the gate actually blocks merge." Codex calls this out as a HIGH-severity governance gap.
+4. **HIGH (Codex) / MEDIUM (Gemini) — CI gate may be advisory unless branch protection requires the status check.** Plan 02-05 wires the workflow but does NOT include "Settings → Branches → main → Require status checks" as a deliverable. Without this, the gate runs but cannot actually block merge.
 
-5. **MEDIUM — Placeholder self-link is a perceived UX defect.** The placeholder section's `<a href="#waitlist">` targets the section it lives inside. Clicking it is a no-op. Codex pushes for either `aria-disabled` styling, a different anchor target, or replacement with non-link button-style text. Gemini didn't flag this directly but mentioned scroll-margin oddness in 02-04. CONTEXT.md explicitly accepts this for Phase 2 (D-09 deferred-section commentary), but the cost is "a perceived broken control on the live site between Phase 2 ship and Phase 3 ship."
+5. **HIGH (Codex) / MEDIUM (Gemini) — manual-only verification of fold/LCP/reduced-motion is brittle.** Both push for at least one automated viewport-screenshot assertion at 320×568.
+
+6. **HIGH (Codex) — footer link tap targets `text-sm` + `py-2` likely fail MOB-02 (≥48px).** Codex stayed firm on this from the prior review. Recommended fix: `min-h-12 inline-flex items-center` on the footer anchors.
 
 ### Divergent / Reviewer-Specific Concerns
 
-- **Codex (HIGH) — footer `text-sm` (14px) may violate MOB-04 ("body text ≥16px on mobile").** *Note: MOB-04's actual scope is iOS-Safari zoom-on-focus prevention, which applies to inputs, not static text. UI-SPEC and Plan 02-03 explicitly accept 14px for non-`<input>` footer copy. This concern likely overreads MOB-04. Worth confirming explicitly during review and recording the decision in CONTEXT.md.*
-- **Codex (HIGH) — footer link tap targets `px-1 py-2` likely under 48px.** *Genuine concern. Plan 02-03 acknowledges (~30–46px effective) and accepts because footer is below the fold and keyboard is the realistic accessibility path. Worth bumping to `py-3` (~46–50px) or `min-h-12` to remove ambiguity, since the cost is one extra Tailwind class.*
-- **Gemini — favicon/metadata work is missing from Phase 2.** *Correct that it's missing, but per CONTEXT.md D-26 and `<canonical_refs>` Phase 5 explicitly owns metadata/OG/favicon. Not a Phase 2 gap.*
-- **Codex (MEDIUM) — `render-blocking-resources` is warn-level rather than error-level despite SC language.** Worth promoting to `error` since the success criterion language is unconditional.
-- **Codex (LOW) — temporary-public-storage report upload exposes preview metadata.** Acceptable for a pre-launch landing page, but worth acknowledging.
+- **Gemini (HIGH) — Vercel token security.** Cautions that the plan should explicitly warn against committing the `VERCEL_TOKEN`. *Plan 02-05 already uses `secrets.VERCEL_TOKEN` (GitHub Secrets, encrypted at rest) — the secret never enters the repo. This concern is largely a misread of the plan's flow; Gemini is being defensive but the actual posture is correct.*
+- **Gemini (LOW) — favicon/metadata missing from Phase 2.** *Correctly noted as missing, but per CONTEXT.md D-26 and `<canonical_refs>`, Phase 5 explicitly owns metadata/OG/favicon. Not a Phase 2 gap.*
+- **Codex (LOW) — keyboard-focus/visible-focus checks not in acceptance lists.** Genuine acceptance gap for footer anchors and CTA links. Trivial to add to the manual checkpoint in 02-04.
+- **Gemini suggestion — `numberOfRuns: 5`** to average out CI noise. Reasonable bump from 3 if CI flakiness becomes an observed problem; not required upfront.
+- **Codex (MEDIUM) — `render-blocking-resources` warn-level conflicts with SC #4 wording.** Worth promoting to `error` since the success criterion language is unconditional.
+- **Codex (MEDIUM) — placeholder self-anchor is a no-op UX.** Both reviewers flagged this; Codex more strongly. Either remove the button in Phase 2 or change copy to "Form coming soon" with `aria-disabled`.
 
-### Top 3 Phase-Level Risks (Both Reviewers Agree)
+### Top 3 Phase-Level Risks (Both Reviewers Agree, Plus the New LCP Signal)
 
-1. **320×568 above-fold fail.** Hero vertical stack is too tall once browser chrome is subtracted; hero CTA likely falls below the fold.
-2. **CI gate may be advisory, not blocking.** Branch-protection setup is not in any plan; without it Plan 02-05's workflow runs but cannot block merge.
-3. **Manual verification of hard SC items.** Fold-fit, LCP-identity, and reduced-motion all rely on developer eyeballing in Plan 02-04; high drift risk PR-over-PR.
+1. **Above-fold failure at 320×568** — vertical stack too tall; Hero CTA likely falls below the fold.
+2. **LCP element mismatch** — even with the `flex-col-reverse` mascot guard, the sub-headline `<p>` may win LCP over the H1 due to larger painted text area on mobile. *(New finding this pass — promotes this from "edge-case" to "primary risk".)*
+3. **CI gate may be non-blocking** without explicit GitHub branch-protection setup.
 
 ### Recommended Adjustments Before Execution
 
-1. **Plan 02-02:** tighten mobile hero spacing — start with `py-8 md:py-16 lg:py-24`, reduce `gap-6` to `gap-4` on base, drop `mt-6` to `mt-4` on the CTA wrapper, then reverify D-07's budget math against the new totals.
-2. **Plan 02-01 or new Plan 02-06:** add an automated regression guard for the `size="hero"` border-radius (Vitest snapshot of `buttonVariants({ size: "hero" })` output, or a Playwright computed-style assertion in CI).
-3. **Plan 02-03:** bump footer link `py-2` to `py-3` or add `min-h-12` for unambiguous MOB-02 compliance; document the 14px footer copy decision explicitly in CONTEXT.md.
-4. **Plan 02-04:** augment the manual checkpoint with an automated 320×568 screenshot assertion (Playwright or `@vercel/blob`-style snapshot diff) so SC #1 has CI coverage.
-5. **Plan 02-05 or new Plan 02-06:** add explicit branch-protection deliverable — "Settings → Branches → main → Require status checks → Lighthouse CI" — and promote `render-blocking-resources` to error-level.
-6. **Plan 02-02:** decide explicitly how the placeholder self-link should behave (accept, `aria-disabled`, or change anchor target). Codify in 02-CONTEXT.md so Phase 3's swap-in doesn't get blamed for the no-op feel.
+1. **Plan 02-02:** tighten mobile hero spacing — `py-8 md:py-16 lg:py-24`, reduce `gap-6` to `gap-4` on base, drop `mt-6` to `mt-4`, then re-verify D-07 math. Consider also constraining the sub-headline width (`max-w-xs sm:max-w-prose`) so the wrapped H1 has more painted area than the wrapped sub-headline.
+2. **Plan 02-02:** explicitly defend against the sub-headline-as-LCP failure mode. Either:
+   - shrink the sub-headline at the smallest breakpoint so its painted area is unambiguously smaller than the H1, OR
+   - move the sub-headline below the CTA (and below the fold) at 320px.
+   - Add a Plan 02-04 manual-check item: confirm Lighthouse LCP element selector references `h1`, not `p` or `div`.
+3. **Plan 02-01 (or new 02-06):** add a `buttonVariants({ size: "hero" })` snapshot test, OR a Playwright computed-style assertion for `border-radius: 28px` on the homepage CTA.
+4. **Plan 02-03:** bump footer link hit area to `min-h-12 inline-flex items-center` (or `py-3`) — removes MOB-02 ambiguity at trivial cost.
+5. **Plan 02-04:** augment the manual checkpoint with an automated 320×568 above-fold assertion (Playwright or snapshot diff). Capture Lighthouse JSON or screenshot evidence in the PR for LCP identity.
+6. **Plan 02-05 (or new 02-06):** add explicit branch-protection deliverable — "Settings → Branches → main → Require status checks → Lighthouse CI". Promote `render-blocking-resources` from `warn` to `error`. Consider `numberOfRuns: 5` if CI proves flaky.
+7. **Plan 02-02:** decide explicitly how the placeholder self-link should behave (keep as no-op anchor, change copy to "Form coming soon" with `aria-disabled`, or remove the button entirely). Codify in 02-CONTEXT.md.
 
 To incorporate this feedback into a replan: `/gsd-plan-phase 2 --reviews`
