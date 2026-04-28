@@ -1,10 +1,11 @@
 ---
 phase: 4
 slug: resend-wiring-bot-protection-welcome-email
-status: draft
+status: approved
 shadcn_initialized: true
 preset: radix-nova
 created: 2026-04-28
+reviewed_at: 2026-04-28T00:00:00Z
 ---
 
 # Phase 4 — UI Design Contract
