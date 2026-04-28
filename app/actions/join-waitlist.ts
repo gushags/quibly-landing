@@ -143,27 +143,49 @@ export async function joinWaitlistAction(
   // eslint-disable-next-line custom/no-raw-process-env -- Vercel system env var
   const consentVersion = process.env.VERCEL_GIT_COMMIT_SHA ?? 'pre-phase-5'
 
-  // STORE-03: contacts.create is the SINGLE write path to the audience.
-  const { data: contact, error: contactError } = await resend.contacts.create({
+  // STORE-03: contacts.create is the SINGLE write path to the audience, BUT the
+  // Phase 4 day-1 probe (Plan 04-07 Task 2 / RESEARCH Open Question #1) revealed
+  // that resend.contacts.create is **idempotent on email**: a duplicate-email
+  // submission returns success silently with the existing contact data
+  // (`{ data: contact, error: null }`) — NO error is raised. This means the prior
+  // error-shape-based duplicate detector was dead code: every duplicate-suppression
+  // branch (welcome-email skip, ANLY-03 duplicate flag) was unreachable.
+  //
+  // Fix: get-then-create. resend.contacts.get returns
+  //   { data: contact, error: null }                        when the contact exists
+  //   { data: null,    error: { name: 'not_found', ... } }  when it does not
+  // confirmed empirically via two probes against the preview audience (Plan 04-07).
+  // Any other error from get() is treated as fatal — same handling as before.
+  const { data: existingContact, error: getError } = await resend.contacts.get({
     audienceId,
     email,
-    unsubscribed: false,
-    properties: { consent_version: consentVersion },
   })
 
-  // D-05 / D-06: duplicate detection. The Phase 4 day-1 probe (5 min) confirms
-  // the exact error shape on duplicate. Until the helper is updated post-probe,
-  // isDuplicateContactError() returns false → D-06 fallback (always send welcome).
-  // Acceptable at pre-launch volume; tighten after probe.
-  if (contactError && !isDuplicateContactError(contactError)) {
-    console.error('contacts_create_failed', { email, error: contactError })
+  if (getError && !isContactNotFoundError(getError)) {
+    console.error('contacts_get_failed', { email, error: getError })
     return {
       status: 'error',
       message: 'Something went wrong. Try again in a moment.',
     }
   }
 
-  const isDuplicate = !!contactError && isDuplicateContactError(contactError)
+  const isDuplicate = !!existingContact && !getError
+
+  if (!isDuplicate) {
+    const { error: createError } = await resend.contacts.create({
+      audienceId,
+      email,
+      unsubscribed: false,
+      properties: { consent_version: consentVersion },
+    })
+    if (createError) {
+      console.error('contacts_create_failed', { email, error: createError })
+      return {
+        status: 'error',
+        message: 'Something went wrong. Try again in a moment.',
+      }
+    }
+  }
 
   // EMAIL-01 / D-05: fire-and-forget welcome email — first-time signups only.
   if (!isDuplicate) {
@@ -198,25 +220,22 @@ export async function joinWaitlistAction(
   // ANLY-03: server-side analytics — duplicate flag for Phase 5 dashboard.
   await track('waitlist_signup', { duplicate: isDuplicate })
 
-  // Suppress unused variable warning — contact data unused at this stage
-  void contact
+  // Suppress unused variable warning — existingContact data unused at this stage
+  void existingContact
 
   return { status: 'success', duplicate: isDuplicate }
 }
 
 /**
- * D-06 fallback shape. Day-1 probe (5 min) updates this body once the exact
- * Resend duplicate response is empirically known. Until then, returns false →
- * always send welcome email on contactError. Acceptable at pre-launch volume.
+ * Empirically-confirmed shape of the not-found response from resend.contacts.get
+ * against a preview audience (Plan 04-07 Task 2 Probe 1, 2026-04-28):
+ *   { name: 'not_found', statusCode: 404, message: 'Contact not found' }
+ *
+ * The check is name-first (most stable) with a statusCode fallback. Anything
+ * else from contacts.get (network error, auth error, etc.) is treated as fatal.
  */
-function isDuplicateContactError(
-  error: { name?: string; message?: string },
+function isContactNotFoundError(
+  error: { name?: string | null; statusCode?: number | null; message?: string | null },
 ): boolean {
-  // After day-1 probe, expected to be something like:
-  //   error.name === 'validation_error' &&
-  //   /already exists|duplicate/i.test(error.message ?? '')
-  // For now: D-06 fallback — return false (always send welcome on contactError path
-  // means duplicates get a re-confirmation, which is bounded by Gmail's 0.3% complaint
-  // threshold and acceptable at <100 signups/day).
-  return /already (exists|subscribed)|duplicate/i.test(error.message ?? '')
+  return error.name === 'not_found' || error.statusCode === 404
 }
