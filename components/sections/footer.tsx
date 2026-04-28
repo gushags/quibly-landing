@@ -34,7 +34,7 @@ export function Footer() {
       <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-3 px-6 text-sm text-muted-foreground md:px-8">
         <span className="font-heading text-base font-bold text-primary">Quibly</span>
         <span aria-hidden="true">·</span>
-        <span>© 2026 Quibly</span>
+        <span>© 2026</span>
         <span aria-hidden="true">·</span>
         <a
           href="/privacy"
