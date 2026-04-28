@@ -132,6 +132,14 @@
 }
 
 @layer base {
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+}
+
+@layer base {
   /* Icon opacity per D-06 */
   [data-sidebar="menu-button"] svg {
     opacity: 0.6;
