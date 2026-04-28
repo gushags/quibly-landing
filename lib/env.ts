@@ -31,6 +31,10 @@ const envSchema = z.object({
   UPSTASH_REDIS_REST_URL: z.string().url('UPSTASH_REDIS_REST_URL must be a valid URL (Upstash Console -> Redis DB -> REST API -> URL)'),
   // Upstash Redis REST API token (Phase 4)
   UPSTASH_REDIS_REST_TOKEN: z.string().min(1, 'UPSTASH_REDIS_REST_TOKEN is required'),
+  // Physical postal address for welcome-email footer (CAN-SPAM EMAIL-05 / D-10).
+  // HARD blocker for production deploy — placeholder ('YOUR-POSTAL-ADDRESS-HERE') is acceptable
+  // in dev/preview only; founder must source registered agent / PO box / CMRA before production merge.
+  RESEND_FROM_POSTAL_ADDRESS: z.string().min(1, 'RESEND_FROM_POSTAL_ADDRESS is required (CAN-SPAM EMAIL-05 — source registered agent or PO box per D-10 before production deploy)'),
 })
 
 // Parse at module load — throws ZodError with all missing keys in one message.
