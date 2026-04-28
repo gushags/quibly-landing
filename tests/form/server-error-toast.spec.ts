@@ -11,6 +11,12 @@ import { expect, test } from "@playwright/test"
  * Toast surface uses sonner's `error` variant (red OctagonXIcon — wired in
  * components/ui/sonner.tsx).
  *
+ * SPAM-02 time-trap bypass: Plan 02's action returns silent success when the
+ * client submits within 2000ms of the server-rendered `renderedAt` timestamp
+ * (D-15). Playwright submits in tens of milliseconds, so without bypass the
+ * action would short-circuit to success and never reach the err@ stub branch.
+ * We zero the hidden `renderedAt` input so `if (renderedAt > 0 && ...)` skips.
+ *
  * Pre-requisite: `npm run dev` running at :3000.
  */
 
@@ -24,6 +30,11 @@ test.describe("Phase 3 form — server-error sonner toast (D-12)", () => {
 
   test("err@example.com triggers sonner toast with D-12 verbatim copy", async ({ page }) => {
     await page.fill('input[name="email"]', 'err@example.com')
+    // SPAM-02 time-trap bypass — see file JSDoc.
+    await page.evaluate(() => {
+      const trap = document.querySelector('input[name="renderedAt"]') as HTMLInputElement | null
+      if (trap) trap.value = "0"
+    })
     await page.click('button[type="submit"]')
 
     // Sonner mounts toasts in [data-sonner-toaster] container (sonner internal selector).

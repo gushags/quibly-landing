@@ -14,6 +14,12 @@ import { expect, test } from "@playwright/test"
  *   - The second click during pending is blocked because button is disabled
  *   - Final state: success (one transition, not two)
  *
+ * SPAM-02 time-trap bypass: Plan 02's action silently returns success when
+ * submit happens within 2000ms of the server-rendered `renderedAt` (D-15).
+ * Without bypass, the slow@ branch's 1500ms delay never fires, the button
+ * never enters a sustained pending state, and POST-04 cannot be observed.
+ * We zero the hidden `renderedAt` input so the slow branch actually runs.
+ *
  * Pre-requisite: `npm run dev` running at :3000.
  */
 
@@ -25,6 +31,11 @@ test.describe("Phase 3 form — idempotent (POST-04)", () => {
 
   test("rapid double-click during pending state results in one success transition (POST-04)", async ({ page }) => {
     await page.fill('input[name="email"]', 'slow@example.com')
+    // SPAM-02 time-trap bypass — see file JSDoc.
+    await page.evaluate(() => {
+      const trap = document.querySelector('input[name="renderedAt"]') as HTMLInputElement | null
+      if (trap) trap.value = "0"
+    })
 
     const submit = page.locator('button[type="submit"]')
 

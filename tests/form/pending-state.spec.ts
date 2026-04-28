@@ -10,6 +10,15 @@ import { expect, test } from "@playwright/test"
  *   - <svg> with `animate-spin` class is visible (Loader2 icon — CD-04)
  *   - Email input is also disabled (D-13 — both disabled to prevent double-submit)
  *
+ * SPAM-02 time-trap bypass: Plan 02's action returns silent success when the
+ * client submits within 2000ms of the server-rendered `renderedAt` timestamp
+ * (D-15 silent-success on bot signal). Playwright submits in tens of
+ * milliseconds, so without bypass the action returns immediately on the
+ * time-trap path and never reaches the slow@ branch's 1500ms delay — making
+ * the pending-window assertions pass for the wrong reason. We zero the
+ * hidden `renderedAt` input so `if (renderedAt > 0 && ...)` skips and the
+ * slow stub branch fires for real.
+ *
  * Pre-requisite: `npm run dev` (or `npm run build && npm run start`) running at :3000.
  */
 test.describe("Phase 3 form — pending state (FORM-05 / D-13)", () => {
@@ -20,6 +29,11 @@ test.describe("Phase 3 form — pending state (FORM-05 / D-13)", () => {
 
   test("slow@example.com triggers visible pending UX (Joining... + spinner + disabled)", async ({ page }) => {
     await page.fill('input[name="email"]', 'slow@example.com')
+    // SPAM-02 time-trap bypass — see file JSDoc.
+    await page.evaluate(() => {
+      const trap = document.querySelector('input[name="renderedAt"]') as HTMLInputElement | null
+      if (trap) trap.value = "0"
+    })
     // Click but don't await — we want to inspect mid-flight state
     const submitClick = page.click('button[type="submit"]')
 

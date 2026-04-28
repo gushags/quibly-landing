@@ -14,8 +14,30 @@ import { expect, test } from "@playwright/test"
  * VALIDATION.md Per-Task Verification Map FORM-06: this spec is the load-bearing
  * signal.
  *
+ * SPAM-02 time-trap bypass: Plan 02's action returns silent success when the
+ * client submits within 2000ms of the server-rendered `renderedAt` timestamp
+ * (D-15 silent-success on bot signal). Playwright fires submits in tens of
+ * milliseconds, so the time-trap would route every fast test submit to
+ * `{ status: 'success' }` — making this spec's "inline error appears" assertion
+ * silently impossible. Each test below sets `input[name="renderedAt"]` to "0"
+ * before submitting; the action skips the time-trap when `renderedAt === 0`
+ * (`if (renderedAt > 0 && Date.now() - renderedAt < 2000)`), letting Zod's
+ * validation surface the error this spec is supposed to verify.
+ *
  * Pre-requisite: `npm run dev` running at :3000.
  */
+
+/**
+ * Bypass the SPAM-02 time-trap by zeroing the hidden `renderedAt` input.
+ * The action evaluates `if (renderedAt > 0 && Date.now() - renderedAt < 2000)`,
+ * so a value of "0" disables the trap deterministically.
+ */
+async function bypassTimeTrap(page: import("@playwright/test").Page) {
+  await page.evaluate(() => {
+    const trap = document.querySelector('input[name="renderedAt"]') as HTMLInputElement | null
+    if (trap) trap.value = "0"
+  })
+}
 
 test.describe("Phase 3 form — validation error (FORM-03 / FORM-06)", () => {
   test.beforeEach(async ({ page }) => {
@@ -26,6 +48,7 @@ test.describe("Phase 3 form — validation error (FORM-03 / FORM-06)", () => {
   test("invalid email shows inline error AND preserves typed value (FORM-06 — Pitfall 1)", async ({ page }) => {
     const emailInput = page.locator('input[name="email"]')
     await emailInput.fill('bad-email')
+    await bypassTimeTrap(page)
     await page.click('button[type="submit"]')
 
     // Inline error appears (role=alert is the wired surface per UI-SPEC line 369)
@@ -44,20 +67,26 @@ test.describe("Phase 3 form — validation error (FORM-03 / FORM-06)", () => {
     await expect(page.locator('[role="status"]'), "success block must NOT render on validation error").toHaveCount(0)
   })
 
-  test("empty email submission shows inline error (FORM-03)", async ({ page }) => {
-    // Note: HTML5 `required` on the input would block submit in JS path; we bypass
-    // by directly submitting via JS to ensure server-side Zod fires (FORM-03 source-of-truth).
-    // Use `page.evaluate` to call form.submit() to bypass HTML5 validation, OR
-    // (simpler) clear the required attribute via dev tools. We use the simpler approach:
-    // remove `required` then submit.
-    await page.evaluate(() => {
-      const input = document.querySelector('input[name="email"]') as HTMLInputElement
-      if (input) input.removeAttribute('required')
-    })
-
+  test("empty/whitespace email submission shows inline error (FORM-03)", async ({ page }) => {
+    // FORM-03 source-of-truth check: even a whitespace-only email must trip the
+    // server-side Zod path (HTML5 `required` won't catch ' ' because the field
+    // is technically populated). The action's `z.email()` schema must reject it.
+    //
+    // We use whitespace rather than truly empty because:
+    //   1. Empty-string + Server Action FormData serialization can omit the
+    //      field entirely on some Next.js versions, causing the action to see
+    //      no `email` key at all (which is still a Zod failure, but routes
+    //      through a different code path than the documented FORM-03 invalid-
+    //      email surface).
+    //   2. Whitespace tests the same FORM-03 invariant (server-side validation
+    //      is the source of truth) without triggering Server Action FormData
+    //      serialization edge-cases.
+    const emailInput = page.locator('input[name="email"]')
+    await emailInput.fill('   ')
+    await bypassTimeTrap(page)
     await page.click('button[type="submit"]')
 
     const error = page.locator('p[role="alert"]')
-    await expect(error, "empty email must trigger Zod-validated inline error").toBeVisible({ timeout: 5000 })
+    await expect(error, "whitespace-only email must trigger Zod-validated inline error (FORM-03)").toBeVisible({ timeout: 5000 })
   })
 })

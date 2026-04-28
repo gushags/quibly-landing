@@ -13,10 +13,28 @@ import { expect, test } from "@playwright/test"
  *   `data-duplicate` attribute, no "duplicate" text, no different copy. Structural equality
  *   between fresh and dup paths is the load-bearing assertion (Dimension-8 risk per VALIDATION.md).
  *
+ * SPAM-02 time-trap bypass: Plan 02's action silently returns
+ * `{ status: 'success' }` when submit happens within 2000ms of the
+ * server-rendered `renderedAt` (D-15). Without bypass, every fast Playwright
+ * submit short-circuits to that silent-success path BEFORE reaching the email
+ * branch — meaning even the dup@example.com test would technically render the
+ * "right" success block but for the wrong reason (the dup branch never ran).
+ * We zero the hidden `renderedAt` input so the email branch routing actually
+ * fires; POST-03 enumeration defense is then validated against the real
+ * dup-branch render, not the silent-success render.
+ *
  * Pre-requisite: `npm run dev` running at :3000.
  */
 
 const POST_02_VERBATIM = "Check your inbox (and spam folder) for confirmation."
+
+/** Bypass the SPAM-02 time-trap by zeroing the hidden `renderedAt` input. */
+async function bypassTimeTrap(page: import("@playwright/test").Page) {
+  await page.evaluate(() => {
+    const trap = document.querySelector('input[name="renderedAt"]') as HTMLInputElement | null
+    if (trap) trap.value = "0"
+  })
+}
 
 test.describe("Phase 3 form — success state (POST-01 / POST-02 / POST-03)", () => {
   test.beforeEach(async ({ page }) => {
@@ -32,6 +50,7 @@ test.describe("Phase 3 form — success state (POST-01 / POST-02 / POST-03)", ()
     const startURL = page.url()
 
     await page.fill('input[name="email"]', 'fresh@example.com')
+    await bypassTimeTrap(page)
     await page.click('button[type="submit"]')
 
     // Success block appears
@@ -61,6 +80,7 @@ test.describe("Phase 3 form — success state (POST-01 / POST-02 / POST-03)", ()
 
   test("dup@example.com renders visually identical success block (POST-03 — no enumeration)", async ({ page }) => {
     await page.fill('input[name="email"]', 'dup@example.com')
+    await bypassTimeTrap(page)
     await page.click('button[type="submit"]')
 
     const status = page.locator('[role="status"]')
@@ -89,6 +109,7 @@ test.describe("Phase 3 form — success state (POST-01 / POST-02 / POST-03)", ()
     // test is ever skipped or quarantined, POST-01 is still enforced atomically.
     const startURL = page.url()
     await page.fill('input[name="email"]', 'fresh2@example.com')
+    await bypassTimeTrap(page)
     await page.click('button[type="submit"]')
     await expect(page.locator('[role="status"]')).toBeVisible({ timeout: 5000 })
     // Either same URL or same URL + #waitlist — both are NOT navigation away
