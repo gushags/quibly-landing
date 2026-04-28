@@ -1,10 +1,11 @@
 ---
 phase: 3
 slug: email-capture-form-stub-action
-status: draft
+status: approved
 shadcn_initialized: true
 preset: radix-nova (existing — see components.json)
 created: 2026-04-27
+reviewed_at: 2026-04-27
 ---
 
 # Phase 3 — UI Design Contract
