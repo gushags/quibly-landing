@@ -53,9 +53,9 @@ Decimal phases appear between their surrounding integers in numeric order.
   - [x] 02-01-PLAN.md — Foundation: Button `size="hero"` CVA variant + `prefers-reduced-motion` smooth-scroll override
   - [x] 02-02-PLAN.md — Hero + HeroMascot + PlaceholderFormSection (D-30 spacing tightening, D-31 disabled-button CTA)
   - [x] 02-03-PLAN.md — WhyQuibly + FounderVoice + SecondaryCTA + Footer (D-31 disabled secondary CTA, D-32 footer ≥48px tap targets)
-  - [ ] 02-04-PLAN.md — Page composition + Playwright above-fold/LCP/tap-target/focus-visible spec + manual viewport sweep checkpoint
+  - [x] 02-04-PLAN.md — Page composition + Playwright above-fold/LCP/tap-target/focus-visible spec + manual viewport sweep checkpoint
   - [ ] 02-05-PLAN.md — Lighthouse CI gate (D-33 render-blocking-resources error-level, D-34 branch-protection requirement)
-  - [ ] 02-06-PLAN.md — Playwright button-radius regression spec (D-06 28px lock — closes review concern #6)
+  - [x] 02-06-PLAN.md — Playwright button-radius regression spec (D-06 28px lock — closes review concern #6)
 **UI hint**: yes
 
 ### Phase 3: Email Capture Form (Stub Action)
