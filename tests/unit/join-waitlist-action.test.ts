@@ -79,6 +79,16 @@ describe('joinWaitlistAction (Phase 3 stub)', () => {
     expect(r).toEqual({ status: 'success', duplicate: true })
   })
 
+  it('normalizes email case + whitespace before stub branch routing (WR-03)', async () => {
+    const r = await joinWaitlistAction(null, fd({
+      email: '  Dup@Example.COM  ',
+      hp_field: '',
+      renderedAt: PAST_RENDERED_AT(),
+    }))
+    // After WR-03 the schema trims + lowercases, so the dup branch matches.
+    expect(r).toEqual({ status: 'success', duplicate: true })
+  })
+
   it('returns error with toast message for err@example.com (D-12 sonner routing; D-11 stub trigger)', async () => {
     const r = await joinWaitlistAction(null, fd({
       email: 'err@example.com',

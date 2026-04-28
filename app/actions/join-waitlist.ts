@@ -33,9 +33,13 @@ import { z } from 'zod'
  */
 
 const schema = z.object({
+  // WR-03: lowercase so stub branch comparisons (and Phase 4's Resend audience
+  // write) are case-insensitive. Trimming happens in the action before parse,
+  // because z.email rejects leading/trailing whitespace before any transform runs.
   email: z
     .email({ error: 'Please enter a valid email address.' })
-    .max(254, { error: 'Email address is too long.' }),
+    .max(254, { error: 'Email address is too long.' })
+    .transform((s) => s.toLowerCase()),
 })
 
 // D-10: discriminated-union return shape — locked through Phase 4.
@@ -69,7 +73,9 @@ export async function joinWaitlistAction(
   }
 
   // 3. Zod validation — server-side source of truth (FORM-03).
-  const rawEmail = String(formData.get('email') ?? '')
+  // WR-03: trim before parse since z.email rejects surrounding whitespace
+  // before any schema-level transform runs.
+  const rawEmail = String(formData.get('email') ?? '').trim()
   const parsed = schema.safeParse({ email: rawEmail })
   if (!parsed.success) {
     const flat = z.flattenError(parsed.error)  // Zod 4 idiom — NOT .flatten()
