@@ -16,11 +16,13 @@ Convert visitors who land at `useQuibly.com` into a list of warm, opted-in waitl
 - [x] Quibs Q-face mascot prominent on hero (carries personality without screenshots) — *Validated in Phase 2: 88×88 teal-gradient HeroMascot wrapper on hero, DOM-second after H1 to preserve LCP-as-H1*
 - [x] Below-the-fold "Why Quibly" section: 3 short text-only differentiator lines pulled from existing brand (Strategy-first / AI advisory board / Metrics-driven loop) — no screenshots needed — *Validated in Phase 2: 3-column FOLD-01 differentiator block shipped*
 - [x] Mobile-first responsive layout (~83% of waitlist traffic is mobile) — *Validated in Phase 2 for the marketing surface: 320×568 above-fold composition tested via Playwright; Lighthouse mobile perf 0.96 / CLS 0 / LCP element = `<h1>`*
+- [x] Single-screen waitlist hero (Quibs Q-face mascot, tagline, 1–2 sentence elaboration, email field, pill CTA) — *Validated in Phase 3: email field + pill CTA wired into a section below the hero; Hero/Secondary CTAs flipped from disabled placeholders to anchors targeting `#waitlist`*
+- [x] Email-only capture form (one field — single-field forms convert ~2–3× higher than multi-field) — *Validated in Phase 3: `<WaitlistForm>` Client Component with single `email` field, `useActionState`-bound to a Server Action with Zod 4 validation; 14 unit tests + 12 form e2e + 1 no-JS spec all green*
+- [x] Graceful "thanks, you're on the list" success state (handles already-subscribed gracefully) — *Validated in Phase 3 against a stub Server Action: in-place success block (POST-01), verbatim copy (POST-02), three-layer enumeration defense for duplicates (POST-03), idempotent retry (POST-04). Resend wiring lands in Phase 4.*
+- [x] Spam / bot protection on the form (rate-limit or hidden honeypot — simplest viable) — *Validated in Phase 3: inline-styled honeypot field (SPAM-01) + ≥2s time-trap (SPAM-02) silently reject suspected bots without user-visible feedback. Rate-limit + disposable-domain block ladder up in Phase 4.*
 
 ### Active
 
-- [ ] Single-screen waitlist hero (Quibs Q-face mascot, tagline, 1–2 sentence elaboration, email field, pill CTA) — *Phase 2 ships hero + mascot + tagline + placeholder pill CTA; the email field lands in Phase 3*
-- [ ] Email-only capture form (one field — single-field forms convert ~2–3× higher than multi-field)
 - [ ] Submit emails to Resend Audience (matches `marketing-app` stack)
 - [ ] Single opt-in: capture email → success state → automatic welcome email confirming waitlist spot
 - [ ] Live signup counter / "N people on the waitlist" social proof (once signups exist)
@@ -28,8 +30,6 @@ Convert visitors who land at `useQuibly.com` into a list of warm, opted-in waitl
 - [ ] Privacy policy and terms pages (legal compliance for email collection — required before going live)
 - [ ] Deploy at `useQuibly.com` on Vercel
 - [ ] Basic page-level analytics (visits + conversion rate)
-- [ ] Graceful "thanks, you're on the list" success state (handles already-subscribed gracefully)
-- [ ] Spam / bot protection on the form (rate-limit or hidden honeypot — simplest viable)
 - [ ] Open Graph / metadata for social sharing
 
 ### Out of Scope
@@ -102,4 +102,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-28 after Phase 2 (static-landing-page-no-form) completed — full RSC marketing surface live; Lighthouse mobile 0.96 / CLS 0 / LCP=`h1` verified locally; CI enforcement gate deferred to follow-up PR session.*
+*Last updated: 2026-04-28 after Phase 3 (email-capture-form-stub-action) completed — `<WaitlistForm>` Client Component live with stubbed Server Action (Zod + honeypot + time-trap), full submit UX verified end-to-end (14 unit + 12 form e2e + 1 no-JS spec, all green). D-18 branch protection enforced on `main`. D-04 founder copy locked. Phase 4 prereq: physical postal address required for welcome-email footer (CAN-SPAM) before Resend wiring ships.*
