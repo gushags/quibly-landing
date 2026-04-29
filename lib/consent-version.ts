@@ -1,29 +1,27 @@
 import 'server-only'
-import { createHash } from 'node:crypto'
-import { readFileSync } from 'node:fs'
-import { join } from 'node:path'
 
 /**
  * Phase 5 D-12 / D-14 — content-hash consent_version.
  *
- * Reads `app/(legal)/privacy/page.tsx` + `app/(legal)/terms/page.tsx` at module
- * load, normalizes CRLF→LF (Pitfall 1: hash must be deterministic across
- * Windows dev machines and Vercel Linux build), computes SHA-256, and exports
- * the first 8 hex chars. Bumps ONLY when policy text changes.
+ * CR-01 fix (post-review): compute the hash at BUILD time via
+ * `scripts/generate-consent-version.mjs` and re-export the generated constant
+ * from `lib/consent-version.generated.ts`. The previous implementation read
+ * `app/(legal)/privacy/page.tsx` and `app/(legal)/terms/page.tsx` with
+ * `readFileSync` at module load, which crashes in Vercel serverless bundles
+ * because:
+ *   - Source .tsx files are not included in the deployed function bundle by
+ *     default (nft trace ignores runtime-computed paths like process.cwd()).
+ *   - The first production invocation would throw ENOENT and every subsequent
+ *     invocation in the same container would inherit the sticky module-init
+ *     error -- the waitlist would be broken in production.
+ *
+ * Build-time generation removes runtime fs access entirely. Behavior parity:
+ *   - SHA-256 of (privacy + terms) contents
+ *   - First 8 lowercase hex chars
+ *   - CRLF -> LF normalization (Pitfall 1: Windows dev / Linux build parity)
  *
  * Used by app/actions/join-waitlist.ts to stamp every Resend contact's
  * `properties.consent_version` at signup time (STORE-04 contract continuation
  * from Phase 4 D-CD-03).
  */
-function readAndNormalize(filePath: string): string {
-  const raw = readFileSync(join(process.cwd(), filePath), 'utf8')
-  return raw.replace(/\r\n/g, '\n')
-}
-
-const privacyContent = readAndNormalize('app/(legal)/privacy/page.tsx')
-const termsContent = readAndNormalize('app/(legal)/terms/page.tsx')
-
-export const CONSENT_VERSION = createHash('sha256')
-  .update(privacyContent + termsContent)
-  .digest('hex')
-  .slice(0, 8)
+export { CONSENT_VERSION } from './consent-version.generated'
