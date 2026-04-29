@@ -8,7 +8,14 @@ process.env.UPSTASH_REDIS_REST_URL = 'https://test.upstash.io'
 process.env.UPSTASH_REDIS_REST_TOKEN = 'test_token'
 process.env.RESEND_FROM_POSTAL_ADDRESS = 'Test Address'
 
-const updateMock = vi.fn(async () => ({ data: null, error: null }))
+type UpdateResult = {
+  data: unknown
+  error: { name: string; message: string; statusCode?: number } | null
+}
+const updateMock = vi.fn<(...args: unknown[]) => Promise<UpdateResult>>(async () => ({
+  data: null,
+  error: null,
+}))
 vi.mock('@/lib/resend', () => ({
   resend: { contacts: { update: updateMock } },
 }))
@@ -72,7 +79,43 @@ describe('POST /unsubscribe (RFC 8058 / D-02)', () => {
     const token = await generateToken('user@example.com')
     const r = await POST(makeReq(`https://test/unsubscribe?t=${encodeURIComponent(token)}`))
     expect(r.status).toBe(200)
-    expect(updateMock).toHaveBeenCalledWith({ email: 'user@example.com', unsubscribed: true })
+    expect(updateMock).toHaveBeenCalledWith({
+      audienceId: 'aud_preview',
+      email: 'user@example.com',
+      unsubscribed: true,
+    })
+  })
+
+  // CR-01: audience routing — when VERCEL_ENV=production, the live audience id must be used.
+  it('uses live RESEND_AUDIENCE_ID when VERCEL_ENV=production', async () => {
+    const original = process.env.VERCEL_ENV
+    process.env.VERCEL_ENV = 'production'
+    try {
+      const token = await generateToken('user@example.com')
+      const r = await POST(makeReq(`https://test/unsubscribe?t=${encodeURIComponent(token)}`))
+      expect(r.status).toBe(200)
+      expect(updateMock).toHaveBeenCalledWith({
+        audienceId: 'aud_prod',
+        email: 'user@example.com',
+        unsubscribed: true,
+      })
+    } finally {
+      if (original === undefined) delete process.env.VERCEL_ENV
+      else process.env.VERCEL_ENV = original
+    }
+  })
+
+  // CR-02: when contacts.update returns { error }, the route MUST surface 500 (not 200 OK
+  // with a misleading "you're unsubscribed" body — that would be a CAN-SPAM exposure).
+  it('returns 500 when contacts.update returns an error envelope', async () => {
+    updateMock.mockResolvedValueOnce({
+      data: null,
+      error: { name: 'application_error', message: 'boom', statusCode: 500 },
+    })
+    const token = await generateToken('user@example.com')
+    const r = await POST(makeReq(`https://test/unsubscribe?t=${encodeURIComponent(token)}`))
+    expect(r.status).toBe(500)
+    expect(updateMock).toHaveBeenCalledTimes(1)
   })
 })
 
@@ -101,6 +144,27 @@ describe('GET /unsubscribe (body-link UX / Plan 04-08)', () => {
     expect(r.headers.get('Content-Type')).toContain('text/html')
     const body = await r.text()
     expect(body).toContain("You're unsubscribed")
-    expect(updateMock).toHaveBeenCalledWith({ email: 'user@example.com', unsubscribed: true })
+    expect(updateMock).toHaveBeenCalledWith({
+      audienceId: 'aud_preview',
+      email: 'user@example.com',
+      unsubscribed: true,
+    })
+  })
+
+  // CR-02: GET path must surface a 500 apology page (not the "you're unsubscribed" page)
+  // when the audience write fails — otherwise the recipient is told they're unsubscribed
+  // when the API call actually returned an error envelope.
+  it('returns 500 HTML apology page when contacts.update returns an error envelope', async () => {
+    updateMock.mockResolvedValueOnce({
+      data: null,
+      error: { name: 'application_error', message: 'boom', statusCode: 500 },
+    })
+    const token = await generateToken('user@example.com')
+    const r = await GET(makeGetReq(`https://test/unsubscribe?t=${encodeURIComponent(token)}`))
+    expect(r.status).toBe(500)
+    expect(r.headers.get('Content-Type')).toContain('text/html')
+    const body = await r.text()
+    expect(body).toContain('Something went wrong')
+    expect(body).not.toContain("You're unsubscribed")
   })
 })

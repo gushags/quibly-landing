@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { resend } from '@/lib/resend'
+import { env } from '@/lib/env'
 import { verifyToken } from '@/lib/unsubscribe-token'
 
 /**
@@ -45,11 +46,39 @@ async function processUnsubscribe(req: NextRequest, via: 'GET' | 'POST') {
 
   const email = await verifyToken(token)
   if (!email) {
-    console.warn('unsubscribe_invalid_token', { tokenPrefix: token.slice(0, 12), via })
+    // WR-06: log a non-PII fingerprint of the rejected token. The token format is
+    // `${base64url(email)}.${base64url(hmac)}` — base64-encoded email leaks PII for
+    // short addresses, so log only the trailing HMAC suffix (random bytes, no PII).
+    console.warn('unsubscribe_invalid_token', {
+      hmacSuffix: token.split('.')[1]?.slice(-6) ?? 'malformed',
+      via,
+    })
     return { status: 401 as const, body: 'Invalid token', email: null }
   }
 
-  await resend.contacts.update({ email, unsubscribed: true })
+  // CR-01: audience routing must mirror app/actions/join-waitlist.ts:142 — production env writes
+  // to live audience; every other env (preview, dev, vercel pull) writes to preview audience.
+  // The Resend SDK's contacts.update path falls back to the global /contacts/:email endpoint
+  // when audienceId is omitted — that endpoint does NOT flip the audience-scoped contact, so
+  // omitting audienceId silently breaks the unsubscribe flow against the real API.
+  // eslint-disable-next-line custom/no-raw-process-env -- Vercel system env var (per PATTERNS.md exception)
+  const audienceId = process.env.VERCEL_ENV === 'production'
+    ? env.RESEND_AUDIENCE_ID
+    : env.RESEND_AUDIENCE_PREVIEW_ID
+
+  // CR-02: inspect the { data, error } envelope. Resend's SDK does NOT throw on API errors;
+  // it returns { data: null, error: { ... } }. Returning 200 OK on a silent failure tells the
+  // recipient they're unsubscribed when the audience write actually failed (CAN-SPAM exposure).
+  const { error: updateError } = await resend.contacts.update({
+    audienceId,
+    email,
+    unsubscribed: true,
+  })
+  if (updateError) {
+    console.error('unsubscribe_update_failed', { email, via, error: updateError })
+    return { status: 500 as const, body: 'Update failed', email }
+  }
+
   console.info('unsubscribe_processed', { email, via })
 
   return { status: 200 as const, body: 'OK', email }
@@ -62,6 +91,21 @@ export async function POST(req: NextRequest) {
 
 export async function GET(req: NextRequest) {
   const result = await processUnsubscribe(req, 'GET')
+
+  if (result.status === 500) {
+    // CR-02: audience write failed against the Resend API. Surface a generic apology page
+    // with a mailto fallback so the recipient has a manual path to unsubscribe.
+    return new NextResponse(
+      `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">` +
+        `<meta name="viewport" content="width=device-width,initial-scale=1">` +
+        `<meta name="robots" content="noindex"><title>Unsubscribe — Quibly</title>` +
+        `<style>body{font-family:system-ui,-apple-system,Segoe UI,sans-serif;max-width:480px;margin:80px auto;padding:0 24px;color:#1a1a1a}h1{color:#0d9488;font-weight:600}p{line-height:1.5}</style>` +
+        `</head><body><h1>Something went wrong</h1>` +
+        `<p>We couldn't process your unsubscribe right now. Please email <a href="mailto:unsubscribe@usequibly.com">unsubscribe@usequibly.com</a> and we'll remove you manually.</p>` +
+        `</body></html>`,
+      { status: 500, headers: { 'Content-Type': 'text/html; charset=utf-8' } },
+    )
+  }
 
   if (result.status !== 200) {
     return new NextResponse(
