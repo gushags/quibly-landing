@@ -5,29 +5,82 @@
  *
  * Allowed analytics: @vercel/analytics, @vercel/speed-insights (cookieless).
  * Prohibited: anything that sets cookies or requires a consent banner.
+ *
+ * WR-06 fix: the previous matcher (`dep === banned || dep.startsWith(banned + '/') || dep.endsWith('/' + banned)`)
+ * had gaps. It would catch `@amplitude/analytics` exactly but not
+ * `@amplitude/analytics-browser` (the actual install name on npm), and it
+ * would not catch arbitrary Segment/FullStory variants that share the scope
+ * but use different package suffixes. Switch to regex-based scope/prefix
+ * matching plus a small set of substring patterns for keyword-based bans
+ * (pixel, hotjar, clarity, etc.). Each pattern is commented so a reviewer
+ * can verify intent at a glance.
  */
 import { readFileSync } from 'node:fs'
 
-const DENYLIST = [
-  'ga4', '@gtag', 'gtag', 'react-ga', 'react-ga4',
-  'posthog', 'posthog-js', 'posthog-node',
-  'gtm', '@google-tag-manager',
-  'clarity-js', 'microsoft-clarity', '@microsoft/clarity',
-  'hotjar', 'react-hotjar',
-  'meta-pixel', 'fbevents', '@facebook/sdk', 'react-facebook-pixel',
-  'linkedin-insight',
-  'mixpanel', 'mixpanel-browser',
-  'amplitude', '@amplitude/analytics',
-  'segment', '@segment/analytics-next',
-  'fullstory', '@fullstory/browser',
+const DENYLIST_PATTERNS = [
+  // Google Analytics / Tag Manager
+  /^gtag(\b|-|\/|$)/i,
+  /^@?google-tag-manager/i,
+  /^react-ga4?$/i,
+  /^@gtag\//i,
+  /\bgtm\b/i,
+  /^ga4$/i,
+
+  // PostHog
+  /^posthog(-js|-node)?$/i,
+
+  // Microsoft Clarity
+  /clarity-js/i,
+  /microsoft-clarity/i,
+  /^@microsoft\/clarity/i,
+
+  // Hotjar
+  /hotjar/i,
+
+  // Meta / Facebook pixel
+  /meta-pixel/i,
+  /^fbevents$/i,
+  /^@facebook\/sdk/i,
+  /react-facebook-pixel/i,
+  /\bpixel\b/i,
+
+  // LinkedIn
+  /linkedin-insight/i,
+
+  // Mixpanel
+  /^mixpanel(-browser)?$/i,
+
+  // Amplitude (any package under the @amplitude scope)
+  /^@amplitude\//i,
+  /^amplitude(\b|-|\/|$)/i,
+
+  // Segment (any package under the @segment scope)
+  /^@segment\//i,
+  /^segment(\b|-|\/|$)/i,
+
+  // FullStory
+  /^@fullstory\//i,
+  /^fullstory(\b|-|\/|$)/i,
+]
+
+// Allowlist suppresses false positives in the patterns above. Add a comment
+// explaining why each entry is exempted.
+const ALLOWLIST = [
+  // (none currently — @vercel/analytics and @vercel/speed-insights do not
+  // overlap with any pattern above.)
 ]
 
 const pkg = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'))
-const allDeps = Object.keys({ ...pkg.dependencies, ...pkg.devDependencies, ...pkg.peerDependencies })
+const allDeps = Object.keys({
+  ...pkg.dependencies,
+  ...pkg.devDependencies,
+  ...pkg.peerDependencies,
+})
 
-const violations = allDeps.filter(dep =>
-  DENYLIST.some(banned => dep === banned || dep.startsWith(banned + '/') || dep.endsWith('/' + banned))
-)
+const violations = allDeps.filter((dep) => {
+  if (ALLOWLIST.includes(dep)) return false
+  return DENYLIST_PATTERNS.some((re) => re.test(dep))
+})
 
 if (violations.length > 0) {
   console.error('ANLY-06 violation: prohibited tracking SDKs found in package.json:')
