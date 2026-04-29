@@ -160,3 +160,34 @@ blocked: 0
     - "Optional: clean up the ~5 UAT-test contacts from the production audience using `npm run export:audience -- --target=production` to enumerate, then remove via Resend Dashboard or a `contacts.remove` script — restores audience cleanliness for launch metrics"
     - "Optional defensive: introduce a NEXT_PUBLIC_LAUNCHED gate so pre-launch writes always go to preview regardless of VERCEL_ENV (changes CD-04 behavior; introduces a launch-day flip step)"
   debug_session: .planning/debug/signups-land-in-production-audience.md
+
+## UAT Methodology — URL Routing Cheat Sheet
+
+Per CD-04 (Plan 04-CONTEXT.md) the action's audience-routing rule is:
+
+```typescript
+const audienceId = process.env.VERCEL_ENV === 'production'
+  ? env.RESEND_AUDIENCE_ID
+  : env.RESEND_AUDIENCE_PREVIEW_ID
+```
+
+`VERCEL_ENV` is auto-set by Vercel based on which deployment scope your request hits.
+**Choose your test URL based on which audience you want to write to.**
+
+| Test URL | VERCEL_ENV | Audience written | When to use |
+|----------|------------|------------------|-------------|
+| `https://quibly-landing.vercel.app` (Production-aliased) | `production` | RESEND_AUDIENCE_ID (live) | Final pre-launch smoke test only — pollutes the live audience |
+| `https://quibly-landing-git-<branch>-<team>.vercel.app` (Preview deploy URL from PR comment) | `preview` | RESEND_AUDIENCE_PREVIEW_ID | Day-to-day UAT, all rehearsal runs, all "does the form work end-to-end" tests |
+| `http://localhost:3000` (`npm run dev`) | unset (falls through to preview branch) | RESEND_AUDIENCE_PREVIEW_ID | Local dev, fastest iteration loop |
+
+**Rule of thumb:** if you would not want this signup in the launch-day numbers, do NOT test against `quibly-landing.vercel.app`. Use the latest Vercel preview URL from the relevant PR's auto-generated comment, or local dev.
+
+This section was added retroactively after UAT 2026-04-28 because Test 3 surfaced a methodology gap: 5 UAT signups landed in the production audience because all UAT was performed against the Production-aliased URL. The CD-04 routing logic is correct as documented (see `.planning/debug/signups-land-in-production-audience.md` for full diagnosis); the gap was the lack of methodology guidance, which this section now provides.
+
+If a small handful of UAT-test contacts pollutes the production audience, run:
+
+```bash
+npm run export:audience -- --target=production --format=csv > prod-audience.csv
+```
+
+Identify the test contacts by `created_at` and `email` patterns, then remove via Resend Dashboard → Audiences → Quibly Waitlist → row → "Remove contact". Plan 04-08 Task 4 covers this cleanup as an optional human-action checkpoint.
