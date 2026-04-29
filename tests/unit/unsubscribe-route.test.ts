@@ -14,11 +14,13 @@ vi.mock('@/lib/resend', () => ({
 }))
 
 let POST: (req: Request) => Promise<Response>
+let GET: (req: Request) => Promise<Response>
 let generateToken: (email: string) => Promise<string>
 
 beforeAll(async () => {
   const mod = await import('@/app/unsubscribe/route')
   POST = mod.POST as never
+  GET = mod.GET as never
   const tok = await import('@/lib/unsubscribe-token')
   generateToken = tok.generateToken
 })
@@ -30,6 +32,10 @@ beforeEach(() => {
 
 function makeReq(url: string): Request {
   return new Request(url, { method: 'POST' })
+}
+
+function makeGetReq(url: string): Request {
+  return new Request(url, { method: 'GET' })
 }
 
 describe('POST /unsubscribe (RFC 8058 / D-02)', () => {
@@ -66,6 +72,35 @@ describe('POST /unsubscribe (RFC 8058 / D-02)', () => {
     const token = await generateToken('user@example.com')
     const r = await POST(makeReq(`https://test/unsubscribe?t=${encodeURIComponent(token)}`))
     expect(r.status).toBe(200)
+    expect(updateMock).toHaveBeenCalledWith({ email: 'user@example.com', unsubscribed: true })
+  })
+})
+
+describe('GET /unsubscribe (body-link UX / Plan 04-08)', () => {
+  it('returns 400 with HTML when t query param is missing', async () => {
+    const r = await GET(makeGetReq('https://test/unsubscribe'))
+    expect(r.status).toBe(400)
+    expect(r.headers.get('Content-Type')).toContain('text/html')
+    expect(updateMock).not.toHaveBeenCalled()
+  })
+
+  it('returns 401 with HTML on tampered token', async () => {
+    const valid = await generateToken('user@example.com')
+    const [head, hmac] = valid.split('.')
+    const tampered = `${head}.${hmac.slice(0, -3)}${hmac.slice(-3) === 'AAA' ? 'BBB' : 'AAA'}`
+    const r = await GET(makeGetReq(`https://test/unsubscribe?t=${tampered}`))
+    expect(r.status).toBe(401)
+    expect(r.headers.get('Content-Type')).toContain('text/html')
+    expect(updateMock).not.toHaveBeenCalled()
+  })
+
+  it('returns 200 HTML confirmation and marks contact unsubscribed on valid token', async () => {
+    const token = await generateToken('user@example.com')
+    const r = await GET(makeGetReq(`https://test/unsubscribe?t=${encodeURIComponent(token)}`))
+    expect(r.status).toBe(200)
+    expect(r.headers.get('Content-Type')).toContain('text/html')
+    const body = await r.text()
+    expect(body).toContain("You're unsubscribed")
     expect(updateMock).toHaveBeenCalledWith({ email: 'user@example.com', unsubscribed: true })
   })
 })
