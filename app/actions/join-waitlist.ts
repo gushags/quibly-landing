@@ -253,9 +253,16 @@ export async function joinWaitlistAction(
         ],
       })
       .catch((err) => {
+        // CR-02: do NOT pass `email` (PII) to track(). Vercel Analytics persists
+        // and indexes custom-event properties; forwarding the user's email to
+        // the analytics dashboard would directly contradict app/(legal)/privacy
+        // ("your email address is not stored by Vercel") and exceed the GDPR
+        // Art. 5(1)(b) purpose-limitation basis the policy is built on. The
+        // server-side console.error below still captures the email for ops
+        // debugging; the analytics call only counts the failure.
         console.error('welcome_email_send_failed', { email, err })
         // EMAIL-08: ops observability for welcome-email send failures.
-        track('welcome_email_send_error', { email })
+        track('welcome_email_send_error')
       })
   }
 
