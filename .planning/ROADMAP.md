@@ -95,8 +95,8 @@ Decimal phases appear between their surrounding integers in numeric order.
   - [x] 04-04-PLAN.md — emails/WelcomeEmail.tsx React Email template (D-01 locked voice) (Wave 2, depends on 04-01)
   - [x] 04-05-PLAN.md — app/actions/join-waitlist.ts body swap to real Resend pipeline + Vitest mock migration (Wave 3)
   - [x] 04-06-PLAN.md — app/api/webhooks/resend/route.ts (svix verify + D-08 dispatch) + app/unsubscribe/route.ts (RFC 8058) + Vitest coverage (Wave 3)
-  - [ ] 04-07-PLAN.md — Playwright spec migration (3 deletions + 1 modification) + 6 manual checkpoints (day-1 probes, postal address D-10, mail-tester, inbox tests, webhook registration, CSV round-trip) (Wave 4, autonomous: false)
-  - [ ] 04-08-PLAN.md — Gap closure (UAT 2026-04-28): harden unsubscribe-URL fallback chain (GAP-1 blocker) + Vercel env var checkpoint + UAT methodology section in 04-UAT.md (GAP-2 major) + optional production-audience cleanup (Wave 5, autonomous: false, gap_closure)
+  - [x] 04-07-PLAN.md — Playwright spec migration (3 deletions + 1 modification) + 6 manual checkpoints (day-1 probes, postal address D-10, mail-tester, inbox tests, webhook registration, CSV round-trip) (Wave 4, autonomous: false)
+  - [x] 04-08-PLAN.md — Gap closure (UAT 2026-04-28): harden unsubscribe-URL fallback chain (GAP-1 blocker) + Vercel env var checkpoint + UAT methodology section in 04-UAT.md (GAP-2 major) + optional production-audience cleanup (Wave 5, autonomous: false, gap_closure)
 
 ### Phase 5: Legal + SEO + Analytics
 **Goal**: All compliance, discoverability, and observability surface area required to expose the form to public traffic — privacy/terms live, OG/Twitter previews render correctly, server-side conversion events fire, and zero non-essential cookies are set.
