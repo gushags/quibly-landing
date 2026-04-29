@@ -9,6 +9,7 @@ import { resend } from '@/lib/resend'
 import { rateLimitPerMinute, rateLimitPerDay } from '@/lib/rate-limit'
 import { isDisposableDomain } from '@/lib/disposable-domains'
 import { track } from '@/lib/analytics'
+import { CONSENT_VERSION } from '@/lib/consent-version'
 import WelcomeEmail, { WORDMARK_CID } from '@/emails/WelcomeEmail'
 import { generateToken } from '@/lib/unsubscribe-token'
 
@@ -135,15 +136,14 @@ export async function joinWaitlistAction(
 
   // STORE-01 / CD-04: audience routing — production env writes to live audience;
   // every other env (preview, dev, vercel pull) writes to preview audience.
-  // STORE-04 / CD-03: consent_version snapshot at signup time. Phase 4 ships a
-  // deterministic stub (git SHA on Vercel; 'pre-phase-5' fallback in local dev).
-  // Phase 5 swaps this for the real privacy-MDX → git-SHA mechanism.
-  // eslint-disable-next-line custom/no-raw-process-env -- Vercel system env vars (per PATTERNS.md exception)
+  // eslint-disable-next-line custom/no-raw-process-env -- Vercel system env var (audience routing only)
   const audienceId = process.env.VERCEL_ENV === 'production'
     ? env.RESEND_AUDIENCE_ID
     : env.RESEND_AUDIENCE_PREVIEW_ID
-  // eslint-disable-next-line custom/no-raw-process-env -- Vercel system env var
-  const consentVersion = process.env.VERCEL_GIT_COMMIT_SHA ?? 'pre-phase-5'
+  // STORE-04 / D-12 / D-14: consent_version is now the SHA-256 prefix of
+  // privacy.tsx + terms.tsx contents (lib/consent-version.ts). Bumps ONLY when
+  // policy text changes; recorded on every contact for audit traceability.
+  const consentVersion = CONSENT_VERSION
 
   // STORE-03: contacts.create is the SINGLE write path to the audience, BUT the
   // Phase 4 day-1 probe (Plan 04-07 Task 2 / RESEARCH Open Question #1) revealed
