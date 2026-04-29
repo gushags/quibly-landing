@@ -492,5 +492,29 @@ describe('joinWaitlistAction (Phase 4 real pipeline)', () => {
         })
       )
     })
+
+    // WR-02: in production, refuse to emit a welcome email with a dead unsubscribe link.
+    // Falling through to the apex fallback would point at NXDOMAIN/parking pre-Phase-6.
+    it('returns error in production when all three site-url env vars are unset', async () => {
+      delete process.env.NEXT_PUBLIC_SITE_URL
+      delete process.env.VERCEL_PROJECT_PRODUCTION_URL
+      delete process.env.VERCEL_URL
+      const originalVercelEnv = process.env.VERCEL_ENV
+      process.env.VERCEL_ENV = 'production'
+
+      try {
+        const result = await joinWaitlistAction(null, fd({
+          email: 'real@example.com',
+          hp_field: '',
+          renderedAt: PAST_RENDERED_AT(),
+        }))
+
+        expect(result.status).toBe('error')
+        expect(resend.emails.send).not.toHaveBeenCalled()
+      } finally {
+        if (originalVercelEnv === undefined) delete process.env.VERCEL_ENV
+        else process.env.VERCEL_ENV = originalVercelEnv
+      }
+    })
   })
 })

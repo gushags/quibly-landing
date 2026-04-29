@@ -203,11 +203,23 @@ export async function joinWaitlistAction(
     const vercelProdHost = process.env.VERCEL_PROJECT_PRODUCTION_URL
     // eslint-disable-next-line custom/no-raw-process-env -- Vercel system env var (per PATTERNS.md exception)
     const vercelDeployHost = process.env.VERCEL_URL
-    const siteUrl =
+    const resolvedSiteUrl =
       explicitSiteUrl ??
       (vercelProdHost ? `https://${vercelProdHost}` : undefined) ??
-      (vercelDeployHost ? `https://${vercelDeployHost}` : undefined) ??
-      'https://usequibly.com'
+      (vercelDeployHost ? `https://${vercelDeployHost}` : undefined)
+    // WR-02: in production, refuse to emit a welcome email with a dead unsubscribe link.
+    // The apex `usequibly.com` is not bound to Vercel pre-Phase-6, so falling through to it
+    // returns NXDOMAIN/parking and the recipient cannot unsubscribe (CAN-SPAM exposure).
+    // eslint-disable-next-line custom/no-raw-process-env -- Vercel system env var (per PATTERNS.md exception)
+    if (process.env.VERCEL_ENV === 'production' && !resolvedSiteUrl) {
+      console.error('site_url_unresolved_in_production', {
+        explicitSiteUrl: !!explicitSiteUrl,
+        vercelProdHost: !!vercelProdHost,
+        vercelDeployHost: !!vercelDeployHost,
+      })
+      return { status: 'error', message: 'Service is being configured. Try again shortly.' }
+    }
+    const siteUrl = resolvedSiteUrl ?? 'https://usequibly.com'
     const unsubscribeUrl = `${siteUrl}/unsubscribe?t=${await generateToken(email)}`
 
     // CD-09: fire-and-forget — NOT awaited. .catch() handles EMAIL-08 observability.
@@ -249,9 +261,6 @@ export async function joinWaitlistAction(
 
   // ANLY-03: server-side analytics — duplicate flag for Phase 5 dashboard.
   await track('waitlist_signup', { duplicate: isDuplicate })
-
-  // Suppress unused variable warning — existingContact data unused at this stage
-  void existingContact
 
   return { status: 'success', duplicate: isDuplicate }
 }
