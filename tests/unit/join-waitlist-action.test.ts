@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeAll, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeAll, beforeEach, afterEach } from 'vitest'
 
 // Set env vars BEFORE any import that transitively loads lib/env.ts.
 // Phase 1 D-08 parses env at module load — these must be in place first.
@@ -410,5 +410,87 @@ describe('joinWaitlistAction (Phase 4 real pipeline)', () => {
       renderedAt: PAST_RENDERED_AT(),
     }))
     expect(track).toHaveBeenCalledWith('waitlist_signup', { duplicate: false })
+  })
+
+  describe('unsubscribe URL fallback chain (GAP-1 / Plan 04-08)', () => {
+    // Capture original env values so we can restore them between cases
+    const originalSiteUrl = process.env.NEXT_PUBLIC_SITE_URL
+    const originalProdHost = process.env.VERCEL_PROJECT_PRODUCTION_URL
+    const originalUrl = process.env.VERCEL_URL
+
+    afterEach(() => {
+      if (originalSiteUrl === undefined) delete process.env.NEXT_PUBLIC_SITE_URL
+      else process.env.NEXT_PUBLIC_SITE_URL = originalSiteUrl
+      if (originalProdHost === undefined) delete process.env.VERCEL_PROJECT_PRODUCTION_URL
+      else process.env.VERCEL_PROJECT_PRODUCTION_URL = originalProdHost
+      if (originalUrl === undefined) delete process.env.VERCEL_URL
+      else process.env.VERCEL_URL = originalUrl
+    })
+
+    it('uses NEXT_PUBLIC_SITE_URL when set (highest priority)', async () => {
+      process.env.NEXT_PUBLIC_SITE_URL = 'https://example-explicit.com'
+      process.env.VERCEL_PROJECT_PRODUCTION_URL = 'should-not-be-used.vercel.app'
+      process.env.VERCEL_URL = 'should-not-be-used-deploy.vercel.app'
+
+      await joinWaitlistAction(null, fd({
+        email: 'real@example.com',
+        hp_field: '',
+        renderedAt: PAST_RENDERED_AT(),
+      }))
+
+      expect(resend.emails.send).toHaveBeenCalledWith(
+        expect.objectContaining({
+          react: expect.objectContaining({
+            props: expect.objectContaining({
+              unsubscribeUrl: expect.stringMatching(/^https:\/\/example-explicit\.com\/unsubscribe\?t=.+/),
+            }),
+          }),
+        })
+      )
+    })
+
+    it('falls back to VERCEL_PROJECT_PRODUCTION_URL when NEXT_PUBLIC_SITE_URL is unset', async () => {
+      delete process.env.NEXT_PUBLIC_SITE_URL
+      process.env.VERCEL_PROJECT_PRODUCTION_URL = 'quibly-landing.vercel.app'
+      delete process.env.VERCEL_URL
+
+      await joinWaitlistAction(null, fd({
+        email: 'real@example.com',
+        hp_field: '',
+        renderedAt: PAST_RENDERED_AT(),
+      }))
+
+      expect(resend.emails.send).toHaveBeenCalledWith(
+        expect.objectContaining({
+          react: expect.objectContaining({
+            props: expect.objectContaining({
+              unsubscribeUrl: expect.stringMatching(/^https:\/\/quibly-landing\.vercel\.app\/unsubscribe\?t=.+/),
+            }),
+          }),
+        })
+      )
+    })
+
+    it('falls back to VERCEL_URL when both NEXT_PUBLIC_SITE_URL and VERCEL_PROJECT_PRODUCTION_URL are unset', async () => {
+      delete process.env.NEXT_PUBLIC_SITE_URL
+      delete process.env.VERCEL_PROJECT_PRODUCTION_URL
+      process.env.VERCEL_URL = 'quibly-landing-git-test-team.vercel.app'
+
+      await joinWaitlistAction(null, fd({
+        email: 'real@example.com',
+        hp_field: '',
+        renderedAt: PAST_RENDERED_AT(),
+      }))
+
+      expect(resend.emails.send).toHaveBeenCalledWith(
+        expect.objectContaining({
+          react: expect.objectContaining({
+            props: expect.objectContaining({
+              unsubscribeUrl: expect.stringMatching(/^https:\/\/quibly-landing-git-test-team\.vercel\.app\/unsubscribe\?t=.+/),
+            }),
+          }),
+        })
+      )
+    })
   })
 })
