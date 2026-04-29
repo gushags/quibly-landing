@@ -1,3 +1,4 @@
+import { headers } from 'next/headers';
 import { WaitlistForm } from '@/components/waitlist/waitlist-form';
 
 /**
@@ -37,7 +38,16 @@ import { WaitlistForm } from '@/components/waitlist/waitlist-form';
  *   - Sub-copy: "Drop your email and we'll ping you the moment Quibly's ready."
  *     (14 words, friendly upstart tone per PROJECT.md)
  */
-export function WaitlistFormSection() {
+export async function WaitlistFormSection() {
+  // CR-04: opt this RSC into dynamic rendering. Without a dynamic API call,
+  // Next 16 statically pre-renders the home page at build time and freezes
+  // `renderedAt` to the build clock -- defeating the SPAM-02 time-trap
+  // entirely (every submission would compare against a build-time timestamp
+  // that is always >2s old). Awaiting `headers()` is a Next-recognized dynamic
+  // API and forces this segment to render per-request so `Date.now()` runs
+  // fresh on every visit.
+  await headers();
+
   // CD-02 + Pitfall 2 + D-06: timestamp runs at request time on the SERVER (RSC, no
   // client directive at the top of this file) and is passed as a stable primitive
   // prop to the Client Component. This is CD-02's "hidden input populated server-side"
