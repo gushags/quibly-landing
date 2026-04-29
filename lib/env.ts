@@ -34,7 +34,19 @@ const envSchema = z.object({
   // Physical postal address for welcome-email footer (CAN-SPAM EMAIL-05 / D-10).
   // HARD blocker for production deploy — placeholder ('YOUR-POSTAL-ADDRESS-HERE') is acceptable
   // in dev/preview only; founder must source registered agent / PO box / CMRA before production merge.
-  RESEND_FROM_POSTAL_ADDRESS: z.string().min(1, 'RESEND_FROM_POSTAL_ADDRESS is required (CAN-SPAM EMAIL-05 — source registered agent or PO box per D-10 before production deploy)'),
+  //
+  // WR-01: enforce the placeholder block at the schema level when VERCEL_ENV=production.
+  // `.min(1)` alone would let 'YOUR-POSTAL-ADDRESS-HERE' (the .env.example placeholder) flow
+  // into real welcome emails as a CAN-SPAM-non-compliant footer string. The .refine() guard
+  // crashes at module load on any production env with a placeholder still in place — same
+  // failure mode (Zod surface) as a missing key.
+  RESEND_FROM_POSTAL_ADDRESS: z
+    .string()
+    .min(1, 'RESEND_FROM_POSTAL_ADDRESS is required (CAN-SPAM EMAIL-05 — source registered agent or PO box per D-10 before production deploy)')
+    .refine(
+      (s) => process.env.VERCEL_ENV !== 'production' || !/YOUR-POSTAL-ADDRESS|placeholder|test address/i.test(s),
+      'RESEND_FROM_POSTAL_ADDRESS still contains a placeholder string (CAN-SPAM EMAIL-05 — set a real postal address before production deploy)',
+    ),
 })
 
 // Parse at module load — throws ZodError with all missing keys in one message.
