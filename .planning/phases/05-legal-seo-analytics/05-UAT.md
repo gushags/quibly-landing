@@ -1,9 +1,9 @@
 ---
-status: complete
+status: diagnosed
 phase: 05-legal-seo-analytics
 source: [05-01-SUMMARY.md, 05-02-SUMMARY.md, 05-03-SUMMARY.md]
 started: 2026-04-29T18:00:00Z
-updated: 2026-04-29T18:25:00Z
+updated: 2026-04-29T18:30:00Z
 ---
 
 ## Current Test
@@ -136,21 +136,75 @@ blocked: 0
   reason: "User reported: why Delaware law? I'm an LLC in CA?"
   severity: major
   test: 2
-  artifacts: []
-  missing: []
+  root_cause: |
+    `app/(legal)/terms/page.tsx` lines 60-64 hardcode "State of Delaware" as
+    governing law and venue. The Phase 5 CONTEXT.md explicitly noted this was
+    a "reasonable default" for the planner with founder confirmation deferred
+    to PR review (`05-CONTEXT.md:183` — "governing law (Claude picks
+    reasonable default during planning, founder confirms in PR)"). Founder is
+    a CA LLC; the default was never confirmed and is incorrect for the actual
+    entity jurisdiction.
+  artifacts:
+    - path: "app/(legal)/terms/page.tsx"
+      issue: "Lines 60-64 hardcode 'State of Delaware, USA' and 'courts of Delaware' — should be California."
+  missing:
+    - "Replace 'State of Delaware, USA' with 'State of California, USA' in Governing Law section."
+    - "Replace 'courts of Delaware' with 'state or federal courts located in California' (or county-level if preferred)."
+    - "Update tests/legal.spec.ts if any test asserts on the literal 'Delaware' string (verify and adjust)."
+  debug_session: ""
 
 - truth: "OG image at /opengraph-image renders the Quibs mascot Q-mark with two-dot eyes (the brand signature)"
   status: failed
   reason: "User reported: The Q mark is supposed to have two dots for eyes. The eyes are missing."
   severity: major
   test: 5
-  artifacts: []
-  missing: []
+  root_cause: |
+    `app/opengraph-image.tsx` (lines ~33-49) renders a styled `<div>` with the
+    letter "Q" inside a rounded teal-translucent square instead of the Quibs
+    mascot. SUMMARY 05-02 documents this as "auto-fix": Satori in @vercel/og
+    0.11.x crashes when rendering an `<img src=data:image/svg+xml;…>` reference
+    to `public/quibs-icon.svg` (the actual mascot, which contains the Q-face
+    plus two eye paths). The fallback dropped the eyes — the brand signature.
+    Two viable Satori-compatible fix paths exist:
+      (a) compose the mascot in JSX — Q letter + two absolutely-positioned dot
+          `<div>`s for the eyes (no SVG, no data URIs, full Satori support);
+      (b) pre-rasterize `public/quibs-icon.svg` to PNG (e.g. `public/quibs-icon.png`
+          at 360×360) and load via `<img src="...">` — Satori supports PNG imgs.
+    Option (b) gives exact visual parity with the on-page mascot.
+  artifacts:
+    - path: "app/opengraph-image.tsx"
+      issue: "Left-panel renders styled 'Q' div (lines ~33-49) instead of the Quibs mascot with eyes."
+    - path: "public/quibs-icon.svg"
+      issue: "Source mascot SVG exists but cannot be rendered directly by Satori 0.11.x."
+  missing:
+    - "Decide rendering approach: (a) JSX Q + 2 dot divs, or (b) pre-rasterized PNG."
+    - "If (b): generate public/quibs-icon.png (360×360 or similar, transparent background, white-on-teal styling matching the on-page mascot)."
+    - "Update app/opengraph-image.tsx left panel to render the chosen approach."
+    - "Verify `npm run build` succeeds and the rendered /opengraph-image PNG shows two visible eyes."
+    - "Update tests/seo.spec.ts visual assertion if it checks for any 'Q' text content (it likely just verifies headers + dimensions)."
+  debug_session: ""
 
 - truth: "Favicon (/icon and /apple-icon) renders the Quibs mascot mark consistent with the on-page logo"
   status: failed
   reason: "User reported: You are using the correct mark on the / page. You are using an incorrect mark as the favicon."
   severity: major
   test: 6
-  artifacts: []
-  missing: []
+  root_cause: |
+    `app/icon.tsx` and `app/apple-icon.tsx` both render a styled `<div>` with
+    sans-serif "Q" on a flat teal background — the inline comment in both
+    files says "Until a PNG mascot is added under public/, render a styled
+    text Q on the brand teal background." The PNG was never added; the
+    placeholder ships as production. Same root cause and same fix path as
+    Gap 2 (OG image) — Satori-compatible mascot rendering. Recommend the
+    same approach picked for the OG image so all three surfaces (OG, /icon
+    32×32, /apple-icon 180×180) stay visually consistent.
+  artifacts:
+    - path: "app/icon.tsx"
+      issue: "Lines 17-32 render styled 'Q' div instead of mascot with eyes."
+    - path: "app/apple-icon.tsx"
+      issue: "Lines 17-32 render styled 'Q' div instead of mascot with eyes (180×180 variant)."
+  missing:
+    - "Apply same rendering approach chosen for OG image to /icon (32×32) and /apple-icon (180×180)."
+    - "If approach (b) PNG is chosen for OG, reuse public/quibs-icon.png in icon.tsx and apple-icon.tsx (Next will scale appropriately, or generate per-size PNGs if visual quality at 32px requires it)."
+    - "Verify favicon visibly shows two-dot eyes at 32×32 in browser tab and at 180×180 on iOS home-screen save."
+  debug_session: ""
