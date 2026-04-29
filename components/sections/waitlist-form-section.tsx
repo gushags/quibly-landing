@@ -59,6 +59,28 @@ export function WaitlistFormSection() {
           ready.
         </p>
         <WaitlistForm renderedAt={renderedAt} />
+
+        {/* LEGAL-06 + LEGAL-07 consent + reassurance microcopy (Phase 5 UI-SPEC §3 — locked) */}
+        <div className="mt-4 space-y-1 text-xs text-muted-foreground text-center">
+          <p data-testid="reassurance-copy">No spam &mdash; unsubscribe anytime.</p>
+          <p data-testid="consent-copy">
+            By joining, you agree to our{' '}
+            <a
+              href="/privacy"
+              className="text-primary underline-offset-2 hover:underline focus-visible:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring rounded-sm"
+            >
+              Privacy Policy
+            </a>
+            {' '}and{' '}
+            <a
+              href="/terms"
+              className="text-primary underline-offset-2 hover:underline focus-visible:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring rounded-sm"
+            >
+              Terms
+            </a>
+            .
+          </p>
+        </div>
       </div>
     </section>
   );
