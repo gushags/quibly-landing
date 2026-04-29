@@ -177,11 +177,11 @@ blocked: 0
     - path: "public/quibs-icon.svg"
       issue: "Source mascot SVG exists but cannot be rendered directly by Satori 0.11.x."
   missing:
-    - "Decide rendering approach: (a) JSX Q + 2 dot divs, or (b) pre-rasterized PNG."
-    - "If (b): generate public/quibs-icon.png (360×360 or similar, transparent background, white-on-teal styling matching the on-page mascot)."
-    - "Update app/opengraph-image.tsx left panel to render the chosen approach."
-    - "Verify `npm run build` succeeds and the rendered /opengraph-image PNG shows two visible eyes."
-    - "Update tests/seo.spec.ts visual assertion if it checks for any 'Q' text content (it likely just verifies headers + dimensions)."
+    - "DECISION (founder, 2026-04-29): use approach (b) — pre-rasterized PNG of the Quibs mascot from public/quibs-icon.svg, for exact visual parity with the on-page mascot."
+    - "Generate public/quibs-icon.png at 360×360 (transparent background, white mascot — match the on-page color/treatment) from public/quibs-icon.svg. Use sharp, ImageMagick, or rsvg-convert; commit the PNG to the repo."
+    - "Update app/opengraph-image.tsx left panel: replace the styled-Q div with an <img> tag loading the PNG via fs read + buffer-to-data-URI (Satori supports PNG <img>). Size the mascot to ~180-220px square within the existing 40% left column."
+    - "Verify `npm run build` succeeds and the rendered /opengraph-image PNG shows two visible eyes — open /opengraph-image directly in a browser."
+    - "Update tests/seo.spec.ts only if it asserts on Q-letter text content (verify by reading the spec; otherwise no test change needed)."
   debug_session: ""
 
 - truth: "Favicon (/icon and /apple-icon) renders the Quibs mascot mark consistent with the on-page logo"
@@ -204,7 +204,8 @@ blocked: 0
     - path: "app/apple-icon.tsx"
       issue: "Lines 17-32 render styled 'Q' div instead of mascot with eyes (180×180 variant)."
   missing:
-    - "Apply same rendering approach chosen for OG image to /icon (32×32) and /apple-icon (180×180)."
-    - "If approach (b) PNG is chosen for OG, reuse public/quibs-icon.png in icon.tsx and apple-icon.tsx (Next will scale appropriately, or generate per-size PNGs if visual quality at 32px requires it)."
-    - "Verify favicon visibly shows two-dot eyes at 32×32 in browser tab and at 180×180 on iOS home-screen save."
+    - "DECISION (founder, 2026-04-29): use approach (b) — same PNG-mascot approach as OG image, for visual consistency across OG card, favicon, and apple-icon."
+    - "Reuse public/quibs-icon.png (generated for OG image) in app/icon.tsx (32×32) and app/apple-icon.tsx (180×180). For 32×32 quality, consider generating a second public/quibs-icon-32.png pre-sized at 32×32 to avoid Satori downscaling artifacts; otherwise reuse 360×360."
+    - "Update app/icon.tsx and app/apple-icon.tsx: keep the teal background div but replace the inner styled-Q div with the mascot PNG <img>."
+    - "Verify favicon visibly shows two-dot eyes at 32×32 in browser tab (hard-refresh required) and at 180×180 on iOS home-screen save."
   debug_session: ""
