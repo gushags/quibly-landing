@@ -111,7 +111,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 3 plans
   - [x] 05-01-PLAN.md — Legal pages + consent-version + microcopy + join-waitlist consent_version swap (LEGAL-01..08, Wave 1)
   - [x] 05-02-PLAN.md — SEO surface: OG image + favicon + robots + sitemap + JSON-LD + metadata extension (SEO-01..08, Wave 2)
-  - [ ] 05-03-PLAN.md — Analytics wiring: Vercel Analytics + Speed Insights + lib/analytics.ts swap + tracker denylist (ANLY-01..06, Wave 3)
+  - [x] 05-03-PLAN.md — Analytics wiring: Vercel Analytics + Speed Insights + lib/analytics.ts swap + tracker denylist (ANLY-01..06, Wave 3)
 
 ### Phase 6: Production Deploy + Cutover Runbook
 **Goal**: Apex go-live at `useQuibly.com` is itself a verified deliverable — domain bound at the Vercel team level for atomic transfer, full DNS verified at mail-tester 10/10, and a written cutover runbook with a dry-run executed against a staging subdomain before launch.
