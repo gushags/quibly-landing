@@ -33,8 +33,8 @@ function safeJsonLdScript(data: unknown): string {
     .replace(/</g, '\\u003c')
     .replace(/>/g, '\\u003e')
     .replace(/&/g, '\\u0026')
-    .replace(/ /g, '\\u2028')
-    .replace(/ /g, '\\u2029')
+    .replace(/\u2028/g, '\\u2028')
+    .replace(/\u2029/g, '\\u2029')
 }
 
 // Phase 5 SEO-08: Schema.org JSON-LD — Organization + WebSite (CD-02: home page only)
