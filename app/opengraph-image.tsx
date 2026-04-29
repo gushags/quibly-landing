@@ -8,18 +8,23 @@ export const contentType = 'image/png'
 export const alt = 'Quibly — You know your business. Quibly knows how to market it.'
 
 export default async function OgImage() {
-  const [quicksandBold, figtreeMedium] = await Promise.all([
+  const [quicksandBold, figtreeMedium, mascotPng] = await Promise.all([
     // WOFF1 files used because Satori does not support variable font tables (fvar/gvar)
     // present in the downloaded Google Fonts TTF. Static-weight WOFF1 from @fontsource
     // is fully supported by Satori/resvg-js.
     readFile(join(process.cwd(), 'public/fonts/Quicksand-Bold.woff')),
     readFile(join(process.cwd(), 'public/fonts/Figtree-Medium.woff')),
+    // Pre-rasterized mascot PNG; see scripts/rasterize-mascot.mjs and Plan 05-05.
+    // Satori 0.11.x supports PNG via data URI but NOT SVG via data URI.
+    readFile(join(process.cwd(), 'public/quibs-icon.png')),
   ])
+
+  const mascotDataUri = `data:image/png;base64,${mascotPng.toString('base64')}`
 
   return new ImageResponse(
     (
       <div style={{ display: 'flex', width: '100%', height: '100%' }}>
-        {/* Left column: teal gradient + Q mascot letter (40%) */}
+        {/* Left column: teal gradient + Quibs mascot (40%) */}
         <div
           style={{
             display: 'flex',
@@ -30,25 +35,27 @@ export default async function OgImage() {
             justifyContent: 'center',
           }}
         >
-          {/* Quibly Q-face text mark — SVG via data URI is unsupported in Satori;
-              using styled text Q as brand mark for the OG left panel */}
+          {/* Quibs mascot — pre-rasterized PNG from public/quibs-icon.svg.
+              Satori 0.11.x supports PNG via data URI but NOT SVG via data URI
+              (see scripts/rasterize-mascot.mjs and 05-02-SUMMARY.md). */}
           <div
             style={{
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              width: 180,
-              height: 180,
-              borderRadius: 40,
+              width: 220,
+              height: 220,
+              borderRadius: 44,
               background: 'rgba(255,255,255,0.15)',
-              fontSize: 120,
-              fontFamily: 'Quicksand',
-              fontWeight: 700,
-              color: '#ffffff',
-              lineHeight: 1,
             }}
           >
-            Q
+            <img
+              src={mascotDataUri}
+              alt=""
+              width={180}
+              height={180}
+              style={{ width: 180, height: 180 }}
+            />
           </div>
         </div>
         {/* Right column: white + tagline (60%) */}
