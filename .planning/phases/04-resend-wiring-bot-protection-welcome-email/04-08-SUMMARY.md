@@ -27,10 +27,10 @@ decisions:
   - "Treat the `NEXT_PUBLIC_LAUNCHED` defensive flag (option 3 from signups-land-in-production-audience.md) as deliberately deferred — CD-04 routing is correct, and the methodology doc (Task 3) is sufficient guidance without changing documented runtime behavior."
 metrics:
   duration_minutes: ~10
-  tasks_completed_auto: 2
+  tasks_completed_auto: 3
   tasks_open_human_action: 2
-  files_modified: 4
-  commits_made: 4
+  files_modified: 6
+  commits_made: 7
   completed_date: 2026-04-29
 ---
 
@@ -73,6 +73,27 @@ Replaced the misleading `Production: https://useQuibly.com` comment with a multi
 
 The placeholder default value is now `https://quibly-landing.vercel.app` so `cp .env.example .env.local` produces a working dev configuration.
 
+### `app/unsubscribe/route.ts` — Task 5 GET handler (commit `d62fabd`)
+
+Surfaced during Task 2's live click-through: the welcome email's body Unsubscribe link is a regular `<Link href={unsubscribeUrl}>`, which sends a GET when clicked. The existing POST-only handler returned 405; contact never flipped. Empirically Gmail does not surface the header-driven Unsubscribe button for new senders without bulk-mail reputation, so the body link is the primary unsubscribe UX in pre-launch — refuting the deferred-GET decision in 04-CONTEXT.md.
+
+The new `GET` handler shares an internal `processUnsubscribe(req, via)` helper with `POST` to keep token verification and `resend.contacts.update` exactly identical between paths. On 200 it returns a Quibly-branded HTML confirmation page; on 400/401 it returns an HTML error page with a `mailto:unsubscribe@usequibly.com` fallback. Both responses are `noindex`.
+
+Prefetch risk (link previewers / scanners issuing GETs) is bounded by per-recipient HMAC tokens — a prefetch can only unsubscribe the original recipient, who already received the email. Upgrade path to two-step confirm-form is ~15 LOC if false-unsubscribe patterns appear post-launch.
+
+### `tests/unit/unsubscribe-route.test.ts` — Task 5 GET coverage (commit `c98db84`)
+
+Three new cases under `describe('GET /unsubscribe (body-link UX / Plan 04-08)')`:
+1. Returns 400 + HTML when `t` query param is missing.
+2. Returns 401 + HTML on tampered token.
+3. Returns 200 + HTML confirmation + `resend.contacts.update({ email, unsubscribed: true })` on valid token.
+
+`npm run test:unit -- tests/unit/unsubscribe-route.test.ts` → **8 tests pass (5 existing POST + 3 new GET)**.
+
+### `.planning/phases/04-resend-wiring-bot-protection-welcome-email/04-CONTEXT.md` — deferred-decision flip (commit `be76901`)
+
+Strike-through preserves the original deferral text for audit trail and notes plan 04-08 implemented the GET handler after empirical UAT refuted the deferral premise.
+
 ### `.planning/phases/04-resend-wiring-bot-protection-welcome-email/04-UAT.md` (commit `d1172da`)
 
 Appended a new top-level "UAT Methodology — URL Routing Cheat Sheet" section. Existing test results and the `## Gaps` block are unmodified (verified by inspecting the diff — only an additive append after the prior last line). Section includes:
@@ -91,7 +112,11 @@ Appended a new top-level "UAT Methodology — URL Routing Cheat Sheet" section. 
 | `ffadcb0` | docs | 04-08 | Update NEXT_PUBLIC_SITE_URL .env.example comment for pre-Phase-6 reality |
 | `d1172da` | docs | 04-08 | Add UAT methodology section to close GAP-2 truth |
 
-All four commits land on `worktree-agent-a6fa80389a64bc7c6` based on `5197ce1`.
+| `d62fabd` | feat | 04-08 | Add GET handler to /unsubscribe to fix body-link UX (Task 5 — surfaced during Task 2 verification) |
+| `c98db84` | test | 04-08 | Cover unsubscribe GET handler |
+| `be76901` | docs | 04-08 | Flip GET-handler deferred decision in CONTEXT.md |
+
+The first four commits landed on `worktree-agent-a6fa80389a64bc7c6` based on `5197ce1` and were fast-forwarded to `main` after wave-merge. The last three (Task 5 — added inline after the executor returned) were committed directly to `main` after the founder's Task 2 verification surfaced the body-link 405 defect.
 
 ## Verification
 
@@ -112,7 +137,7 @@ These are the two `checkpoint:human-action` tasks from the plan. They could not 
 
 ### Open Human Action 1 — Task 2: Vercel Production env var + live unsubscribe verification (BLOCKING for GAP 1 closure)
 
-**Status:** open — required to fully close GAP 1 (the code half is in; the runtime verification half is not).
+**Status (updated 2026-04-28):** Vercel env var **set and confirmed by founder** (`vercel env ls | grep NEXT_PUBLIC_SITE_URL` → present in Production scope). Live click-through revealed a SECOND defect: body-link GET returned 405 from the POST-only handler, so the contact never flipped. Plan 04-08 was extended with **Task 5** (GET handler implementation) to fix this. After Task 5's commits push to `main` and Production redeploy, founder re-tests click-through. Until that re-test confirms `unsubscribed: true` in Resend, GAP 1 truth remains **partial-closed** (URL routing fixed; full-flow verification pending).
 
 **Founder steps (verbatim from the plan):**
 
