@@ -27,14 +27,26 @@ test.describe('Phase 5 — SEO surface (SEO-01..08)', () => {
     expect(response.headers()['content-type']).toContain('image/png')
   })
 
-  test('favicon (SEO-05): /icon (favicon) and /apple-icon return 200', async ({ request }) => {
+  test('favicon (SEO-05): /icon (favicon) and /apple-icon return 200 with non-trivial body', async ({ request }) => {
     // Next.js app/icon.tsx file convention generates /icon (not /favicon.ico)
     // and registers it via <link rel="icon" href="/icon"> in the page <head>.
     // Browsers and social crawlers follow the <link> tag, not a bare /favicon.ico path.
+    //
+    // CR-03 hardening: a 200 response would be returned even if Satori swallowed
+    // the SVG-via-data-URI path and produced a blank/empty PNG. Assert a content
+    // floor so a regression to a near-empty image fails the test instead of passing.
     const fav = await request.get('/icon')
     expect([200, 304]).toContain(fav.status())
+    if (fav.status() === 200) {
+      const favBody = await fav.body()
+      expect(favBody.length).toBeGreaterThan(200)
+    }
     const apple = await request.get('/apple-icon')
     expect([200, 304]).toContain(apple.status())
+    if (apple.status() === 200) {
+      const appleBody = await apple.body()
+      expect(appleBody.length).toBeGreaterThan(500)
+    }
   })
 
   test('robots (SEO-06): /robots.txt lists named AI crawlers Allow', async ({ request }) => {
