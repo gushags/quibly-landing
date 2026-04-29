@@ -108,7 +108,10 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. `/sitemap.xml` lists `/`, `/privacy`, `/terms`; `/robots.txt` declares an explicit allow/deny decision for GPTBot, ClaudeBot, Google-Extended, PerplexityBot, and CCBot; Schema.org JSON-LD (Organization + WebSite) is present on the home page.
   4. A successful signup fires a server-side `track('waitlist_signup', { duplicate })` event; a welcome-email failure fires `track('welcome_email_send_error', { contactId })`; both appear in Vercel's custom-events dashboard.
   5. A fresh-incognito visit to the home page sets zero non-essential cookies in DevTools — no GA4, PostHog, Meta Pixel, LinkedIn Insight, Hotjar, Clarity, GTM, or any other third-party tracker is present in the bundle or network panel.
-**Plans**: TBD
+**Plans**: 3 plans
+  - [ ] 05-01-PLAN.md — Legal pages + consent-version + microcopy + join-waitlist consent_version swap (LEGAL-01..08, Wave 1)
+  - [ ] 05-02-PLAN.md — SEO surface: OG image + favicon + robots + sitemap + JSON-LD + metadata extension (SEO-01..08, Wave 2)
+  - [ ] 05-03-PLAN.md — Analytics wiring: Vercel Analytics + Speed Insights + lib/analytics.ts swap + tracker denylist (ANLY-01..06, Wave 3)
 
 ### Phase 6: Production Deploy + Cutover Runbook
 **Goal**: Apex go-live at `useQuibly.com` is itself a verified deliverable — domain bound at the Vercel team level for atomic transfer, full DNS verified at mail-tester 10/10, and a written cutover runbook with a dry-run executed against a staging subdomain before launch.
@@ -133,5 +136,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | 2. Static Landing Page | 0/6 | Not started | - |
 | 3. Email Capture Form (Stub Action) | 0/TBD | Not started | - |
 | 4. Resend Wiring + Bot Protection + Welcome Email | 0/8 | Not started | - |
-| 5. Legal + SEO + Analytics | 0/TBD | Not started | - |
+| 5. Legal + SEO + Analytics | 0/3 | Not started | - |
 | 6. Production Deploy + Cutover Runbook | 0/TBD | Not started | - |
