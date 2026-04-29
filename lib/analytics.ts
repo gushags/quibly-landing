@@ -1,18 +1,22 @@
 import 'server-only'
+import { track as vercelTrack } from '@vercel/analytics/server'
 
 /**
- * Phase 4 analytics shim.
+ * Phase 4 analytics shim — Phase 5 body swap.
  *
- * Phase 5 swaps this body for `@vercel/analytics/server` track() call.
+ * Phase 5 swaps the Phase 4 shim body for `@vercel/analytics/server` track().
  * The TrackEvent union is the contract — adding new event names here
  * requires updating Plan 03/05/06 callers.
  *
- * Events emitted in Phase 4:
- *   - 'waitlist_signup'           — fresh + duplicate signups (action body, Plan 05)
- *   - 'signup_rejected'           — rate-limit + disposable rejections (D-03, Plan 05)
- *   - 'welcome_email_send_error'  — fire-and-forget catch (EMAIL-08, Plan 05)
- *   - 'contact_bounced'           — webhook D-08 (Plan 06)
- *   - 'contact_complained'        — webhook D-08 (Plan 06)
+ * @vercel/analytics/server auto-detects the Vercel environment via VERCEL_ANALYTICS_ID
+ * and friends; no provider configuration is required. Locally it no-ops.
+ *
+ * Events emitted in Phase 4 + 5:
+ *   - 'waitlist_signup'           — fresh + duplicate signups
+ *   - 'signup_rejected'           — rate-limit + disposable rejections
+ *   - 'welcome_email_send_error'  — fire-and-forget catch
+ *   - 'contact_bounced'           — webhook
+ *   - 'contact_complained'        — webhook
  */
 export type TrackEvent =
   | 'waitlist_signup'
@@ -25,8 +29,7 @@ export async function track(
   event: TrackEvent,
   properties?: Record<string, unknown>,
 ): Promise<void> {
-  // Phase 4 shim — structured log only.
-  // Phase 5 swaps this body for `import { track as vercelTrack } from '@vercel/analytics/server'`
-  // and calls `vercelTrack(event, properties)`.
-  console.log('[analytics]', event, properties ?? {})
+  // Cast to AllowedPropertyValues — all actual call sites pass string | boolean | null values.
+  // The wide Record<string, unknown> signature preserves backward-compat for callers.
+  await vercelTrack(event, properties as Record<string, string | number | boolean | null | undefined>)
 }
