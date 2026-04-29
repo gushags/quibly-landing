@@ -88,7 +88,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. Submitting six emails in one minute from one IP, or 51 in one day, results in the sixth/51st being rate-limited; submitting an address ending in a disposable domain (e.g., `mailinator.com`) is silently rejected.
   4. A bounce or spam-complaint event from Resend's webhook reaches our route handler, is logged, and marks the contact unsubscribed; failed welcome-email sends produce both a server log and a `track('welcome_email_send_error')` event.
   5. The "Quibly Waitlist (Preview)" audience receives all PR-preview signups (production audience untouched), and a CSV export round-trip (audience → CSV → re-import) is validated end-to-end.
-**Plans**: 7 plans
+**Plans**: 8 plans
   - [x] 04-01-PLAN.md — Wave 0 deps + env extension (RESEND_FROM_POSTAL_ADDRESS, NEXT_PUBLIC_SITE_URL) + lib/disposable-domains.ts (SPAM-04) (Wave 1)
   - [x] 04-02-PLAN.md — lib/analytics.ts shim + lib/unsubscribe-token.ts HMAC + Vitest token round-trip (Wave 1, parallel with 04-01)
   - [x] 04-03-PLAN.md — lib/resend.ts singleton + lib/rate-limit.ts two-limiter ladder (Wave 2, depends on 04-01)
@@ -96,6 +96,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   - [x] 04-05-PLAN.md — app/actions/join-waitlist.ts body swap to real Resend pipeline + Vitest mock migration (Wave 3)
   - [x] 04-06-PLAN.md — app/api/webhooks/resend/route.ts (svix verify + D-08 dispatch) + app/unsubscribe/route.ts (RFC 8058) + Vitest coverage (Wave 3)
   - [ ] 04-07-PLAN.md — Playwright spec migration (3 deletions + 1 modification) + 6 manual checkpoints (day-1 probes, postal address D-10, mail-tester, inbox tests, webhook registration, CSV round-trip) (Wave 4, autonomous: false)
+  - [ ] 04-08-PLAN.md — Gap closure (UAT 2026-04-28): harden unsubscribe-URL fallback chain (GAP-1 blocker) + Vercel env var checkpoint + UAT methodology section in 04-UAT.md (GAP-2 major) + optional production-audience cleanup (Wave 5, autonomous: false, gap_closure)
 
 ### Phase 5: Legal + SEO + Analytics
 **Goal**: All compliance, discoverability, and observability surface area required to expose the form to public traffic — privacy/terms live, OG/Twitter previews render correctly, server-side conversion events fire, and zero non-essential cookies are set.
@@ -131,6 +132,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | 1. Scaffold + Brand Token Parity | 0/6 | Not started | - |
 | 2. Static Landing Page | 0/6 | Not started | - |
 | 3. Email Capture Form (Stub Action) | 0/TBD | Not started | - |
-| 4. Resend Wiring + Bot Protection + Welcome Email | 0/7 | Not started | - |
+| 4. Resend Wiring + Bot Protection + Welcome Email | 0/8 | Not started | - |
 | 5. Legal + SEO + Analytics | 0/TBD | Not started | - |
 | 6. Production Deploy + Cutover Runbook | 0/TBD | Not started | - |
