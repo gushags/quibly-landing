@@ -108,10 +108,13 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. `/sitemap.xml` lists `/`, `/privacy`, `/terms`; `/robots.txt` declares an explicit allow/deny decision for GPTBot, ClaudeBot, Google-Extended, PerplexityBot, and CCBot; Schema.org JSON-LD (Organization + WebSite) is present on the home page.
   4. A successful signup fires a server-side `track('waitlist_signup', { duplicate })` event; a welcome-email failure fires `track('welcome_email_send_error', { contactId })`; both appear in Vercel's custom-events dashboard.
   5. A fresh-incognito visit to the home page sets zero non-essential cookies in DevTools — no GA4, PostHog, Meta Pixel, LinkedIn Insight, Hotjar, Clarity, GTM, or any other third-party tracker is present in the bundle or network panel.
-**Plans**: 3 plans
+**Plans**: 6 plans
   - [x] 05-01-PLAN.md — Legal pages + consent-version + microcopy + join-waitlist consent_version swap (LEGAL-01..08, Wave 1)
   - [x] 05-02-PLAN.md — SEO surface: OG image + favicon + robots + sitemap + JSON-LD + metadata extension (SEO-01..08, Wave 2)
   - [x] 05-03-PLAN.md — Analytics wiring: Vercel Analytics + Speed Insights + lib/analytics.ts swap + tracker denylist (ANLY-01..06, Wave 3)
+  - [ ] 05-04-PLAN.md — Gap closure (UAT 2026-04-29): Terms governing law Delaware → California per D-01 PR confirmation (UAT Gap 1, Wave 1, gap_closure)
+  - [ ] 05-05-PLAN.md — Gap closure (UAT 2026-04-29): pre-rasterize public/quibs-icon.png + wire mascot into /opengraph-image (UAT Gap 2, Wave 1, gap_closure)
+  - [ ] 05-06-PLAN.md — Gap closure (UAT 2026-04-29): wire mascot PNG into /icon and /apple-icon for visual consistency (UAT Gap 3, Wave 2, depends on 05-05, gap_closure)
 
 ### Phase 6: Production Deploy + Cutover Runbook
 **Goal**: Apex go-live at `useQuibly.com` is itself a verified deliverable — domain bound at the Vercel team level for atomic transfer, full DNS verified at mail-tester 10/10, and a written cutover runbook with a dry-run executed against a staging subdomain before launch.
@@ -136,5 +139,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | 2. Static Landing Page | 0/6 | Not started | - |
 | 3. Email Capture Form (Stub Action) | 0/TBD | Not started | - |
 | 4. Resend Wiring + Bot Protection + Welcome Email | 0/8 | Not started | - |
-| 5. Legal + SEO + Analytics | 0/3 | Not started | - |
+| 5. Legal + SEO + Analytics | 0/6 | Not started | - |
 | 6. Production Deploy + Cutover Runbook | 0/TBD | Not started | - |
