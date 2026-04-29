@@ -57,10 +57,10 @@ export default function TermsPage() {
       <section className="space-y-4 mb-10">
         <h2 className="font-heading text-xl font-semibold">Governing Law</h2>
         <p className="text-foreground leading-relaxed">
-          These terms are governed by the laws of the State of Delaware, USA, without regard to
+          These terms are governed by the laws of the State of California, USA, without regard to
           conflict-of-laws principles. Any disputes arising from or relating to these terms shall
-          be resolved in the courts of Delaware, and you consent to the personal jurisdiction of
-          those courts.
+          be resolved in the state or federal courts located in California, and you consent to the
+          personal jurisdiction of those courts.
         </p>
       </section>
 
