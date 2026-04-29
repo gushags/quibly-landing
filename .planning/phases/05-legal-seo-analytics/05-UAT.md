@@ -1,9 +1,9 @@
 ---
-status: diagnosed
+status: complete
 phase: 05-legal-seo-analytics
 source: [05-01-SUMMARY.md, 05-02-SUMMARY.md, 05-03-SUMMARY.md]
 started: 2026-04-29T18:00:00Z
-updated: 2026-04-29T18:30:00Z
+updated: 2026-04-29T19:15:00Z
 ---
 
 ## Current Test
@@ -22,12 +22,13 @@ result: pass
 
 ### 2. Terms page renders with waitlist-scoped TOS
 expected: |
-  Visit `/terms`. Page renders with ~6 sections covering: acceptance of terms,
-  no guarantees about launch / features, right of withdrawal (user can leave
-  the waitlist any time), Delaware governing law, and a contact section.
-result: issue
-reported: "why Delaware law? I'm an LLC in CA?"
-severity: major
+  Visit `/terms`. Governing Law section now references California (not
+  Delaware). Page still renders with ~6 sections covering: acceptance of
+  terms, no guarantees about launch / features, right of withdrawal (user
+  can leave the waitlist any time), California governing law, and a
+  contact section.
+result: pass
+note: "Re-verified 2026-04-29 after 05-04 gap closure (Delaware → California)."
 
 ### 3. Footer Privacy + Terms links navigate without 404
 expected: |
@@ -47,21 +48,20 @@ result: pass
 ### 5. OG image renders at 1200×630 with brand styling
 expected: |
   Visit `/opengraph-image` directly in a browser tab. Image loads as a
-  1200×630 PNG with a teal gradient panel on the left containing a "Q" letter
-  mark (Quicksand 700) and a tagline panel on the right with text in
+  1200×630 PNG. Left panel shows the Quibs mascot with two visible
+  dot-eyes (matching the on-page logo). Right panel has the tagline in
   Quicksand/Figtree weights. No broken image, no Satori crash.
-result: issue
-reported: "The Q mark is supposed to have two dots for eyes. The eyes are missing."
-severity: major
+result: pass
+note: "Re-verified 2026-04-29 after 05-05 gap closure (PNG mascot with eyes)."
 
 ### 6. Favicon shows in browser tab
 expected: |
-  On `/`, the browser tab icon shows the Quibly teal "Q" favicon (not the
-  default Next.js favicon, not a blank/broken icon). Visit `/icon` directly —
-  a 32×32 PNG renders.
-result: issue
-reported: "You are using the correct mark on the / page. You are using an incorrect mark as the favicon."
-severity: major
+  On `/`, the browser tab icon shows the Quibs mascot mark (with the
+  two-dot eyes — matching the on-page logo). Visit `/icon` directly — a
+  32×32 PNG renders showing the mascot. Visit `/apple-icon` — a 180×180
+  PNG renders showing the mascot.
+result: pass
+note: "Re-verified 2026-04-29 after 05-06 gap closure (PNG mascot in /icon and /apple-icon)."
 
 ### 7. robots.txt lists 10 AI crawler Allow rules + sitemap
 expected: |
@@ -123,16 +123,17 @@ note: |
 ## Summary
 
 total: 12
-passed: 9
-issues: 3
+passed: 12
+issues: 0
 pending: 0
 skipped: 0
 blocked: 0
+note: "Tests 2, 5, 6 re-verified pass after gap-closure plans 05-04/05/06."
 
 ## Gaps
 
 - truth: "Terms governing law clause matches the founder's actual entity jurisdiction"
-  status: failed
+  status: resolved
   reason: "User reported: why Delaware law? I'm an LLC in CA?"
   severity: major
   test: 2
@@ -154,7 +155,7 @@ blocked: 0
   debug_session: ""
 
 - truth: "OG image at /opengraph-image renders the Quibs mascot Q-mark with two-dot eyes (the brand signature)"
-  status: failed
+  status: resolved
   reason: "User reported: The Q mark is supposed to have two dots for eyes. The eyes are missing."
   severity: major
   test: 5
@@ -185,7 +186,7 @@ blocked: 0
   debug_session: ""
 
 - truth: "Favicon (/icon and /apple-icon) renders the Quibs mascot mark consistent with the on-page logo"
-  status: failed
+  status: resolved
   reason: "User reported: You are using the correct mark on the / page. You are using an incorrect mark as the favicon."
   severity: major
   test: 6
