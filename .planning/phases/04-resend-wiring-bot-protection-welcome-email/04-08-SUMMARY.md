@@ -135,9 +135,23 @@ None — plan executed exactly as written for the two auto tasks. The two `check
 
 These are the two `checkpoint:human-action` tasks from the plan. They could not be performed by the executor (require Vercel dashboard access, redeploy, live signup + click-through verification). Founder must complete them after this plan's commits land on `main`.
 
-### Open Human Action 1 — Task 2: Vercel Production env var + live unsubscribe verification (BLOCKING for GAP 1 closure)
+### Open Human Action 1 — Task 2: Vercel Production env var + live unsubscribe verification (CLOSED)
 
-**Status (updated 2026-04-28):** Vercel env var **set and confirmed by founder** (`vercel env ls | grep NEXT_PUBLIC_SITE_URL` → present in Production scope). Live click-through revealed a SECOND defect: body-link GET returned 405 from the POST-only handler, so the contact never flipped. Plan 04-08 was extended with **Task 5** (GET handler implementation) to fix this. After Task 5's commits push to `main` and Production redeploy, founder re-tests click-through. Until that re-test confirms `unsubscribed: true` in Resend, GAP 1 truth remains **partial-closed** (URL routing fixed; full-flow verification pending).
+**Status (final, 2026-04-28):** **CLOSED — GAP 1 fully verified end-to-end.**
+
+Verification timeline:
+1. Founder set `NEXT_PUBLIC_SITE_URL=https://quibly-landing.vercel.app` in Vercel Production scope (`vercel env ls | grep NEXT_PUBLIC_SITE_URL` confirmed present).
+2. First click-through against `https://quibly-landing.vercel.app` exposed a second defect: body-link GET returned 405 from the POST-only handler. Plan 04-08 was extended inline with **Task 5** (GET handler) — three new commits (`d62fabd`, `c98db84`, `be76901`) — fixing the body-link unsubscribe path.
+3. Founder pushed Task 5 commits, Vercel redeployed Production, and re-ran the click-through with a fresh test address (`gushags+wild2@gmail.com`).
+4. **Result confirmed:** body-link GET returned 200 from the Quibly-branded confirmation page; Resend Dashboard production audience flipped the contact to `unsubscribed: true`.
+
+Token evidence (HMAC-signed, redacted email-bearing prefix):
+```
+<TOKEN_PREFIX_BASE64URL_EMAIL>.<HMAC_BASE64URL>
+```
+Decodes to `gushags+wild2@gmail.com` + valid HMAC signature → only producible by the live action's `generateToken(email)`, only acceptable to `verifyToken` if the secret matches → end-to-end proof the wired Production deployment processed the unsubscribe.
+
+GAP 1 truth ("Welcome-email unsubscribe link routes to a live Quibly endpoint and marks the contact unsubscribed") fully closed.
 
 **Founder steps (verbatim from the plan):**
 
