@@ -22,10 +22,22 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://useQuibly.com"),
   title: {
     template: "%s | Quibly",
-    default: "Quibly",
+    default: "Quibly — AI Marketing for Solopreneurs",
   },
-  description: "Strategy-first AI marketing for solopreneurs and small teams. Coming soon.",
-  openGraph: { type: "website", url: "https://useQuibly.com" },
+  description: "Strategy-first AI marketing for solopreneurs and small teams. Join the waitlist.",
+  openGraph: {
+    type: "website",
+    url: "https://useQuibly.com",
+    siteName: "Quibly",
+    locale: "en_US",
+    // og:image auto-provided by app/opengraph-image.tsx file convention
+    // Do NOT set openGraph.images here — causes Pitfall 6 (duplicate og:image tags)
+  },
+  twitter: {
+    card: "summary_large_image",
+    // twitter:image auto-inherited from opengraph-image.tsx
+    // Omit twitter:creator/twitter:site — no public X handle yet
+  },
 };
 
 export default function RootLayout({
