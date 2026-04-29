@@ -136,16 +136,7 @@ The hardened fallback chain in the action provides a defense-in-depth net even b
 
 ### Open Human Action 2 — Task 4: Optional cleanup of ~5 UAT-test contacts in production audience (OPTIONAL)
 
-**Status:** open / optional — does not block GAP 2 closure (methodology section in 04-UAT.md is sufficient).
-
-**Founder steps (verbatim from the plan):**
-
-1. Run `npm run export:audience -- --target=production --format=csv > prod-audience.csv`.
-2. Identify UAT-test rows by `created_at` (2026-04-28 ~22:30 UTC – ~23:00 UTC) and `email` patterns.
-3. Remove each test row via Resend Dashboard → Audiences → Quibly Waitlist → row → "Remove contact".
-4. Re-export and verify cleanup.
-
-If the founder elects to skip this (acceptable — UAT contacts will receive at most one welcome email if not unsubscribed), record "skipped" in this SUMMARY's append-only follow-up section.
+**Status:** **skipped by founder (2026-04-28)** — GAP 2 truth already closed by the Task 3 methodology section. Founder elected to leave the ~5 UAT-test contacts in the production audience until launch; they will receive at most one welcome email if not already unsubscribed, which is acceptable for a pre-launch waitlist.
 
 ## Phase 6 Forward-Looking Note
 
