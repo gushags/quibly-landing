@@ -27,8 +27,11 @@ test.describe('Phase 5 — SEO surface (SEO-01..08)', () => {
     expect(response.headers()['content-type']).toContain('image/png')
   })
 
-  test('favicon (SEO-05): /favicon.ico and /apple-icon return 200', async ({ request }) => {
-    const fav = await request.get('/favicon.ico')
+  test('favicon (SEO-05): /icon (favicon) and /apple-icon return 200', async ({ request }) => {
+    // Next.js app/icon.tsx file convention generates /icon (not /favicon.ico)
+    // and registers it via <link rel="icon" href="/icon"> in the page <head>.
+    // Browsers and social crawlers follow the <link> tag, not a bare /favicon.ico path.
+    const fav = await request.get('/icon')
     expect([200, 304]).toContain(fav.status())
     const apple = await request.get('/apple-icon')
     expect([200, 304]).toContain(apple.status())
