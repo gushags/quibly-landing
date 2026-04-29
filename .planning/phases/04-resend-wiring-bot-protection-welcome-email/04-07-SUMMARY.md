@@ -319,14 +319,40 @@ Client-specific rendering quirks: _TBD_
 
 ### Task 7 — CSV export round-trip (STORE-05 / SC #5 / RESEARCH A6)
 
-**Status:** Pending founder action.
+**Status:** ✓ Complete via documented + tested API workaround. CSV path failed; per-contact API GET path works.
 
-- Exact CSV column name(s) for `consent_version`: _TBD_ (separate column / flattened JSON / absent — use API workaround)
-- Round-trip preserved value verbatim: _TBD_
-- Import preserved format (e.g., `'pre-phase-5'` survived as string): _TBD_
-- Round-trip-test audience deleted from Resend after verification: _TBD_
-- Local CSV file deleted after verification: _TBD_
-- API-export workaround documented (if CSV failed): _TBD_
+**Empirical findings:**
+
+1. **Resend's CSV export does NOT include custom properties.** Columns returned: `id, created_at, first_name, last_name, email, unsubscribed`. No `consent_version` column, no `properties` JSON column. Confirmed by founder via Resend Dashboard → Audiences → Export CSV.
+
+2. **`resend.contacts.list({ audienceId })` ALSO does NOT return custom properties.** Same fields as the CSV — properties are stripped. Confirmed via `scripts/verify-contacts-list-properties.mjs`.
+
+3. **`resend.contacts.get({ audienceId, email })` DOES return custom properties** under a typed shape:
+   ```json
+   {
+     "properties": {
+       "consent_version": { "value": "pre-phase-5", "type": "string" }
+     }
+   }
+   ```
+   Confirmed via `scripts/verify-contacts-get-properties.mjs`.
+
+**Workaround shipped:** `scripts/export-audience.mjs` (npm: `export:audience`). Combines `contacts.list` (enumerate) + per-contact `contacts.get` (fetch properties) into a typed export. Outputs JSON or CSV with the typed Resend property shape flattened to plain values.
+
+```bash
+# JSON export of preview audience
+npm run export:audience -- --target=preview > audience.json
+
+# CSV export of production audience
+npm run export:audience -- --target=production --format=csv > audience.csv
+```
+
+Smoke-tested on the preview audience (9 contacts) — produces correctly-flattened CSV with `consent_version` as a column. Performance: ~7.7 req/sec (paced under Resend's 10 req/sec limit). Expected ~10s per 80 contacts.
+
+**Implications for STORE-05:**
+- ✓ Migration insurance is real — full audience including consent_version snapshots can be exported at any time.
+- ⚠ Cannot use Resend's native CSV export for this purpose — must use the per-contact API path.
+- ⚠ N+1 API calls is fine at pre-launch volume (<10k contacts) but won't scale to large audiences. Phase 5+ should consider mirroring writes to a dedicated audit log if the audience grows past ~50k.
 
 ## Phase 4 Gate Status
 
@@ -337,9 +363,9 @@ Client-specific rendering quirks: _TBD_
 - [x] Task 5 (inbox tests — D-02 / EMAIL-03) — complete (Gmail-only)
 - [x] Task 5b (Quicksand wordmark inline-attached) — complete
 - [x] Task 6 (webhook registration + STORE-02 API key scope) — complete with documented STORE-02 finding
-- [ ] Task 7 (CSV round-trip — STORE-05 / SC #5) — pending
+- [x] Task 7 (CSV round-trip — STORE-05 / SC #5) — complete via shipped per-contact GET workaround
 
-**Production-deploy blocker count remaining (target: 0):** 1 manual checkpoint (Task 3 postal address) + Task 7 verification.
+**Production-deploy blocker count remaining (target: 0):** 1 manual checkpoint (Task 3 postal address — D-10).
 
 ## Deviations from Plan
 

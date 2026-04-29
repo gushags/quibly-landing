@@ -12,6 +12,7 @@
     "test:unit": "vitest run --passWithNoTests",
     "test:unit:watch": "vitest",
     "email:wordmark": "node scripts/generate-wordmark.mjs",
+    "export:audience": "node --env-file=.env.local scripts/export-audience.mjs",
     "lh:ci": "lhci autorun --config=.lighthouserc.json",
     "prepare": "husky"
   },
