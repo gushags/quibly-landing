@@ -44,4 +44,30 @@ test.describe('Phase 5 — legal pages (LEGAL-01..04, 06..08)', () => {
     await page.goto('/privacy')
     await expect(page.locator('a[href="mailto:privacy@useQuibly.com"]').first()).toBeVisible()
   })
+
+  // WR-03: cross-page invariants. The original LEGAL-04 suite asserted content
+  // on each page in isolation; a future PR could edit one page without the
+  // other and tests would still pass while the user-facing experience drifts.
+  test('terms page links back to /privacy (LEGAL-09)', async ({ page }) => {
+    await page.goto('/terms')
+    await expect(page.locator('a[href="/privacy"]').first()).toBeVisible()
+  })
+
+  test('privacy and terms last-updated dates match (LEGAL-10)', async ({ page }) => {
+    await page.goto('/privacy')
+    const privacyDate = await page.locator('text=/Last updated:/').first().textContent()
+    expect(privacyDate).not.toBeNull()
+    await page.goto('/terms')
+    const termsDate = await page.locator('text=/Last updated:/').first().textContent()
+    expect(termsDate).not.toBeNull()
+    expect(privacyDate?.trim()).toBe(termsDate?.trim())
+  })
+
+  test('privacy mailto matches terms mailto (LEGAL-11)', async ({ page }) => {
+    await page.goto('/privacy')
+    const privacyMailto = await page.locator('a[href^="mailto:"]').first().getAttribute('href')
+    await page.goto('/terms')
+    const termsMailto = await page.locator('a[href^="mailto:"]').first().getAttribute('href')
+    expect(privacyMailto).toBe(termsMailto)
+  })
 })
