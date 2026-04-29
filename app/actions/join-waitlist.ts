@@ -191,8 +191,23 @@ export async function joinWaitlistAction(
 
   // EMAIL-01 / D-05: fire-and-forget welcome email — first-time signups only.
   if (!isDuplicate) {
+    // GAP-1 (Plan 04-08) — defensive fallback chain to prevent unsubscribe links from
+    // routing to an unbound apex. Order: explicit user-set > Vercel-injected production
+    // canonical > Vercel-injected per-deployment > apex string (only useful post-Phase 6).
+    // VERCEL_PROJECT_PRODUCTION_URL / VERCEL_URL are bare hostnames (no protocol) per
+    // Vercel docs — prefix `https://` when used. NEXT_PUBLIC_SITE_URL must include protocol.
+    // PATTERNS.md §"env import convention" exception applies to all four reads.
     // eslint-disable-next-line custom/no-raw-process-env -- NEXT_PUBLIC_* runtime injected by Next/Vercel
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://useQuibly.com'
+    const explicitSiteUrl = process.env.NEXT_PUBLIC_SITE_URL
+    // eslint-disable-next-line custom/no-raw-process-env -- Vercel system env var (per PATTERNS.md exception)
+    const vercelProdHost = process.env.VERCEL_PROJECT_PRODUCTION_URL
+    // eslint-disable-next-line custom/no-raw-process-env -- Vercel system env var (per PATTERNS.md exception)
+    const vercelDeployHost = process.env.VERCEL_URL
+    const siteUrl =
+      explicitSiteUrl ??
+      (vercelProdHost ? `https://${vercelProdHost}` : undefined) ??
+      (vercelDeployHost ? `https://${vercelDeployHost}` : undefined) ??
+      'https://usequibly.com'
     const unsubscribeUrl = `${siteUrl}/unsubscribe?t=${await generateToken(email)}`
 
     // CD-09: fire-and-forget — NOT awaited. .catch() handles EMAIL-08 observability.
