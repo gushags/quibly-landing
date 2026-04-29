@@ -1,41 +1,33 @@
-import { describe, it, expect, beforeAll, vi } from 'vitest'
+import { describe, it, expect } from 'vitest'
+import { createHash } from 'node:crypto'
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
+import { CONSENT_VERSION } from '@/lib/consent-version'
 
-// Env setup BEFORE any module that loads lib/env.ts (copy from unsubscribe-token.test.ts lines 4-10)
-process.env.RESEND_API_KEY = 're_test_dummy_key_for_unit_tests'
-process.env.RESEND_AUDIENCE_ID = '00000000-0000-0000-0000-000000000001'
-process.env.RESEND_AUDIENCE_PREVIEW_ID = '00000000-0000-0000-0000-000000000002'
-process.env.RESEND_WEBHOOK_SECRET = 'whsec_test_secret_unit_only_64_chars_padded_for_realism_xxxx'
-process.env.UPSTASH_REDIS_REST_URL = 'https://test.upstash.io'
-process.env.UPSTASH_REDIS_REST_TOKEN = 'test_token_unit_only'
-process.env.RESEND_FROM_POSTAL_ADDRESS = 'Test Address, Test City, TS 99999'
-
-// Mock node:fs BEFORE the dynamic import — consent-version reads files at module load
-vi.mock('node:fs', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('node:fs')>()
-  return {
-    ...actual,
-    readFileSync: vi.fn((filePath: string) => {
-      if (typeof filePath === 'string' && filePath.includes('privacy')) return 'mock-privacy-content\n'
-      if (typeof filePath === 'string' && filePath.includes('terms')) return 'mock-terms-content\n'
-      return ''
-    }),
-  }
-})
-
+/**
+ * CR-01 / WR-04 fix — `lib/consent-version.ts` no longer reads source .tsx
+ * files at runtime. The hash is generated at BUILD time by
+ * `scripts/generate-consent-version.mjs` into
+ * `lib/consent-version.generated.ts`.
+ *
+ * The previous "is deterministic" test was a tautology (re-importing the same
+ * cached ES module always returns the same value). This suite re-runs the
+ * canonical hash algorithm against the live privacy + terms source files and
+ * asserts equality with the generated constant — catching:
+ *   - hash-algorithm drift (e.g., someone swaps sha256 for sha1)
+ *   - normalization drift (CRLF -> LF removed)
+ *   - generator script not re-run after source policy edits
+ */
 describe('lib/consent-version (LEGAL-04 / D-12 / D-14)', () => {
-  let CONSENT_VERSION: string
-
-  beforeAll(async () => {
-    const mod = await import('@/lib/consent-version')
-    CONSENT_VERSION = mod.CONSENT_VERSION
-  })
-
   it('exports an 8-character lowercase hex string', () => {
     expect(CONSENT_VERSION).toMatch(/^[0-9a-f]{8}$/)
   })
 
-  it('is deterministic for the same file contents', async () => {
-    const mod2 = await import('@/lib/consent-version')
-    expect(mod2.CONSENT_VERSION).toBe(CONSENT_VERSION)
+  it('matches sha256(privacy + terms).slice(0, 8) of the live source files', () => {
+    const repoRoot = process.cwd()
+    const privacy = readFileSync(join(repoRoot, 'app/(legal)/privacy/page.tsx'), 'utf8').replace(/\r\n/g, '\n')
+    const terms = readFileSync(join(repoRoot, 'app/(legal)/terms/page.tsx'), 'utf8').replace(/\r\n/g, '\n')
+    const expected = createHash('sha256').update(privacy + terms).digest('hex').slice(0, 8)
+    expect(CONSENT_VERSION).toBe(expected)
   })
 })
