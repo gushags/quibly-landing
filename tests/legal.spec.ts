@@ -42,6 +42,6 @@ test.describe('Phase 5 — legal pages (LEGAL-01..04, 06..08)', () => {
 
   test('dsar mailto privacy@useQuibly.com (LEGAL-08)', async ({ page }) => {
     await page.goto('/privacy')
-    await expect(page.locator('a[href="mailto:privacy@useQuibly.com"]')).toBeVisible()
+    await expect(page.locator('a[href="mailto:privacy@useQuibly.com"]').first()).toBeVisible()
   })
 })

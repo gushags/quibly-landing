@@ -3,10 +3,12 @@ import { defineConfig } from "@playwright/test"
 /**
  * Playwright config — multi-project, mobile-first.
  *
- * Two projects:
+ * Projects:
  *   - "visual-and-form": runs tests/visual/* (Phase 2 specs) + tests/form/* (Phase 3 e2e)
  *   - "no-js":           runs tests/no-js/* with javaScriptEnabled: false (Phase 3 progressive
  *                        enhancement spec — see RESEARCH Pattern 4 + Pitfall 3)
+ *   - "chromium":        runs Phase 5+ root-level e2e specs (tests/legal.spec.ts,
+ *                        tests/seo.spec.ts, tests/analytics.spec.ts) — Phase 5 addition
  *
  * Tests run against a Next.js server at http://localhost:3000. The `webServer`
  * block lets Playwright manage the lifecycle: in CI it boots `next start` and
@@ -43,6 +45,11 @@ export default defineConfig({
       name: "no-js",
       testMatch: /tests\/no-js\/.*\.spec\.ts/,
       use: { javaScriptEnabled: false },
+    },
+    {
+      // Phase 5 addition: covers root-level e2e specs (legal, seo, analytics)
+      name: "chromium",
+      testMatch: /tests\/[^/]+\.spec\.ts/,
     },
   ],
 })

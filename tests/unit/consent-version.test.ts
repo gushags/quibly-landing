@@ -10,13 +10,17 @@ process.env.UPSTASH_REDIS_REST_TOKEN = 'test_token_unit_only'
 process.env.RESEND_FROM_POSTAL_ADDRESS = 'Test Address, Test City, TS 99999'
 
 // Mock node:fs BEFORE the dynamic import — consent-version reads files at module load
-vi.mock('node:fs', () => ({
-  readFileSync: vi.fn((filePath: string) => {
-    if (typeof filePath === 'string' && filePath.includes('privacy')) return 'mock-privacy-content\n'
-    if (typeof filePath === 'string' && filePath.includes('terms')) return 'mock-terms-content\n'
-    return ''
-  }),
-}))
+vi.mock('node:fs', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('node:fs')>()
+  return {
+    ...actual,
+    readFileSync: vi.fn((filePath: string) => {
+      if (typeof filePath === 'string' && filePath.includes('privacy')) return 'mock-privacy-content\n'
+      if (typeof filePath === 'string' && filePath.includes('terms')) return 'mock-terms-content\n'
+      return ''
+    }),
+  }
+})
 
 describe('lib/consent-version (LEGAL-04 / D-12 / D-14)', () => {
   let CONSENT_VERSION: string
