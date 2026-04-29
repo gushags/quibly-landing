@@ -14,6 +14,22 @@ import WelcomeEmail, { WORDMARK_CID } from '@/emails/WelcomeEmail'
 import { generateToken } from '@/lib/unsubscribe-token'
 
 /**
+ * WR-01: hoist the wordmark PNG read to module scope so the file is loaded
+ * exactly once on cold-start instead of on every non-duplicate signup, AND
+ * so a missing-asset error never throws AFTER `contacts.create` has already
+ * succeeded. The promise's `.catch()` resolves to `null`; the action then
+ * sends the welcome email without the inline-attached wordmark (decorative
+ * only -- the email still renders without it). Failure is logged for ops
+ * visibility but does NOT break the user-visible signup flow.
+ */
+const wordmarkPromise: Promise<Buffer | null> = readFile(
+  join(process.cwd(), 'public', 'email', 'wordmark.png'),
+).catch((err) => {
+  console.error('wordmark_load_failed', err)
+  return null
+})
+
+/**
  * Phase 4 Server Action — real Resend pipeline.
  *
  * Defense ordering (CD-11):
@@ -228,8 +244,12 @@ export async function joinWaitlistAction(
     // Inline-attached wordmark PNG. Referenced from WelcomeEmail.tsx via cid:
     // (RFC 2392) — embedded in the email body, no external image fetch, works
     // in Gmail/Outlook/Apple Mail with images-on or images-off.
-    const wordmarkPath = join(process.cwd(), 'public', 'email', 'wordmark.png')
-    const wordmark = await readFile(wordmarkPath)
+    //
+    // WR-01: wordmarkPromise is hoisted to module scope so the file is read
+    // once on cold-start (not per-signup) AND a missing/unreadable asset never
+    // throws AFTER contacts.create succeeded. If null, send without attachment
+    // -- the wordmark is decorative; the email body renders without it.
+    const wordmark = await wordmarkPromise
 
     resend.emails
       .send({
@@ -244,13 +264,15 @@ export async function joinWaitlistAction(
           'List-Unsubscribe': `<${unsubscribeUrl}>, <mailto:unsubscribe@usequibly.com>`,
           'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
         },
-        attachments: [
-          {
-            filename: 'wordmark.png',
-            content: wordmark,
-            contentId: WORDMARK_CID,
-          },
-        ],
+        attachments: wordmark
+          ? [
+              {
+                filename: 'wordmark.png',
+                content: wordmark,
+                contentId: WORDMARK_CID,
+              },
+            ]
+          : [],
       })
       .catch((err) => {
         // CR-02: do NOT pass `email` (PII) to track(). Vercel Analytics persists
