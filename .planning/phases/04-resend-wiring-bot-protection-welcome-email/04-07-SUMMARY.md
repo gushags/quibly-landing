@@ -199,27 +199,111 @@ Root cause: Resend's SDK does `await import("@react-email/render")` directly (`n
 
 ### Task 3 — Postal address sourced + wired to RESEND_FROM_POSTAL_ADDRESS (D-10)
 
-**Status:** Pending founder action.
+**Status:** Deferred. Production deploy remains gated until a real address replaces the placeholder.
 
-- Provider chosen (NOT the address itself): _TBD_ (registered agent / USPS PO Box / CMRA / existing business address)
-- Date sourced: _TBD_
-- `.env.local` updated with real value (replacing `YOUR-POSTAL-ADDRESS-HERE`): _TBD_
-- Vercel Production env var `RESEND_FROM_POSTAL_ADDRESS` set: _TBD_
-- Vercel Preview env var `RESEND_FROM_POSTAL_ADDRESS` set (optional): _TBD_
-- Manual test send — real address renders in welcome email footer: _TBD_
+- Provider chosen (NOT the address itself): _deferred — sourcing a non-home address (registered agent / PO Box / CMRA) takes real-world time_
+- Date sourced: _pending_
+- `.env.local` placeholder kept: `RESEND_FROM_POSTAL_ADDRESS=YOUR-POSTAL-ADDRESS-HERE`
+- Vercel Production env var: placeholder set (`Quibly · TBD · TBD`) so deploys succeed
+- Manual test send: real address NOT yet rendered in welcome email footer
+- **Production-deploy HARD blocker** — must close before launch. Will surface in `/gsd-progress` and `/gsd-audit-uat`.
 
 ### Task 4 — mail-tester.com 10/10 verification (CD-06)
 
-**Status:** Pending founder action.
+**Status:** ✓ Complete. 10/10 achieved on 2026-04-28.
 
-- Score achieved: _TBD_ (target: 10/10)
-- Date: _TBD_
-- DNS issues found and fixed:
-  - SPF: _TBD_
-  - DKIM (resend, resend2, resend3): _TBD_
-  - DMARC: _TBD_
-  - Return-Path: _TBD_
-- Screenshot reference (if stored): _TBD_
+- Score achieved: 10/10
+- Date: 2026-04-28
+- DNS issues found and fixed: none — domain was already configured correctly via Resend's domain setup
+  - SPF: ✓ verified
+  - DKIM (resend, resend2, resend3): ✓ all three CNAMEs verified
+  - DMARC: ✓ present
+  - Return-Path: ✓ aligned
+
+### From-display-name + domain-case fixes (during Task 5 set-up)
+
+Two production-blocking bugs surfaced during real-inbox testing that the locked plan didn't anticipate. Both are committed and merged.
+
+**Fix A — Resend domain case mismatch (commit `414e29a`):**
+- **Symptom:** First real send returned 403 `"The useQuibly.com domain is not verified"` despite the dashboard showing the domain as verified.
+- **Root cause:** Resend's API validates the literal From-header domain string against the canonical lowercase form on file. `lib/env.ts` and the action body shipped with mixed-case `useQuibly.com` in two literals — the `from:` value and the `mailto:` in the `List-Unsubscribe` header. DNS is case-insensitive but Resend's validation layer is strict.
+- **Fix:** Lowercased both literals to `usequibly.com`. URLs in the email body (unsubscribe link, marketing copy, OG tags) keep mixed-case branding form — only the SMTP-layer values needed canonicalization.
+
+**Fix B — Gmail strips `@` from display names (commit `03cfe88`):**
+- **Symptom:** Welcome email arrived in Gmail showing the From as just `hello@usequibly.com` — the display name `Jeff @ Quibly` was stripped.
+- **Root cause:** Gmail (and most major clients) treat `@` in a display name as an anti-phishing red flag — `Trusted Brand @ Trusted` patterns are commonly used to spoof legitimacy. The classifier ignores the display name when it contains `@`.
+- **Fix:** Renamed display name to `Quibly` (no `@`). Brand-voice over personal-voice; in exchange, Gmail now renders the display name correctly.
+
+### Task 5 — Inbox tests: Gmail (EMAIL-01..06 + D-02)
+
+**Status:** ✓ Complete (Gmail-only verification approved by founder).
+
+- Welcome email arrives in Gmail within ~10s of signup (well under 60s SLA).
+- From renders as `Quibly` after Fix B above.
+- Subject renders as `You're on the Quibly list`.
+- Body copy renders correctly (4 paragraphs per D-01 lock).
+- Footer shows Unsubscribe link + postal-address placeholder (Task 3 will replace).
+- Headers verified via Show Original: `List-Unsubscribe`, `List-Unsubscribe-Post`, DKIM-Signature with both header names in the `h=` parameter.
+- Unsubscribe round-trip: clicking link hit `/unsubscribe?t=<token>` and marked the contact `unsubscribed: true` in Resend audience.
+- **Promotions tab placement noted** — expected for new domains with marketing-flavored content; will improve with sender reputation over time. Not blocking launch.
+
+Outlook + iCloud verification skipped per founder approval — Gmail is the strictest of the three and the highest-volume.
+
+### Task 5b — Inline Quicksand wordmark in welcome email (commit `21e24b4`)
+
+**Discovered during Task 5 inbox testing.** Email clients strip `@font-face` and external font links — body fonts fall back to system stack regardless of CSS effort. The "Quibly" wordmark in the teal header was rendering as Helvetica/Segoe instead of Quicksand.
+
+**Fix applied:** wordmark rendered server-side as a transparent PNG and inline-attached via Resend's `contentId` mechanism, referenced from `WelcomeEmail.tsx` via `cid:wordmark@quibly`.
+
+- New script `scripts/generate-wordmark.mjs` (npm run `email:wordmark`) — decompresses `@fontsource/quicksand` WOFF2 → TTF via `wawoff2`, feeds to `@vercel/og` to render at 480×120 (3× retina), writes `public/email/wordmark.png`.
+- `app/actions/join-waitlist.ts` reads the PNG at request time, attaches inline.
+- `emails/WelcomeEmail.tsx` exports `WORDMARK_CID` as the source of truth.
+- Body copy stays system-font (best practice — readability beats fidelity for email body).
+- New Vitest assertions cover the attachment shape (filename, contentId, buffer presence).
+
+### Task 6 — Resend webhook registration + STORE-02 API key scope verification
+
+**Status:** ✓ Complete (with documented STORE-02 finding).
+
+**Part A — Webhook registration + bounce probe:**
+- Production-deploy URL: `https://quibly-landing.vercel.app/api/webhooks/resend`
+- Webhook registered in Resend Dashboard for events: `email.bounced`, `email.complained`
+- `RESEND_WEBHOOK_SECRET` set in Vercel env vars (Production + Preview + Development)
+- `bounced@resend.dev` test event delivered successfully — captured Vercel log:
+  ```
+  email_hard_bounced {
+    email: 'bounced@resend.dev',
+    bounce: {
+      diagnosticCode: ['smtp; 550 5.1.1 As requested: user unknown <bounce@simulator.amazonses.com>'],
+      message: "The recipient's email provider sent a hard bounce message...",
+      subType: 'General',
+      type: 'Permanent'
+    }
+  }
+  ```
+- Signature verification ✓ (no `webhook_signature_invalid` log)
+- Contact marked `unsubscribed: true` in Resend audience post-bounce ✓
+- Empirical confirmation of Probe 2: `subType: 'General'` matches the "illustrative subType" pattern — current handler's `type === 'Permanent'` check is sufficient. No handler extension needed.
+
+**Part B — STORE-02 API key scope (CORRECTION):**
+
+Plan 04-CONTEXT D-08 / STORE-02 specified that `RESEND_API_KEY` must use `Sending access` scope (NOT `Full access`) for least-privilege. **This requirement is technically infeasible at Resend's current permission granularity and was based on an incorrect understanding of their permission model.**
+
+Empirical finding: Resend offers exactly two API key scopes:
+- **`Sending access`** — covers `emails.send`, `emails.list`, `emails.get`, `domains.get`, `domains.list`. Does NOT include the contacts API.
+- **`Full access`** — all operations including the contacts API.
+
+The action body legitimately requires `contacts.get` (Probe 1 duplicate detection), `contacts.create` (audience write per STORE-03), and `contacts.update` (Plan 06 webhook unsubscribe flow). All three return 401/403 under `Sending access`. The user verified this empirically by switching the production key to `Sending access` and observing signups break.
+
+**Production state:** `RESEND_API_KEY` is `Full access`. STORE-02 cannot be satisfied as originally written.
+
+**Mitigation:** Compensating controls already in place:
+- gitleaks pre-commit hook blocks `re_*` patterns from commits.
+- Vercel env vars are encrypted at rest and never committed.
+- `RESEND_API_KEY` is read only via `lib/env.ts` (no `process.env.RESEND_API_KEY` direct reads — enforced by the custom ESLint `no-raw-process-env` rule).
+- Rotate the key on any suspected leak via Resend Dashboard.
+
+**Recommendation for future phases:** revisit STORE-02 if Resend introduces a `Sending + Contacts` scope, OR migrate to a separate database for contact storage and downgrade the Resend key to `Sending access`. Either path moves us out of the current binary trade-off.
 
 ### Task 5 — Inbox tests: Gmail + Outlook + iCloud (EMAIL-01..06 + D-02)
 
@@ -232,27 +316,6 @@ Root cause: Resend's SDK does `await import("@react-email/render")` directly (`n
 | iCloud | _TBD_ | _TBD_ | _TBD_ | _TBD_ | _TBD_ | _TBD_ | _TBD_ |
 
 Client-specific rendering quirks: _TBD_
-
-### Task 6 — Resend webhook registration + STORE-02 API key scope verification
-
-**Status:** Pending founder action.
-
-**Part A — Webhook registration + bounce probe:**
-- Registered webhook URL: _TBD_ (production or preview Vercel URL)
-- `RESEND_WEBHOOK_SECRET` matches between Resend Dashboard and Vercel env vars: _TBD_
-- `bounced@resend.dev` test event reached the handler: _TBD_
-- `email_hard_bounced` log line observed: _TBD_
-- Contact marked `unsubscribed: true` post-bounce in Resend Audience: _TBD_
-- (Optional) `complained@resend.dev` test event verified: _TBD_
-
-**Part B — STORE-02 API key scope verification:**
-- Confirmed scope of `RESEND_API_KEY` in production: _TBD_ ("Sending access" / "Full access")
-- If the key was rotated (Full → Sending):
-  - Old key prefix (last 4 chars only): _TBD_
-  - New key prefix (last 4 chars only): _TBD_
-  - Date rotated: _TBD_
-  - Date old key revoked: _TBD_
-- Screenshot reference (if stored, redacted): _TBD_
 
 ### Task 7 — CSV export round-trip (STORE-05 / SC #5 / RESEARCH A6)
 
@@ -268,14 +331,15 @@ Client-specific rendering quirks: _TBD_
 ## Phase 4 Gate Status
 
 - [x] Task 1 (test migration) — complete
-- [ ] Task 2 (day-1 probes) — pending
-- [ ] Task 3 (postal address — D-10 production-deploy HARD blocker) — pending
-- [ ] Task 4 (mail-tester 10/10 — CD-06) — pending
-- [ ] Task 5 (inbox tests — D-02 / EMAIL-03) — pending
-- [ ] Task 6 (webhook registration + STORE-02 API key scope) — pending
+- [x] Task 2 (day-1 probes + Bug 2 render-dep fix) — complete
+- [ ] Task 3 (postal address — D-10 production-deploy HARD blocker) — **deferred**
+- [x] Task 4 (mail-tester 10/10 — CD-06) — complete
+- [x] Task 5 (inbox tests — D-02 / EMAIL-03) — complete (Gmail-only)
+- [x] Task 5b (Quicksand wordmark inline-attached) — complete
+- [x] Task 6 (webhook registration + STORE-02 API key scope) — complete with documented STORE-02 finding
 - [ ] Task 7 (CSV round-trip — STORE-05 / SC #5) — pending
 
-**Production-deploy blocker count remaining (target: 0):** 6 manual checkpoints.
+**Production-deploy blocker count remaining (target: 0):** 1 manual checkpoint (Task 3 postal address) + Task 7 verification.
 
 ## Deviations from Plan
 
