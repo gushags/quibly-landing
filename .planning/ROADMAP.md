@@ -112,9 +112,9 @@ Decimal phases appear between their surrounding integers in numeric order.
   - [x] 05-01-PLAN.md — Legal pages + consent-version + microcopy + join-waitlist consent_version swap (LEGAL-01..08, Wave 1)
   - [x] 05-02-PLAN.md — SEO surface: OG image + favicon + robots + sitemap + JSON-LD + metadata extension (SEO-01..08, Wave 2)
   - [x] 05-03-PLAN.md — Analytics wiring: Vercel Analytics + Speed Insights + lib/analytics.ts swap + tracker denylist (ANLY-01..06, Wave 3)
-  - [ ] 05-04-PLAN.md — Gap closure (UAT 2026-04-29): Terms governing law Delaware → California per D-01 PR confirmation (UAT Gap 1, Wave 1, gap_closure)
-  - [ ] 05-05-PLAN.md — Gap closure (UAT 2026-04-29): pre-rasterize public/quibs-icon.png + wire mascot into /opengraph-image (UAT Gap 2, Wave 1, gap_closure)
-  - [ ] 05-06-PLAN.md — Gap closure (UAT 2026-04-29): wire mascot PNG into /icon and /apple-icon for visual consistency (UAT Gap 3, Wave 2, depends on 05-05, gap_closure)
+  - [x] 05-04-PLAN.md — Gap closure (UAT 2026-04-29): Terms governing law Delaware → California per D-01 PR confirmation (UAT Gap 1, Wave 1, gap_closure)
+  - [x] 05-05-PLAN.md — Gap closure (UAT 2026-04-29): pre-rasterize public/quibs-icon.png + wire mascot into /opengraph-image (UAT Gap 2, Wave 1, gap_closure)
+  - [x] 05-06-PLAN.md — Gap closure (UAT 2026-04-29): wire mascot PNG into /icon and /apple-icon for visual consistency (UAT Gap 3, Wave 2, depends on 05-05, gap_closure)
 
 ### Phase 6: Production Deploy + Cutover Runbook
 **Goal**: Apex go-live at `useQuibly.com` is itself a verified deliverable — domain bound at the Vercel team level for atomic transfer, full DNS verified at mail-tester 10/10, and a written cutover runbook with a dry-run executed against a staging subdomain before launch.
