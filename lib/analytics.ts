@@ -17,6 +17,12 @@ import { track as vercelTrack } from '@vercel/analytics/server'
  *   - 'welcome_email_send_error'  — fire-and-forget catch
  *   - 'contact_bounced'           — webhook
  *   - 'contact_complained'        — webhook
+ *
+ * WR-05 fix: per-event property shapes are now enforced via a discriminated
+ * `TrackEventProperties` map. Callers can no longer pass arbitrary keys (or
+ * PII like `email`) and have the call type-check. The matching unit test in
+ * tests/unit/analytics.test.ts is updated to exercise the production-shape
+ * properties; mismatched shapes now fail at compile time, not at review.
  */
 export type TrackEvent =
   | 'waitlist_signup'
@@ -25,11 +31,33 @@ export type TrackEvent =
   | 'contact_bounced'
   | 'contact_complained'
 
-export async function track(
-  event: TrackEvent,
-  properties?: Record<string, unknown>,
+/**
+ * Allowed leaf-value types for analytics properties. `email` and any other
+ * PII MUST NOT appear as a key in any of the per-event shapes below
+ * (CR-02 / privacy policy contract: "your email address is not stored by
+ * Vercel"). Use a SHA-256 prefix or the Resend contact ID if a stable
+ * non-PII identifier is needed.
+ */
+export type TrackPropertyValue = string | number | boolean | null
+
+export type TrackEventProperties = {
+  waitlist_signup: { duplicate: boolean }
+  signup_rejected: { reason: 'rate_limit' | 'disposable_domain' }
+  welcome_email_send_error: undefined
+  contact_bounced: { kind: 'hard' | 'soft' }
+  contact_complained: undefined
+}
+
+export async function track<E extends TrackEvent>(
+  ...args: TrackEventProperties[E] extends undefined
+    ? [event: E] | [event: E, properties?: undefined]
+    : [event: E, properties: TrackEventProperties[E]]
 ): Promise<void> {
-  // Cast to AllowedPropertyValues — all actual call sites pass string | boolean | null values.
-  // The wide Record<string, unknown> signature preserves backward-compat for callers.
-  await vercelTrack(event, properties as Record<string, string | number | boolean | null | undefined>)
+  const [event, properties] = args
+  // The discriminated map above guarantees `properties` is one of the allowed
+  // shapes; cast to the wide @vercel/analytics property type at the boundary.
+  await vercelTrack(
+    event,
+    properties as Record<string, TrackPropertyValue | undefined> | undefined,
+  )
 }

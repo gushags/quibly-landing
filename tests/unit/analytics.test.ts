@@ -15,31 +15,59 @@ vi.mock('@vercel/analytics/server', () => ({
   track: trackMock,
 }))
 
+/**
+ * WR-05 fix: assert the per-event property SHAPES match what the production
+ * code actually sends. The previous suite tested
+ * `track('welcome_email_send_error', { contactId: 'abc-123' })` -- a shape no
+ * production caller used. The action drift to `{ email }` (CR-02) went
+ * undetected because nothing constrained the property contract. The
+ * `TrackEventProperties` map in lib/analytics.ts now type-enforces the shape;
+ * these runtime assertions document and lock the contract.
+ */
 describe('lib/analytics (ANLY-03 / T-05-03 — body swap regression)', () => {
-  let track: (event: string, properties?: Record<string, unknown>) => Promise<void>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- shim under test
+  let track: any
 
   beforeAll(async () => {
     const mod = await import('@/lib/analytics')
-    track = mod.track as typeof track
+    track = mod.track
   })
 
   afterEach(() => {
     trackMock.mockClear()
   })
 
-  it('forwards event name and properties verbatim', async () => {
+  it('forwards waitlist_signup with { duplicate } verbatim', async () => {
     await track('waitlist_signup', { duplicate: false })
     expect(trackMock).toHaveBeenCalledOnce()
     expect(trackMock).toHaveBeenCalledWith('waitlist_signup', { duplicate: false })
   })
 
-  it('handles welcome_email_send_error path', async () => {
-    await track('welcome_email_send_error', { contactId: 'abc-123' })
-    expect(trackMock).toHaveBeenCalledWith('welcome_email_send_error', { contactId: 'abc-123' })
+  it('welcome_email_send_error carries no PII / no properties (CR-02)', async () => {
+    await track('welcome_email_send_error')
+    expect(trackMock).toHaveBeenCalledOnce()
+    const [event, properties] = trackMock.mock.calls[0]
+    expect(event).toBe('welcome_email_send_error')
+    // The property object must NOT contain `email` or any other PII key.
+    // Asserted as either undefined or an empty bag -- both are acceptable
+    // shapes given the typed shim's discriminated union.
+    if (properties != null) {
+      expect(Object.keys(properties)).not.toContain('email')
+    }
   })
 
-  it('does not throw on rate-limit rejection event', async () => {
-    await expect(track('signup_rejected', { reason: 'rate_limit' })).resolves.toBeUndefined()
-    expect(trackMock).toHaveBeenCalled()
+  it('signup_rejected with rate_limit reason routes through verbatim', async () => {
+    await track('signup_rejected', { reason: 'rate_limit' })
+    expect(trackMock).toHaveBeenCalledWith('signup_rejected', { reason: 'rate_limit' })
+  })
+
+  it('signup_rejected with disposable_domain reason routes through verbatim', async () => {
+    await track('signup_rejected', { reason: 'disposable_domain' })
+    expect(trackMock).toHaveBeenCalledWith('signup_rejected', { reason: 'disposable_domain' })
+  })
+
+  it('contact_bounced carries { kind } as production shape', async () => {
+    await track('contact_bounced', { kind: 'hard' })
+    expect(trackMock).toHaveBeenCalledWith('contact_bounced', { kind: 'hard' })
   })
 })
