@@ -126,7 +126,12 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. No Service Worker is registered, and `Strict-Transport-Security` is set to `max-age=300` (NOT `preload`), so the cutover to `marketing-app` remains reversible during the swap window.
   4. A complete `docs/cutover.md` exists in the repo covering: verify `marketing-app` ready → CSV export → broadcast timing decision → atomic Vercel domain transfer → legacy redirects → decommission steps (do NOT delete repo / Resend domain / audience) → rollback plan.
   5. The cutover has been dry-run on a staging subdomain (e.g., `staging.useQuibly.com`) end-to-end before the real launch, including a domain transfer back-and-forth between projects.
-**Plans**: TBD
+**Plans**: 5 plans
+  - [ ] 06-01-PLAN.md — next.config.ts async headers() block: 5-header hardening set with HSTS literal max-age=300 (DEPLOY-06; Wave 1)
+  - [ ] 06-02-PLAN.md — docs/cutover.md future-oriented runbook: 9 step-numbered sections + Rollback + Checklist, 200–500 lines (DEPLOY-08; Wave 1)
+  - [ ] 06-03-PLAN.md — 06-UAT.md launch-gating checklist: 12 numbered tests covering all 9 DEPLOY-XX + LEGAL-08 carryover (DEPLOY-01..09; Wave 1)
+  - [ ] 06-04-PLAN.md — Cutover dry-run on staging.useQuibly.com: 4-screenshot transfer back-and-forth; updates docs/cutover.md Step 5 if observed UI labels differ (DEPLOY-09; Wave 3, autonomous: false)
+  - [ ] 06-05-PLAN.md — Production go-live: privacy@useQuibly.com mailbox HARD launch-gate, apex bind verify, DNS dig, mail-tester 10/10, real-signup smoke, no-SW DevTools (DEPLOY-01..07; Wave 2, autonomous: false)
 
 ## Progress
 
@@ -140,4 +145,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | 3. Email Capture Form (Stub Action) | 0/TBD | Not started | - |
 | 4. Resend Wiring + Bot Protection + Welcome Email | 0/8 | Not started | - |
 | 5. Legal + SEO + Analytics | 0/6 | Not started | - |
-| 6. Production Deploy + Cutover Runbook | 0/TBD | Not started | - |
+| 6. Production Deploy + Cutover Runbook | 0/5 | Not started | - |
