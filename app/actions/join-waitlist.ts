@@ -4,6 +4,7 @@ import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { z } from 'zod'
 import { headers } from 'next/headers'
+import { after } from 'next/server'
 import { env } from '@/lib/env'
 import { resend } from '@/lib/resend'
 import { rateLimitPerMinute, rateLimitPerDay } from '@/lib/rate-limit'
@@ -251,41 +252,53 @@ export async function joinWaitlistAction(
     // -- the wordmark is decorative; the email body renders without it.
     const wordmark = await wordmarkPromise
 
-    resend.emails
-      .send({
-        from: 'Quibly <hello@usequibly.com>',
-        to: email,
-        subject: "You're on the Quibly list",
-        react: WelcomeEmail({
-          unsubscribeUrl,
-          postalAddress: env.RESEND_FROM_POSTAL_ADDRESS,
+    // WR-02: wrap the send + analytics tail in `after()` from `next/server`.
+    // The Server Action returns immediately after this branch (line below),
+    // and on Vercel serverless any pending I/O the function holds open after
+    // the response is sent can be killed mid-flight. `after()` is the App
+    // Router primitive for guaranteed post-response work -- it keeps the
+    // execution context alive until the Promise settles, so the
+    // `welcome_email_send_error` track call actually reaches Vercel Analytics
+    // (EMAIL-08 ops observability that was previously unreliable).
+    after(
+      resend.emails
+        .send({
+          from: 'Quibly <hello@usequibly.com>',
+          to: email,
+          subject: "You're on the Quibly list",
+          react: WelcomeEmail({
+            unsubscribeUrl,
+            postalAddress: env.RESEND_FROM_POSTAL_ADDRESS,
+          }),
+          headers: {
+            'List-Unsubscribe': `<${unsubscribeUrl}>, <mailto:unsubscribe@usequibly.com>`,
+            'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+          },
+          attachments: wordmark
+            ? [
+                {
+                  filename: 'wordmark.png',
+                  content: wordmark,
+                  contentId: WORDMARK_CID,
+                },
+              ]
+            : [],
+        })
+        .catch((err) => {
+          // CR-02: do NOT pass `email` (PII) to track(). Vercel Analytics persists
+          // and indexes custom-event properties; forwarding the user's email to
+          // the analytics dashboard would directly contradict app/(legal)/privacy
+          // ("your email address is not stored by Vercel") and exceed the GDPR
+          // Art. 5(1)(b) purpose-limitation basis the policy is built on. The
+          // server-side console.error below still captures the email for ops
+          // debugging; the analytics call only counts the failure.
+          console.error('welcome_email_send_failed', { email, err })
+          // EMAIL-08: ops observability for welcome-email send failures.
+          // Return the analytics promise so `after()` waits on it, not just
+          // on the email send.
+          return track('welcome_email_send_error')
         }),
-        headers: {
-          'List-Unsubscribe': `<${unsubscribeUrl}>, <mailto:unsubscribe@usequibly.com>`,
-          'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
-        },
-        attachments: wordmark
-          ? [
-              {
-                filename: 'wordmark.png',
-                content: wordmark,
-                contentId: WORDMARK_CID,
-              },
-            ]
-          : [],
-      })
-      .catch((err) => {
-        // CR-02: do NOT pass `email` (PII) to track(). Vercel Analytics persists
-        // and indexes custom-event properties; forwarding the user's email to
-        // the analytics dashboard would directly contradict app/(legal)/privacy
-        // ("your email address is not stored by Vercel") and exceed the GDPR
-        // Art. 5(1)(b) purpose-limitation basis the policy is built on. The
-        // server-side console.error below still captures the email for ops
-        // debugging; the analytics call only counts the failure.
-        console.error('welcome_email_send_failed', { email, err })
-        // EMAIL-08: ops observability for welcome-email send failures.
-        track('welcome_email_send_error')
-      })
+    )
   }
 
   // ANLY-03: server-side analytics — duplicate flag for Phase 5 dashboard.
