@@ -17,6 +17,26 @@ import { WhyQuibly } from "@/components/sections/why-quibly"
  * Phase 5: JSON-LD scripts injected before <main> (SEO-08 / PATTERNS.md Pattern 7).
  */
 
+/**
+ * WR-07: centralize JSON-LD escaping. The previous inline
+ * `JSON.stringify(...).replace(/</g, '\\u003c')` only neutralized the
+ * `</script>` injection vector; OWASP recommends also escaping `>`, `&`, and
+ * the U+2028 / U+2029 line-separator characters that JavaScript treats as
+ * line terminators inside script blocks. Today's data is fully static so the
+ * gaps are inert, but duplicating a partial pattern across two scripts
+ * invites a future caller to copy-paste it for user-derived data. The helper
+ * documents the expectation and gives every JSON-LD insertion a single
+ * audited path.
+ */
+function safeJsonLdScript(data: unknown): string {
+  return JSON.stringify(data)
+    .replace(/</g, '\\u003c')
+    .replace(/>/g, '\\u003e')
+    .replace(/&/g, '\\u0026')
+    .replace(/ /g, '\\u2028')
+    .replace(/ /g, '\\u2029')
+}
+
 // Phase 5 SEO-08: Schema.org JSON-LD — Organization + WebSite (CD-02: home page only)
 const organizationJsonLd = {
   '@context': 'https://schema.org',
@@ -41,15 +61,11 @@ export default function HomePage() {
       {/* Phase 5 SEO-08: Schema.org JSON-LD — injected before <main> */}
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(organizationJsonLd).replace(/</g, '\\u003c'),
-        }}
+        dangerouslySetInnerHTML={{ __html: safeJsonLdScript(organizationJsonLd) }}
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(webSiteJsonLd).replace(/</g, '\\u003c'),
-        }}
+        dangerouslySetInnerHTML={{ __html: safeJsonLdScript(webSiteJsonLd) }}
       />
       <main className="flex flex-col">
         <Hero />
