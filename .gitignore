@@ -46,3 +46,6 @@ next-env.d.ts
 
 # Lighthouse CI
 .lighthouseci/
+
+# Claude
+.claude/
