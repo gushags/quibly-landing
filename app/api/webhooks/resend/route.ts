@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { resend } from '@/lib/resend'
-import { env } from '@/lib/env'
-import { track } from '@/lib/analytics'
+import { NextRequest, NextResponse } from 'next/server';
+import { resend } from '@/lib/resend';
+import { env } from '@/lib/env';
+import { track } from '@/lib/analytics';
 
 /**
  * Phase 4 — Resend webhook handler (EMAIL-09).
@@ -28,33 +28,39 @@ import { track } from '@/lib/analytics'
  * JSON.stringify(parsed) does not produce the same byte sequence as the original payload.
  */
 
-export const runtime = 'nodejs'
+export const runtime = 'nodejs';
 
 export async function POST(req: NextRequest) {
   // 1. Raw body — required for HMAC verification.
-  const payload = await req.text()
+  const payload = await req.text();
 
   // 2. Required svix headers.
-  const id = req.headers.get('svix-id')
-  const timestamp = req.headers.get('svix-timestamp')
-  const signature = req.headers.get('svix-signature')
+  const id = req.headers.get('svix-id');
+  const timestamp = req.headers.get('svix-timestamp');
+  const signature = req.headers.get('svix-signature');
 
   if (!id || !timestamp || !signature) {
-    console.warn('webhook_missing_svix_headers', { hasId: !!id, hasTimestamp: !!timestamp, hasSignature: !!signature })
-    return new NextResponse('Missing svix headers', { status: 400 })
+    console.warn('webhook_missing_svix_headers', {
+      hasId: !!id,
+      hasTimestamp: !!timestamp,
+      hasSignature: !!signature,
+    });
+    return new NextResponse('Missing svix headers', { status: 400 });
   }
 
   // 3. Verify signature — throws on invalid/replay/missing-secret.
-  let event: ResendWebhookEvent
+  let event: ResendWebhookEvent;
   try {
     event = resend.webhooks.verify({
       payload,
       headers: { id, timestamp, signature },
       webhookSecret: env.RESEND_WEBHOOK_SECRET,
-    }) as ResendWebhookEvent
+    }) as ResendWebhookEvent;
   } catch (err) {
-    console.error('webhook_signature_invalid', { err: err instanceof Error ? err.message : String(err) })
-    return new NextResponse('Invalid signature', { status: 401 })
+    console.error('webhook_signature_invalid', {
+      err: err instanceof Error ? err.message : String(err),
+    });
+    return new NextResponse('Invalid signature', { status: 401 });
   }
 
   // CR-04: extract recipient ONCE up front and guard before any dispatch. Previously the
@@ -62,28 +68,29 @@ export async function POST(req: NextRequest) {
   // — the analytics event reported a bounce but no remediation happened (silent data loss).
   // Bounce + complaint events without a recipient are malformed; return 4xx so Resend stops
   // retrying, and skip the track call (no contact = no remediation to report).
-  const recipientEmail = event.data?.to?.[0] ?? ''
-  const isContactEvent = event.type === 'email.bounced' || event.type === 'email.complained'
+  const recipientEmail = event.data?.to?.[0] ?? '';
+  const isContactEvent =
+    event.type === 'email.bounced' || event.type === 'email.complained';
   if (isContactEvent && !recipientEmail) {
     console.error('webhook_missing_recipient', {
       eventType: event.type,
       eventData: event.data,
-    })
-    return new NextResponse('Missing recipient', { status: 400 })
+    });
+    return new NextResponse('Missing recipient', { status: 400 });
   }
 
   // CR-01: audience routing must mirror app/actions/join-waitlist.ts:142. Resend SDK falls
   // back to the global /contacts/:email endpoint when audienceId is omitted — that endpoint
   // does NOT flip the audience-scoped contact, so omitting audienceId silently leaves the
   // hard-bounced contact subscribed and we keep mailing them, accruing reputation damage.
-  // eslint-disable-next-line custom/no-raw-process-env -- Vercel system env var (per PATTERNS.md exception)
-  const audienceId = process.env.VERCEL_ENV === 'production'
-    ? env.RESEND_AUDIENCE_ID
-    : env.RESEND_AUDIENCE_PREVIEW_ID
+  const audienceId =
+    env.VERCEL_ENV === 'production'
+      ? env.RESEND_AUDIENCE_ID
+      : env.RESEND_AUDIENCE_PREVIEW_ID;
 
   // 4. Dispatch per D-08.
   if (event.type === 'email.bounced') {
-    const bounceType = event.data?.bounce?.type
+    const bounceType = event.data?.bounce?.type;
     if (bounceType === 'Permanent') {
       // CR-02: inspect { error } envelope. Resend SDK does NOT throw — silent failures here
       // leave hard-bounced contacts subscribed. Return 5xx so Resend retries the webhook.
@@ -91,17 +98,20 @@ export async function POST(req: NextRequest) {
         audienceId,
         email: recipientEmail,
         unsubscribed: true,
-      })
+      });
       if (updateError) {
         console.error('webhook_update_failed', {
           email: recipientEmail,
           eventType: event.type,
           error: updateError,
-        })
-        return new NextResponse('Update failed', { status: 500 })
+        });
+        return new NextResponse('Update failed', { status: 500 });
       }
-      console.error('email_hard_bounced', { email: recipientEmail, bounce: event.data?.bounce })
-      await track('contact_bounced', { kind: 'hard' })
+      console.error('email_hard_bounced', {
+        email: recipientEmail,
+        bounce: event.data?.bounce,
+      });
+      await track('contact_bounced', { kind: 'hard' });
     } else {
       // CR-03: any non-Permanent value is treated as a soft bounce. Resend uses 'Transient'
       // per SES nomenclature (NOT 'Temporary' — the previous comment was wrong). Log the
@@ -111,8 +121,8 @@ export async function POST(req: NextRequest) {
         email: recipientEmail,
         bounceType,
         bounce: event.data?.bounce,
-      })
-      await track('contact_bounced', { kind: 'soft' })
+      });
+      await track('contact_bounced', { kind: 'soft' });
     }
   } else if (event.type === 'email.complained') {
     // CR-02: inspect { error } envelope on complaint flips too — same risk as hard bounce.
@@ -120,21 +130,21 @@ export async function POST(req: NextRequest) {
       audienceId,
       email: recipientEmail,
       unsubscribed: true,
-    })
+    });
     if (updateError) {
       console.error('webhook_update_failed', {
         email: recipientEmail,
         eventType: event.type,
         error: updateError,
-      })
-      return new NextResponse('Update failed', { status: 500 })
+      });
+      return new NextResponse('Update failed', { status: 500 });
     }
-    console.error('email_complained', { email: recipientEmail })
-    await track('contact_complained')
+    console.error('email_complained', { email: recipientEmail });
+    await track('contact_complained');
   }
   // Other event types: no-op (forward-compatible).
 
-  return new NextResponse('OK', { status: 200 })
+  return new NextResponse('OK', { status: 200 });
 }
 
 /**
@@ -148,9 +158,9 @@ export async function POST(req: NextRequest) {
  * branches that will silently never fire.
  */
 type ResendWebhookEvent = {
-  type: string
+  type: string;
   data?: {
-    to?: string[]
-    bounce?: { type?: string; subType?: string }
-  }
-}
+    to?: string[];
+    bounce?: { type?: string; subType?: string };
+  };
+};
