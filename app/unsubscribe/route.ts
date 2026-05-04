@@ -108,7 +108,7 @@ export async function GET(req: NextRequest) {
         `<link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&family=Quicksand:wght@300..700&display=swap" rel="stylesheet">` +
         `<style>body{font-family:Figtree,system-ui,-apple-system,Segoe UI,sans-serif;max-width:480px;margin:80px auto;padding:0 24px;color:#1a1a1a}h1{color:#0d9488;font-family:Quicksand,system-ui;font-weight:600}p{line-height:1.5}</style>` +
         `</head><body><h1>Something went wrong</h1>` +
-        `<p>We couldn't process your unsubscribe right now. Please email <a href="mailto:unsubscribe@usequibly.com">unsubscribe@usequibly.com</a> and we'll remove you manually.</p>` +
+        `<p>We couldn't process your unsubscribe right now. Please email <a href="mailto:unsubscribe@usequibly.com">unsubscribe@useQuibly.com</a> and we'll remove you manually.</p>` +
         `</body></html>`,
       { status: 500, headers: { 'Content-Type': 'text/html; charset=utf-8' } },
     );
@@ -124,7 +124,7 @@ export async function GET(req: NextRequest) {
         `<link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&family=Quicksand:wght@300..700&display=swap" rel="stylesheet">` +
         `<style>body{font-family:Figtree,system-ui,-apple-system,Segoe UI,sans-serif;max-width:480px;margin:80px auto;padding:0 24px;color:#1a1a1a}h1{color:#0d9488;font-family:Quicksand,system-ui;font-weight:600}p{line-height:1.5}</style>` +
         `</head><body><h1>Unsubscribe link is invalid</h1>` +
-        `<p>This link is missing or no longer valid. If you meant to unsubscribe, reply to any Quibly email or write to <a href="mailto:unsubscribe@usequibly.com">unsubscribe@usequibly.com</a> and we'll handle it manually.</p>` +
+        `<p>This link is missing or no longer valid. If you meant to unsubscribe, reply to any Quibly email or write to <a href="mailto:unsubscribe@usequibly.com">unsubscribe@useQuibly.com</a> and we'll handle it manually.</p>` +
         `</body></html>`,
       {
         status: result.status,
@@ -142,7 +142,7 @@ export async function GET(req: NextRequest) {
       `<link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&family=Quicksand:wght@300..700&display=swap" rel="stylesheet">` +
       `<style>body{font-family:Figtree,system-ui,-apple-system,Segoe UI,sans-serif;max-width:480px;margin:80px auto;padding:0 24px;color:#1a1a1a;text-align:center}h1{color:#0d9488;font-family:Quicksand, system-ui;font-weight:600}p{line-height:1.5}a{color:#0d9488}</style>` +
       `</head><body><h1>You're unsubscribed</h1>` +
-      `<p>You won't receive any further Quibly emails. If this was a mistake, you can re-join the waitlist anytime at <a href="https://usequibly.com">usequibly.com</a>.</p>` +
+      `<p>You won't receive any further Quibly emails. If this was a mistake, you can re-join the waitlist anytime at <a href="https://usequibly.com">useQuibly.com</a>.</p>` +
       `</body></html>`,
     { status: 200, headers: { 'Content-Type': 'text/html; charset=utf-8' } },
   );
