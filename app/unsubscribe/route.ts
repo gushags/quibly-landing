@@ -100,32 +100,176 @@ export async function GET(req: NextRequest) {
     // CR-02: audience write failed against the Resend API. Surface a generic apology page
     // with a mailto fallback so the recipient has a manual path to unsubscribe.
     return new NextResponse(
-      `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">` +
-        `<meta name="viewport" content="width=device-width,initial-scale=1">` +
-        `<meta name="robots" content="noindex"><title>Unsubscribe — Quibly</title>` +
-        `<link rel="preconnect" href="https://fonts.googleapis.com">` +
-        `<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>` +
-        `<link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&family=Quicksand:wght@300..700&display=swap" rel="stylesheet">` +
-        `<style>body{font-family:Figtree,system-ui,-apple-system,Segoe UI,sans-serif;max-width:480px;margin:80px auto;padding:0 24px;color:#1a1a1a}h1{color:#0d9488;font-family:Quicksand,system-ui;font-weight:600}p{line-height:1.5}</style>` +
-        `</head><body><h1>Something went wrong</h1>` +
-        `<p>We couldn't process your unsubscribe right now. Please email <a href="mailto:unsubscribe@usequibly.com">unsubscribe@useQuibly.com</a> and we'll remove you manually.</p>` +
-        `</body></html>`,
+      `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Unsubscribed — Quibly</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,400;0,500;0,600;1,400&family=Quicksand:wght@500;600&display=optional" rel="stylesheet">
+
+  <style>
+    :root {
+      --teal: #0d9488;
+      --text: #1a1a1a;
+    }
+
+    html {
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
+    }
+
+    body {
+      margin: 0;
+      padding: 0 24px;
+      max-width: 480px;
+      margin: 80px auto;
+      text-align: center;
+      color: var(--text);
+
+      font-family:
+        Figtree,
+        ui-sans-serif,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Helvetica,
+        Arial,
+        sans-serif;
+    }
+
+    h1 {
+      margin-bottom: 12px;
+      color: var(--teal);
+      font-weight: 600;
+
+      font-family:
+        Quicksand,
+        "Nunito",
+        ui-sans-serif,
+        system-ui,
+        sans-serif;
+    }
+
+    p {
+      line-height: 1.55;
+      margin: 0;
+    }
+
+    a {
+      color: var(--teal);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <h1>Something went wrong</h1>
+  <p>
+    We couldn't process your unsubscribe right now. Please email <a href="mailto:unsubscribe@usequibly.com">unsubscribe@useQuibly.com</a> and we'll remove you manually.
+  </p>
+</body>
+</html>`,
       { status: 500, headers: { 'Content-Type': 'text/html; charset=utf-8' } },
     );
   }
 
   if (result.status !== 200) {
     return new NextResponse(
-      `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">` +
-        `<meta name="viewport" content="width=device-width,initial-scale=1">` +
-        `<meta name="robots" content="noindex"><title>Unsubscribe — Quibly</title>` +
-        `<link rel="preconnect" href="https://fonts.googleapis.com">` +
-        `<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>` +
-        `<link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&family=Quicksand:wght@300..700&display=swap" rel="stylesheet">` +
-        `<style>body{font-family:Figtree,system-ui,-apple-system,Segoe UI,sans-serif;max-width:480px;margin:80px auto;padding:0 24px;color:#1a1a1a}h1{color:#0d9488;font-family:Quicksand,system-ui;font-weight:600}p{line-height:1.5}</style>` +
-        `</head><body><h1>Unsubscribe link is invalid</h1>` +
-        `<p>This link is missing or no longer valid. If you meant to unsubscribe, reply to any Quibly email or write to <a href="mailto:unsubscribe@usequibly.com">unsubscribe@useQuibly.com</a> and we'll handle it manually.</p>` +
-        `</body></html>`,
+      `<!DOCTYPE html>
+      <html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Unsubscribed — Quibly</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,400;0,500;0,600;1,400&family=Quicksand:wght@500;600&display=optional" rel="stylesheet">
+
+  <style>
+    :root {
+      --teal: #0d9488;
+      --text: #1a1a1a;
+    }
+
+    html {
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
+    }
+
+    body {
+      margin: 0;
+      padding: 0 24px;
+      max-width: 480px;
+      margin: 80px auto;
+      text-align: center;
+      color: var(--text);
+
+      font-family:
+        Figtree,
+        ui-sans-serif,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Helvetica,
+        Arial,
+        sans-serif;
+    }
+
+    h1 {
+      margin-bottom: 12px;
+      color: var(--teal);
+      font-weight: 600;
+
+      font-family:
+        Quicksand,
+        "Nunito",
+        ui-sans-serif,
+        system-ui,
+        sans-serif;
+    }
+
+    p {
+      line-height: 1.55;
+      margin: 0;
+    }
+
+    a {
+      color: var(--teal);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <h1>Unsubscribe link is invalid</h1>
+  <p>
+    This link is missing or no longer valid. If you meant to unsubscribe, reply to any Quibly email or write to <a href="mailto:unsubscribe@usequibly.com">unsubscribe@useQuibly.com</a> and we'll handle it manually.
+  </p>
+</body>
+</html>`,
       {
         status: result.status,
         headers: { 'Content-Type': 'text/html; charset=utf-8' },
@@ -134,16 +278,93 @@ export async function GET(req: NextRequest) {
   }
 
   return new NextResponse(
-    `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">` +
-      `<meta name="viewport" content="width=device-width,initial-scale=1">` +
-      `<meta name="robots" content="noindex"><title>Unsubscribed — Quibly</title>` +
-      `<link rel="preconnect" href="https://fonts.googleapis.com">` +
-      `<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>` +
-      `<link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&family=Quicksand:wght@300..700&display=swap" rel="stylesheet">` +
-      `<style>body{font-family:Figtree,system-ui,-apple-system,Segoe UI,sans-serif;max-width:480px;margin:80px auto;padding:0 24px;color:#1a1a1a;text-align:center}h1{color:#0d9488;font-family:Quicksand, system-ui;font-weight:600}p{line-height:1.5}a{color:#0d9488}</style>` +
-      `</head><body><h1>You're unsubscribed</h1>` +
-      `<p>You won't receive any further Quibly emails. If this was a mistake, you can re-join the waitlist anytime at <a href="https://usequibly.com">useQuibly.com</a>.</p>` +
-      `</body></html>`,
-    { status: 200, headers: { 'Content-Type': 'text/html; charset=utf-8' } },
+    `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Unsubscribed — Quibly</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,400;0,500;0,600;1,400&family=Quicksand:wght@500;600&display=optional" rel="stylesheet">
+
+  <style>
+    :root {
+      --teal: #0d9488;
+      --text: #1a1a1a;
+    }
+
+    html {
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
+    }
+
+    body {
+      margin: 0;
+      padding: 0 24px;
+      max-width: 480px;
+      margin: 80px auto;
+      text-align: center;
+      color: var(--text);
+
+      font-family:
+        Figtree,
+        ui-sans-serif,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Helvetica,
+        Arial,
+        sans-serif;
+    }
+
+    h1 {
+      margin-bottom: 12px;
+      color: var(--teal);
+      font-weight: 600;
+
+      font-family:
+        Quicksand,
+        "Nunito",
+        ui-sans-serif,
+        system-ui,
+        sans-serif;
+    }
+
+    p {
+      line-height: 1.55;
+      margin: 0;
+    }
+
+    a {
+      color: var(--teal);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <h1>You're unsubscribed</h1>
+  <p>
+    You won't receive any further Quibly emails.
+    If this was a mistake, you can re-join the waitlist anytime at
+    <a href="https://usequibly.com">useQuibly.com</a>.
+  </p>
+</body>
+</html>`,
+    {
+      status: 200,
+      headers: { 'Content-Type': 'text/html; charset=utf-8' },
+    },
   );
 }
