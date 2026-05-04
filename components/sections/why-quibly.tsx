@@ -1,4 +1,4 @@
-import { LineChart, Target, Users } from "lucide-react"
+import { LineChart, Target, Users, GitBranch } from 'lucide-react';
 
 /**
  * "Why Quibly" — three differentiator cards (FOLD-01).
@@ -14,50 +14,65 @@ import { LineChart, Target, Users } from "lucide-react"
  *
  * Descriptions are draft per D-28 — founder edits in PR.
  */
+
+// Originals:
+// Strategy:
+// "90-day plans before posts. Strategy drives execution; you stop guessing what to publish."
+// AI advisory:
+// "Five AI specialists weigh in on every move — like having a marketing team in your pocket."
+// Metrics:
+// "Real platform metrics flow back into the strategy so the next 90 days beat the last."
+
 const DIFFERENTIATORS = [
   {
     icon: Target,
-    label: "Strategy-first",
+    label: 'Strategy First',
     description:
-      "90-day plans before posts. Strategy drives execution; you stop guessing what to publish.",
+      'Start with a 90-day plan, not prompts. Every piece of content ties back to your goals.',
   },
   {
     icon: Users,
-    label: "AI advisory board",
+    label: 'AI Advisory Board',
     description:
-      "Five AI specialists weigh in on every move — like having a marketing team in your pocket.",
+      'Five AI specialists shape every move. Like a marketing team in your pocket.',
+  },
+  {
+    icon: GitBranch,
+    label: 'Provenance',
+    description:
+      'See exactly what influenced every output. No black box, just full transparency.',
   },
   {
     icon: LineChart,
-    label: "Metrics-driven loop",
+    label: 'Metrics Loop',
     description:
-      "Real platform metrics flow back into the strategy so the next 90 days beat the last.",
+      'Connect your tools and close the loop. Real data improves every decision.',
   },
-] as const
+] as const;
 
 export function WhyQuibly() {
   return (
-    <section className="py-16 md:py-24">
-      <div className="mx-auto max-w-6xl px-6 md:px-8">
-        <h2 className="mb-12 text-center font-heading text-3xl font-bold leading-tight text-foreground md:text-4xl">
+    <section className='py-16 md:py-24'>
+      <div className='mx-auto max-w-6xl px-6 md:px-8'>
+        <h2 className='mb-12 text-center font-heading text-3xl font-bold leading-tight text-foreground md:text-4xl'>
           Why Quibly
         </h2>
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+        <div className='grid grid-cols-1 gap-8 md:grid-cols-2 md:ml-28 md:mr-28'>
           {DIFFERENTIATORS.map(({ icon: Icon, label, description }) => (
             <div
               key={label}
-              className="flex flex-col items-center gap-4 text-center"
+              className='flex flex-col items-center gap-4 text-center'
             >
               <Icon
-                className="text-primary"
+                className='text-primary'
                 size={24}
                 strokeWidth={1.75}
-                aria-hidden="true"
+                aria-hidden='true'
               />
-              <p className="font-heading text-lg font-semibold text-foreground">
+              <p className='font-heading text-lg font-semibold text-foreground'>
                 {label}
               </p>
-              <p className="font-sans text-base text-muted-foreground">
+              <p className='font-sans text-base text-muted-foreground'>
                 {description}
               </p>
             </div>
@@ -65,5 +80,5 @@ export function WhyQuibly() {
         </div>
       </div>
     </section>
-  )
+  );
 }

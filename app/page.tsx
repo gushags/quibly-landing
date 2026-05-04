@@ -1,9 +1,8 @@
-import { FounderVoice } from "@/components/sections/founder-voice"
-import { Footer } from "@/components/sections/footer"
-import { Hero } from "@/components/sections/hero"
-import { WaitlistFormSection } from "@/components/sections/waitlist-form-section"
-import { SecondaryCTA } from "@/components/sections/secondary-cta"
-import { WhyQuibly } from "@/components/sections/why-quibly"
+import { Footer } from '@/components/sections/footer';
+import { Hero } from '@/components/sections/hero';
+import { WaitlistFormSection } from '@/components/sections/waitlist-form-section';
+import { SecondaryCTA } from '@/components/sections/secondary-cta';
+import { WhyQuibly } from '@/components/sections/why-quibly';
 
 /**
  * Quibly waitlist landing page (Phase 2).
@@ -34,7 +33,7 @@ function safeJsonLdScript(data: unknown): string {
     .replace(/>/g, '\\u003e')
     .replace(/&/g, '\\u0026')
     .replace(/\u2028/g, '\\u2028')
-    .replace(/\u2029/g, '\\u2029')
+    .replace(/\u2029/g, '\\u2029');
 }
 
 // Phase 5 SEO-08: Schema.org JSON-LD — Organization + WebSite (CD-02: home page only)
@@ -46,35 +45,36 @@ const organizationJsonLd = {
   logo: 'https://useQuibly.com/quibs-icon.svg',
   description: 'Strategy-first AI marketing for solopreneurs and small teams.',
   // No sameAs — no social handles published yet (CD-02)
-}
+};
 
 const webSiteJsonLd = {
   '@context': 'https://schema.org',
   '@type': 'WebSite',
   name: 'Quibly',
   url: 'https://useQuibly.com',
-}
+};
 
 export default function HomePage() {
   return (
     <>
       {/* Phase 5 SEO-08: Schema.org JSON-LD — injected before <main> */}
       <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: safeJsonLdScript(organizationJsonLd) }}
+        type='application/ld+json'
+        dangerouslySetInnerHTML={{
+          __html: safeJsonLdScript(organizationJsonLd),
+        }}
       />
       <script
-        type="application/ld+json"
+        type='application/ld+json'
         dangerouslySetInnerHTML={{ __html: safeJsonLdScript(webSiteJsonLd) }}
       />
-      <main className="flex flex-col">
+      <main className='flex flex-col'>
         <Hero />
         <WaitlistFormSection />
         <WhyQuibly />
-        <FounderVoice />
         <SecondaryCTA />
       </main>
       <Footer />
     </>
-  )
+  );
 }
