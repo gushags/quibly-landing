@@ -28,7 +28,7 @@ export function Hero() {
     <section className='relative isolate overflow-hidden py-8 md:py-16 lg:py-24'>
       <div
         aria-hidden='true'
-        className='pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(at_30%_20%,oklch(0.6002_0.1038_184.704_/_0.08),transparent_60%),radial-gradient(at_75%_80%,oklch(0.78_0.13_70_/_0.06),transparent_55%)]'
+        className='pointer-events-none absolute inset-0 -z-10 .bg-\[radial-gradient\(at_30\%_20\%\,oklch\(0\.6002_0\.1038_184\.704_\/_0\.08\)\,transparent_60\%\)\,radial-gradient\(at_75\%_80\%\,oklch\(0\.78_0\.13_70_\/_0\.06\)\,transparent_55\%\)\]'
       />
       <div className='mx-auto flex max-w-6xl flex-col-reverse items-center gap-4 px-6 text-center md:px-8'>
         <h1 className='max-w-3xl font-heading font-bold leading-tight text-foreground text-3xl sm:text-4xl md:text-5xl lg:text-6xl'>
