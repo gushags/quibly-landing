@@ -9,8 +9,8 @@ import {
   Preview,
   Section,
   Text,
-} from '@react-email/components'
-import * as React from 'react'
+} from '@react-email/components';
+import * as React from 'react';
 
 /**
  * Content-ID used for the inline wordmark attachment. The action body in
@@ -18,7 +18,7 @@ import * as React from 'react'
  * this CID; the `<Img src="cid:..." />` below resolves to the embedded
  * binary at render time. Exported so the action and template stay in sync.
  */
-export const WORDMARK_CID = 'wordmark@quibly'
+export const WORDMARK_CID = 'wordmark@quibly';
 
 /**
  * Phase 4 — Welcome email (EMAIL-07).
@@ -43,8 +43,8 @@ export const WORDMARK_CID = 'wordmark@quibly'
  */
 
 export interface WelcomeEmailProps {
-  unsubscribeUrl: string
-  postalAddress: string
+  unsubscribeUrl: string;
+  postalAddress: string;
 }
 
 export function WelcomeEmail({
@@ -54,9 +54,7 @@ export function WelcomeEmail({
   return (
     <Html>
       <Head />
-      <Preview>
-        Welcome to the Quibly waitlist — I&apos;ll be in touch.
-      </Preview>
+      <Preview>Welcome to the Quibly waitlist — I&apos;ll be in touch.</Preview>
       <Body style={main}>
         <Container style={container}>
           {/* Teal header strip — UI-SPEC #0D9488, 48px height. The wordmark
@@ -67,9 +65,9 @@ export function WelcomeEmail({
           <Section style={header}>
             <Img
               src={`cid:${WORDMARK_CID}`}
-              alt="Quibly"
-              width="160"
-              height="40"
+              alt='Quibly'
+              width='160'
+              height='40'
               style={wordmark}
             />
           </Section>
@@ -78,21 +76,20 @@ export function WelcomeEmail({
           <Section style={content}>
             <Text style={paragraph}>Hey —</Text>
             <Text style={paragraph}>
-              Thanks for joining the Quibly waitlist. I&apos;m Jeff —
-              a solopreneur building Quibly for other solopreneurs
-              and small operators who are experts at what they
-              make but not necessarily at marketing it.
+              Thanks for joining the Quibly waitlist. I&apos;m Jeff — a
+              solopreneur building Quibly for other solopreneurs and small
+              operators who are experts at what they make but not necessarily at
+              marketing it.
             </Text>
             <Text style={paragraph}>
-              I&apos;m deep in a strategy-first AI marketing tool that
-              learns your business and runs the marketing loop
-              with you (not at you). I&apos;ll send one more email when
-              I open it up — no spam, no product-launch hype.
+              I&apos;m deep in a strategy-first AI marketing tool that learns
+              your business and runs the marketing loop with you (not at you).
+              I&apos;ll send one more email when I open it up — no spam, no
+              product-launch hype.
             </Text>
             <Text style={paragraph}>
-              In the meantime, hit reply if there&apos;s a marketing
-              problem you wish someone would just solve. I read
-              everything.
+              In the meantime, hit reply if there&apos;s a marketing problem you
+              wish someone would just solve. I read everything.
             </Text>
             <Text style={paragraph}>— Jeff</Text>
           </Section>
@@ -109,13 +106,14 @@ export function WelcomeEmail({
               {postalAddress}
             </Text>
             <Text style={footer}>
-              You&apos;re receiving this because you signed up for the Quibly waitlist.
+              You&apos;re receiving this because you signed up for the Quibly
+              waitlist.
             </Text>
           </Section>
         </Container>
       </Body>
     </Html>
-  )
+  );
 }
 
 /**
@@ -124,32 +122,31 @@ export function WelcomeEmail({
  */
 WelcomeEmail.PreviewProps = {
   unsubscribeUrl: 'https://useQuibly.com/unsubscribe?t=preview_token',
-  postalAddress: '123 Main St, Anytown, CA 90210',
-} satisfies WelcomeEmailProps
+  postalAddress: '28106 Bouquet Canyon Road #1017, Santa Clarita, CA 91350',
+} satisfies WelcomeEmailProps;
 
-export default WelcomeEmail
+export default WelcomeEmail;
 
 // ─── Inline styles (hex colors only — UI-SPEC.md §Color) ────────────────────
 
 const main: React.CSSProperties = {
   backgroundColor: '#ffffff',
-  fontFamily:
-    '-apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+  fontFamily: '-apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
   margin: 0,
   padding: 0,
-}
+};
 
 const container: React.CSSProperties = {
   maxWidth: '600px',
   margin: '0 auto',
-}
+};
 
 const header: React.CSSProperties = {
   height: '48px',
   padding: '4px 24px',
   backgroundColor: '#0D9488',
   textAlign: 'center',
-}
+};
 
 const wordmark: React.CSSProperties = {
   display: 'inline-block',
@@ -157,32 +154,32 @@ const wordmark: React.CSSProperties = {
   // Image is rendered at 480x120 (3x retina), displayed at 160x40
   width: '160px',
   height: '40px',
-}
+};
 
 const content: React.CSSProperties = {
   padding: '32px 24px',
-}
+};
 
 const paragraph: React.CSSProperties = {
   color: '#404040',
   fontSize: '14px',
   lineHeight: 1.5,
   margin: '0 0 16px 0',
-}
+};
 
 const hr: React.CSSProperties = {
   borderColor: '#e5e5e5',
   margin: '24px 0',
-}
+};
 
 const footer: React.CSSProperties = {
   color: '#737373',
   fontSize: '12px',
   lineHeight: 1.5,
   margin: '0 0 4px 0',
-}
+};
 
 const footerLink: React.CSSProperties = {
   color: '#737373',
   textDecoration: 'underline',
-}
+};

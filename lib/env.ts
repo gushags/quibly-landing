@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import { z } from 'zod';
 
 /**
  * Per D-07: enumerate every env var any future phase will touch, even though
@@ -20,17 +20,35 @@ import { z } from 'zod'
  */
 const envSchema = z.object({
   // Resend transactional + audience client (Phase 4)
-  RESEND_API_KEY: z.string().min(1, 'RESEND_API_KEY is required (Resend Dashboard -> API Keys, scope "Sending access")'),
+  RESEND_API_KEY: z
+    .string()
+    .min(
+      1,
+      'RESEND_API_KEY is required (Resend Dashboard -> API Keys, scope "Sending access")',
+    ),
   // Production audience for the live waitlist (Phase 4)
-  RESEND_AUDIENCE_ID: z.string().min(1, 'RESEND_AUDIENCE_ID is required (Resend Dashboard -> Audiences -> "Quibly Waitlist")'),
+  RESEND_AUDIENCE_ID: z
+    .string()
+    .min(
+      1,
+      'RESEND_AUDIENCE_ID is required (Resend Dashboard -> Audiences -> "Quibly Waitlist")',
+    ),
   // Preview/PR audience — separate from production (Phase 4)
-  RESEND_AUDIENCE_PREVIEW_ID: z.string().min(1, 'RESEND_AUDIENCE_PREVIEW_ID is required'),
+  RESEND_AUDIENCE_PREVIEW_ID: z
+    .string()
+    .min(1, 'RESEND_AUDIENCE_PREVIEW_ID is required'),
   // Webhook signature secret for bounce + complaint events (Phase 4)
   RESEND_WEBHOOK_SECRET: z.string().min(1, 'RESEND_WEBHOOK_SECRET is required'),
   // Upstash Redis REST URL for sliding-window rate limit (Phase 4)
-  UPSTASH_REDIS_REST_URL: z.string().url('UPSTASH_REDIS_REST_URL must be a valid URL (Upstash Console -> Redis DB -> REST API -> URL)'),
+  UPSTASH_REDIS_REST_URL: z
+    .string()
+    .url(
+      'UPSTASH_REDIS_REST_URL must be a valid URL (Upstash Console -> Redis DB -> REST API -> URL)',
+    ),
   // Upstash Redis REST API token (Phase 4)
-  UPSTASH_REDIS_REST_TOKEN: z.string().min(1, 'UPSTASH_REDIS_REST_TOKEN is required'),
+  UPSTASH_REDIS_REST_TOKEN: z
+    .string()
+    .min(1, 'UPSTASH_REDIS_REST_TOKEN is required'),
   // Physical postal address for welcome-email footer (CAN-SPAM EMAIL-05 / D-10).
   // HARD blocker for production deploy — placeholder ('YOUR-POSTAL-ADDRESS-HERE') is acceptable
   // in dev/preview only; founder must source registered agent / PO box / CMRA before production merge.
@@ -42,12 +60,18 @@ const envSchema = z.object({
   // failure mode (Zod surface) as a missing key.
   RESEND_FROM_POSTAL_ADDRESS: z
     .string()
-    .min(1, 'RESEND_FROM_POSTAL_ADDRESS is required (CAN-SPAM EMAIL-05 — source registered agent or PO box per D-10 before production deploy)')
+    .min(
+      1,
+      'RESEND_FROM_POSTAL_ADDRESS is required (CAN-SPAM EMAIL-05 — source registered agent or PO box per D-10 before production deploy)',
+    )
     .refine(
-      (s) => process.env.VERCEL_ENV !== 'production' || !/YOUR-POSTAL-ADDRESS|placeholder|test address/i.test(s),
+      (s) =>
+        process.env.VERCEL_ENV !== 'production' ||
+        !/YOUR-POSTAL-ADDRESS|placeholder|test address/i.test(s),
       'RESEND_FROM_POSTAL_ADDRESS still contains a placeholder string (CAN-SPAM EMAIL-05 — set a real postal address before production deploy)',
     ),
-})
+  VERCEL_ENV: z.enum(['development', 'preview', 'production']),
+});
 
 // Parse at module load — throws ZodError with all missing keys in one message.
-export const env = envSchema.parse(process.env)
+export const env = envSchema.parse(process.env);

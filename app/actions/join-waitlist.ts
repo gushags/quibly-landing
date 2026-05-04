@@ -1,18 +1,18 @@
-'use server'
+'use server';
 
-import { readFile } from 'node:fs/promises'
-import { join } from 'node:path'
-import { z } from 'zod'
-import { headers } from 'next/headers'
-import { after } from 'next/server'
-import { env } from '@/lib/env'
-import { resend } from '@/lib/resend'
-import { rateLimitPerMinute, rateLimitPerDay } from '@/lib/rate-limit'
-import { isDisposableDomain } from '@/lib/disposable-domains'
-import { track } from '@/lib/analytics'
-import { CONSENT_VERSION } from '@/lib/consent-version'
-import WelcomeEmail, { WORDMARK_CID } from '@/emails/WelcomeEmail'
-import { generateToken } from '@/lib/unsubscribe-token'
+import { readFile } from 'node:fs/promises';
+import { join } from 'node:path';
+import { z } from 'zod';
+import { headers } from 'next/headers';
+import { after } from 'next/server';
+import { env } from '@/lib/env';
+import { resend } from '@/lib/resend';
+import { rateLimitPerMinute, rateLimitPerDay } from '@/lib/rate-limit';
+import { isDisposableDomain } from '@/lib/disposable-domains';
+import { track } from '@/lib/analytics';
+import { CONSENT_VERSION } from '@/lib/consent-version';
+import WelcomeEmail, { WORDMARK_CID } from '@/emails/WelcomeEmail';
+import { generateToken } from '@/lib/unsubscribe-token';
 
 /**
  * WR-01: hoist the wordmark PNG read to module scope so the file is loaded
@@ -26,9 +26,9 @@ import { generateToken } from '@/lib/unsubscribe-token'
 const wordmarkPromise: Promise<Buffer | null> = readFile(
   join(process.cwd(), 'public', 'email', 'wordmark.png'),
 ).catch((err) => {
-  console.error('wordmark_load_failed', err)
-  return null
-})
+  console.error('wordmark_load_failed', err);
+  return null;
+});
 
 /**
  * Phase 4 Server Action — real Resend pipeline.
@@ -64,17 +64,17 @@ const schema = z.object({
     .email({ error: 'Please enter a valid email address.' })
     .max(254, { error: 'Email address is too long.' })
     .transform((s) => s.toLowerCase()),
-})
+});
 
 // D-10: discriminated-union return shape — locked through Phase 4.
 export type JoinWaitlistResult =
   | { status: 'success'; duplicate?: boolean }
   | {
-      status: 'error'
-      message?: string
-      fieldErrors?: Record<string, string>
-      submittedValues?: { email: string }
-    }
+      status: 'error';
+      message?: string;
+      fieldErrors?: Record<string, string>;
+      submittedValues?: { email: string };
+    };
 
 export async function joinWaitlistAction(
   _prevState: JoinWaitlistResult | null,
@@ -83,15 +83,15 @@ export async function joinWaitlistAction(
   // 1. Honeypot — silent success (SPAM-01 / D-15). Bot fills the hidden field; user never sees it.
   // WR-02: field name avoids password manager auto-fill (D-15).
   if (formData.get('hp_field')) {
-    return { status: 'success' }
+    return { status: 'success' };
   }
 
   // 2. Time-trap — silent success (SPAM-02 / D-15). Submits faster than 2s after render
   //    are almost certainly bots. The `renderedAt` value is planted by the parent RSC at
   //    request time and passed to the Client Component as a stable prop (RESEARCH Pitfall 2).
-  const renderedAt = Number(formData.get('renderedAt') ?? 0)
+  const renderedAt = Number(formData.get('renderedAt') ?? 0);
   if (renderedAt > 0 && Date.now() - renderedAt < 2000) {
-    return { status: 'success' }
+    return { status: 'success' };
   }
 
   // 3. Zod validation — server-side source of truth (FORM-03).
@@ -101,14 +101,16 @@ export async function joinWaitlistAction(
   // client via submittedValues.
   // WR-03: trim before parse since z.email rejects surrounding whitespace
   // before any schema-level transform runs.
-  const rawEmailField = formData.get('email')
-  const rawEmail = (typeof rawEmailField === 'string' ? rawEmailField : '').trim()
-  const parsed = schema.safeParse({ email: rawEmail })
+  const rawEmailField = formData.get('email');
+  const rawEmail = (
+    typeof rawEmailField === 'string' ? rawEmailField : ''
+  ).trim();
+  const parsed = schema.safeParse({ email: rawEmail });
   if (!parsed.success) {
-    const flat = z.flattenError(parsed.error)  // Zod 4 idiom — NOT .flatten()
-    const fieldErrors: Record<string, string> = {}
+    const flat = z.flattenError(parsed.error); // Zod 4 idiom — NOT .flatten()
+    const fieldErrors: Record<string, string> = {};
     for (const [key, msgs] of Object.entries(flat.fieldErrors)) {
-      if (msgs?.[0]) fieldErrors[key] = msgs[0]
+      if (msgs?.[0]) fieldErrors[key] = msgs[0];
     }
     // Echo the raw typed value back so the Client Component can preserve it
     // via <Input defaultValue={state.submittedValues?.email} /> (Pitfall 1 / FORM-06).
@@ -116,51 +118,51 @@ export async function joinWaitlistAction(
       status: 'error',
       fieldErrors,
       submittedValues: { email: rawEmail },
-    }
+    };
   }
 
   // ─── Phase 4: real pipeline (replaces D-11 stub branches) ─────────────────
 
-  const email = parsed.data.email
+  const email = parsed.data.email;
 
   // CD-11: Disposable-domain check AFTER Zod, BEFORE rate-limit (cheaper than network).
   // D-03 / SPAM-04: silent success matches honeypot/time-trap defense-in-depth posture.
   if (isDisposableDomain(email)) {
-    console.warn('disposable_domain_rejected', { email })
-    await track('signup_rejected', { reason: 'disposable_domain' })
-    return { status: 'success' }
+    console.warn('disposable_domain_rejected', { email });
+    await track('signup_rejected', { reason: 'disposable_domain' });
+    return { status: 'success' };
   }
 
   // SPAM-03: sliding-window rate limit ladder (5/min + 50/day per IP).
   // CD-10: x-forwarded-for first segment is Vercel-canonical; x-real-ip is fallback.
   // Pitfall 5: order matters — honeypot/time-trap rejections never reach this code,
   //   so legitimate-looking-but-bot traffic does NOT charge legitimate users' IP buckets.
-  const reqHeaders = await headers()
+  const reqHeaders = await headers();
   const ip =
     reqHeaders.get('x-forwarded-for')?.split(',')[0]?.trim() ??
     reqHeaders.get('x-real-ip') ??
-    'unknown'
+    'unknown';
 
   const [minResult, dayResult] = await Promise.all([
     rateLimitPerMinute.limit(ip),
     rateLimitPerDay.limit(ip),
-  ])
+  ]);
   if (!minResult.success || !dayResult.success) {
-    console.warn('rate_limit_rejected', { ip })
-    await track('signup_rejected', { reason: 'rate_limit' })
-    return { status: 'success' }
+    console.warn('rate_limit_rejected', { ip });
+    await track('signup_rejected', { reason: 'rate_limit' });
+    return { status: 'success' };
   }
 
   // STORE-01 / CD-04: audience routing — production env writes to live audience;
   // every other env (preview, dev, vercel pull) writes to preview audience.
-  // eslint-disable-next-line custom/no-raw-process-env -- Vercel system env var (audience routing only)
-  const audienceId = process.env.VERCEL_ENV === 'production'
-    ? env.RESEND_AUDIENCE_ID
-    : env.RESEND_AUDIENCE_PREVIEW_ID
+  const audienceId =
+    env.VERCEL_ENV === 'production'
+      ? env.RESEND_AUDIENCE_ID
+      : env.RESEND_AUDIENCE_PREVIEW_ID;
   // STORE-04 / D-12 / D-14: consent_version is now the SHA-256 prefix of
   // privacy.tsx + terms.tsx contents (lib/consent-version.ts). Bumps ONLY when
   // policy text changes; recorded on every contact for audit traceability.
-  const consentVersion = CONSENT_VERSION
+  const consentVersion = CONSENT_VERSION;
 
   // STORE-03: contacts.create is the SINGLE write path to the audience, BUT the
   // Phase 4 day-1 probe (Plan 04-07 Task 2 / RESEARCH Open Question #1) revealed
@@ -178,17 +180,17 @@ export async function joinWaitlistAction(
   const { data: existingContact, error: getError } = await resend.contacts.get({
     audienceId,
     email,
-  })
+  });
 
   if (getError && !isContactNotFoundError(getError)) {
-    console.error('contacts_get_failed', { email, error: getError })
+    console.error('contacts_get_failed', { email, error: getError });
     return {
       status: 'error',
       message: 'Something went wrong. Try again in a moment.',
-    }
+    };
   }
 
-  const isDuplicate = !!existingContact && !getError
+  const isDuplicate = !!existingContact && !getError;
 
   if (!isDuplicate) {
     const { error: createError } = await resend.contacts.create({
@@ -196,13 +198,13 @@ export async function joinWaitlistAction(
       email,
       unsubscribed: false,
       properties: { consent_version: consentVersion },
-    })
+    });
     if (createError) {
-      console.error('contacts_create_failed', { email, error: createError })
+      console.error('contacts_create_failed', { email, error: createError });
       return {
         status: 'error',
         message: 'Something went wrong. Try again in a moment.',
-      }
+      };
     }
   }
 
@@ -215,15 +217,15 @@ export async function joinWaitlistAction(
     // Vercel docs — prefix `https://` when used. NEXT_PUBLIC_SITE_URL must include protocol.
     // PATTERNS.md §"env import convention" exception applies to all four reads.
     // eslint-disable-next-line custom/no-raw-process-env -- NEXT_PUBLIC_* runtime injected by Next/Vercel
-    const explicitSiteUrl = process.env.NEXT_PUBLIC_SITE_URL
+    const explicitSiteUrl = process.env.NEXT_PUBLIC_SITE_URL;
     // eslint-disable-next-line custom/no-raw-process-env -- Vercel system env var (per PATTERNS.md exception)
-    const vercelProdHost = process.env.VERCEL_PROJECT_PRODUCTION_URL
+    const vercelProdHost = process.env.VERCEL_PROJECT_PRODUCTION_URL;
     // eslint-disable-next-line custom/no-raw-process-env -- Vercel system env var (per PATTERNS.md exception)
-    const vercelDeployHost = process.env.VERCEL_URL
+    const vercelDeployHost = process.env.VERCEL_URL;
     const resolvedSiteUrl =
       explicitSiteUrl ??
       (vercelProdHost ? `https://${vercelProdHost}` : undefined) ??
-      (vercelDeployHost ? `https://${vercelDeployHost}` : undefined)
+      (vercelDeployHost ? `https://${vercelDeployHost}` : undefined);
     // WR-02: in production, refuse to emit a welcome email with a dead unsubscribe link.
     // The apex `usequibly.com` is not bound to Vercel pre-Phase-6, so falling through to it
     // returns NXDOMAIN/parking and the recipient cannot unsubscribe (CAN-SPAM exposure).
@@ -233,11 +235,14 @@ export async function joinWaitlistAction(
         explicitSiteUrl: !!explicitSiteUrl,
         vercelProdHost: !!vercelProdHost,
         vercelDeployHost: !!vercelDeployHost,
-      })
-      return { status: 'error', message: 'Service is being configured. Try again shortly.' }
+      });
+      return {
+        status: 'error',
+        message: 'Service is being configured. Try again shortly.',
+      };
     }
-    const siteUrl = resolvedSiteUrl ?? 'https://usequibly.com'
-    const unsubscribeUrl = `${siteUrl}/unsubscribe?t=${await generateToken(email)}`
+    const siteUrl = resolvedSiteUrl ?? 'https://usequibly.com';
+    const unsubscribeUrl = `${siteUrl}/unsubscribe?t=${await generateToken(email)}`;
 
     // CD-09: fire-and-forget — NOT awaited. .catch() handles EMAIL-08 observability.
     // The Promise typically resolves within the request lifecycle on Vercel; if
@@ -250,7 +255,7 @@ export async function joinWaitlistAction(
     // once on cold-start (not per-signup) AND a missing/unreadable asset never
     // throws AFTER contacts.create succeeded. If null, send without attachment
     // -- the wordmark is decorative; the email body renders without it.
-    const wordmark = await wordmarkPromise
+    const wordmark = await wordmarkPromise;
 
     // WR-02: wrap the send + analytics tail in `after()` from `next/server`.
     // The Server Action returns immediately after this branch (line below),
@@ -263,7 +268,7 @@ export async function joinWaitlistAction(
     after(
       resend.emails
         .send({
-          from: 'Quibly <hello@usequibly.com>',
+          from: 'Jeff at Quibly <hello@usequibly.com>',
           to: email,
           subject: "You're on the Quibly list",
           react: WelcomeEmail({
@@ -292,19 +297,19 @@ export async function joinWaitlistAction(
           // Art. 5(1)(b) purpose-limitation basis the policy is built on. The
           // server-side console.error below still captures the email for ops
           // debugging; the analytics call only counts the failure.
-          console.error('welcome_email_send_failed', { email, err })
+          console.error('welcome_email_send_failed', { email, err });
           // EMAIL-08: ops observability for welcome-email send failures.
           // Return the analytics promise so `after()` waits on it, not just
           // on the email send.
-          return track('welcome_email_send_error')
+          return track('welcome_email_send_error');
         }),
-    )
+    );
   }
 
   // ANLY-03: server-side analytics — duplicate flag for Phase 5 dashboard.
-  await track('waitlist_signup', { duplicate: isDuplicate })
+  await track('waitlist_signup', { duplicate: isDuplicate });
 
-  return { status: 'success', duplicate: isDuplicate }
+  return { status: 'success', duplicate: isDuplicate };
 }
 
 /**
@@ -315,8 +320,10 @@ export async function joinWaitlistAction(
  * The check is name-first (most stable) with a statusCode fallback. Anything
  * else from contacts.get (network error, auth error, etc.) is treated as fatal.
  */
-function isContactNotFoundError(
-  error: { name?: string | null; statusCode?: number | null; message?: string | null },
-): boolean {
-  return error.name === 'not_found' || error.statusCode === 404
+function isContactNotFoundError(error: {
+  name?: string | null;
+  statusCode?: number | null;
+  message?: string | null;
+}): boolean {
+  return error.name === 'not_found' || error.statusCode === 404;
 }
