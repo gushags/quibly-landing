@@ -76,14 +76,13 @@ export function WelcomeEmail({
           <Section style={content}>
             <Text style={paragraph}>Hey —</Text>
             <Text style={paragraph}>
-              Thanks for joining the Quibly waitlist. I&apos;m Jeff — a
-              solopreneur building Quibly for other solopreneurs and small
-              operators who are experts at what they make but not necessarily at
-              marketing it.
+              Thanks for joining the Quibly waitlist. I&apos;m a solopreneur
+              building Quibly for other solopreneurs and small operators who are
+              experts at what they make but not necessarily at marketing it.
             </Text>
             <Text style={paragraph}>
-              I&apos;m deep in a strategy-first AI marketing tool that learns
-              your business and runs the marketing loop with you (not at you).
+              Quibly is a strategy-first AI marketing tool that learns your
+              business and runs the marketing loop with you (not at you).
               I&apos;ll send one more email when I open it up — no spam, no
               product-launch hype.
             </Text>
