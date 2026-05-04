@@ -229,8 +229,7 @@ export async function joinWaitlistAction(
     // WR-02: in production, refuse to emit a welcome email with a dead unsubscribe link.
     // The apex `usequibly.com` is not bound to Vercel pre-Phase-6, so falling through to it
     // returns NXDOMAIN/parking and the recipient cannot unsubscribe (CAN-SPAM exposure).
-    // eslint-disable-next-line custom/no-raw-process-env -- Vercel system env var (per PATTERNS.md exception)
-    if (process.env.VERCEL_ENV === 'production' && !resolvedSiteUrl) {
+    if (env.VERCEL_ENV === 'production' && !resolvedSiteUrl) {
       console.error('site_url_unresolved_in_production', {
         explicitSiteUrl: !!explicitSiteUrl,
         vercelProdHost: !!vercelProdHost,
