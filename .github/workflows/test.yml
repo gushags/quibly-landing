@@ -86,6 +86,10 @@ jobs:
           # RESEND_MOCK=1 swaps lib/resend.ts to a hand-rolled mock for form e2e tests (260504-rw4) —
           # without it the form Server Action calls Resend with the stub key and fails 400.
           RESEND_MOCK: '1'
+          # UPSTASH_MOCK=1 swaps lib/rate-limit.ts to hand-rolled mock limiters for form e2e tests (260504-srf) —
+          # without it the form Server Action's Promise.all rate-limit checks fetch test.upstash.io and fail
+          # with a TLS cert-altname mismatch (DNS resolves the stub URL to a non-Upstash IP).
+          UPSTASH_MOCK: '1'
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
