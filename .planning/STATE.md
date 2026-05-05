@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-04-27)
 Phase: 06 (production-deploy-cutover-runbook) — EXECUTING
 Plan: 1 of 5
 Status: Executing Phase 06
-Last activity: 2026-04-29 -- Phase 06 execution started
+Last activity: 2026-05-05 -- Completed quick task 260504-r7b: Fix CI env drift
 
 Progress: [██████████] 100%
 
@@ -79,6 +79,12 @@ None yet.
 - **Phase 4 prerequisite:** physical postal address required for welcome-email footer (CAN-SPAM) — founder must source registered agent / PO box / CMRA before Phase 4 ships.
 - **Phase 5 decision:** explicit AI-crawler allow/deny decision for `robots.ts` (GPTBot, ClaudeBot, Google-Extended, PerplexityBot, CCBot) needed during Phase 5.
 - **Phase 4 day-1 probes:** Resend duplicate-email response shape (5-min) and Resend webhook event names for `email.bounced`/`email.complained` (15-min docs check) flagged in research SUMMARY.md.
+
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 260504-r7b | Fix CI env drift (vitest crash on lib/env.ts; missing VERCEL_ENV + RESEND_FROM_POSTAL_ADDRESS in playwright job env blocks) | 2026-05-05 | 4719cf3 | [260504-r7b-fix-ci-env-drift-vitest-crashes-on-lib-e](./quick/260504-r7b-fix-ci-env-drift-vitest-crashes-on-lib-e/) |
 
 ## Deferred Items
 
