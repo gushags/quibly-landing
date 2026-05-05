@@ -66,6 +66,8 @@ jobs:
           RESEND_WEBHOOK_SECRET: whsec_test_stub
           UPSTASH_REDIS_REST_URL: https://test.upstash.io
           UPSTASH_REDIS_REST_TOKEN: test_token_stub
+          RESEND_FROM_POSTAL_ADDRESS: '123 Example St, Exampleville, EX 00000'
+          VERCEL_ENV: development
       # CR-01: Playwright's `webServer` config (playwright.config.ts) boots
       # `next start` and propagates startup failures to the test runner —
       # replaces the prior `npx next start &` + `wait-on` pattern which masked
@@ -79,6 +81,8 @@ jobs:
           RESEND_WEBHOOK_SECRET: whsec_test_stub
           UPSTASH_REDIS_REST_URL: https://test.upstash.io
           UPSTASH_REDIS_REST_TOKEN: test_token_stub
+          RESEND_FROM_POSTAL_ADDRESS: '123 Example St, Exampleville, EX 00000'
+          VERCEL_ENV: development
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
