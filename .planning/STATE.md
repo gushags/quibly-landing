@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-04-27)
 Phase: 06 (production-deploy-cutover-runbook) — EXECUTING
 Plan: 1 of 5
 Status: Executing Phase 06
-Last activity: 2026-05-05 -- Completed quick task 260504-rw4: Mock Resend in CI for Playwright e2e
+Last activity: 2026-05-05 -- Completed quick task 260504-srf: Mock Upstash rate-limit in CI for Playwright e2e
 
 Progress: [██████████] 100%
 
@@ -86,6 +86,7 @@ None yet.
 |---|-------------|------|--------|-----------|
 | 260504-r7b | Fix CI env drift (vitest crash on lib/env.ts; missing VERCEL_ENV + RESEND_FROM_POSTAL_ADDRESS in playwright job env blocks) | 2026-05-05 | 4719cf3 | [260504-r7b-fix-ci-env-drift-vitest-crashes-on-lib-e](./quick/260504-r7b-fix-ci-env-drift-vitest-crashes-on-lib-e/) |
 | 260504-rw4 | Mock Resend in CI for Playwright e2e form-submit tests via env gate (RESEND_MOCK=1) in lib/resend.ts | 2026-05-05 | cbc90a6 | [260504-rw4-mock-resend-in-ci-for-playwright-e2e-for](./quick/260504-rw4-mock-resend-in-ci-for-playwright-e2e-for/) |
+| 260504-srf | Mock Upstash rate-limit in CI for Playwright e2e tests via env gate (UPSTASH_MOCK=1) in lib/rate-limit.ts | 2026-05-05 | a7c3e9c | [260504-srf-mock-upstash-rate-limit-in-ci-for-playwr](./quick/260504-srf-mock-upstash-rate-limit-in-ci-for-playwr/) |
 
 ## Deferred Items
 
