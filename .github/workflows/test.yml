@@ -83,6 +83,9 @@ jobs:
           UPSTASH_REDIS_REST_TOKEN: test_token_stub
           RESEND_FROM_POSTAL_ADDRESS: '123 Example St, Exampleville, EX 00000'
           VERCEL_ENV: development
+          # RESEND_MOCK=1 swaps lib/resend.ts to a hand-rolled mock for form e2e tests (260504-rw4) —
+          # without it the form Server Action calls Resend with the stub key and fails 400.
+          RESEND_MOCK: '1'
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
