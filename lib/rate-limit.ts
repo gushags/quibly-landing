@@ -23,18 +23,42 @@ import { Redis } from '@upstash/redis'
  *
  * `analytics` is omitted (defaults to false) per RESEARCH Pattern 3 — keeps
  * the implementation simple; no `context.waitUntil(pending)` plumbing required.
+ *
+ * CI mock gate (260504-srf):
+ *   When `UPSTASH_MOCK === '1'` (set only in the CI playwright test step, never
+ *   in Vercel), both exported limiters are hand-rolled mocks that resolve
+ *   `{ success: true, limit: 999, remaining: 999, reset: 0 }`. This prevents the
+ *   form e2e tests from failing with `TypeError: fetch failed (cert altname mismatch
+ *   on test.upstash.io)` — `Redis.fromEnv()` triggers a TLS fetch even at module
+ *   load, so the guard must fire before Redis is ever instantiated. Vitest is
+ *   unaffected — its tests use `vi.mock('@/lib/rate-limit')` which replaces this
+ *   module before the gate runs. Production deployments never set UPSTASH_MOCK,
+ *   so the gate defaults to the real `Redis.fromEnv()` + `new Ratelimit({...})`
+ *   path verbatim. The mock satisfies the only caller
+ *   (`app/actions/join-waitlist.ts`) which reads `.success` only.
  */
 
-const redis = Redis.fromEnv()
+// eslint-disable-next-line custom/no-raw-process-env -- UPSTASH_MOCK is a CI-only test toggle; intentionally NOT in lib/env.ts to avoid forcing production deployments to set it
+const isMock = process.env.UPSTASH_MOCK === '1'
 
-export const rateLimitPerMinute = new Ratelimit({
-  redis,
-  limiter: Ratelimit.slidingWindow(5, '60 s'),
-  prefix: '@quibly/ratelimit/min',
-})
+function makeMockLimiter() {
+  return {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars -- mock; args intentionally ignored
+    limit: async (_ip: string) =>
+      Promise.resolve({ success: true, limit: 999, remaining: 999, reset: 0 }),
+  }
+}
 
-export const rateLimitPerDay = new Ratelimit({
-  redis,
-  limiter: Ratelimit.slidingWindow(50, '1 d'),
-  prefix: '@quibly/ratelimit/day',
-})
+const redis = isMock ? null : Redis.fromEnv()
+
+export const rateLimitPerMinute = (
+  isMock
+    ? makeMockLimiter()
+    : new Ratelimit({ redis: redis!, limiter: Ratelimit.slidingWindow(5, '60 s'), prefix: '@quibly/ratelimit/min' })
+) as unknown as Ratelimit
+
+export const rateLimitPerDay = (
+  isMock
+    ? makeMockLimiter()
+    : new Ratelimit({ redis: redis!, limiter: Ratelimit.slidingWindow(50, '1 d'), prefix: '@quibly/ratelimit/day' })
+) as unknown as Ratelimit
