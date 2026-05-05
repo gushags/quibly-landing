@@ -41,6 +41,7 @@ paths = [
   '''(.+/)?CLAUDE\.md$''',
   '''(.+/)?README\.md$''',
   '''(.+/)?\.planning/.*\.md$''',
+  '''(.+/)?tests/.*\.(ts|tsx)$''',
 ]
 # Also allowlist the literal placeholder strings used in .env.example
 # so an inline `cat .env.example | git apply` style edit cannot trick the
