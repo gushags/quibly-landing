@@ -92,29 +92,33 @@ describe('POST /api/webhooks/resend', () => {
   })
 
   // CR-01: audience routing — production env writes to live audience.
+  // lib/env.ts parses at module load, so this test re-imports the route module after
+  // stubbing VERCEL_ENV=production via vi.resetModules() + vi.stubEnv().
+  // RESEND_FROM_POSTAL_ADDRESS must also be a real address (not a placeholder) because
+  // lib/env.ts's .refine() guard rejects placeholder strings in production.
   it('uses live RESEND_AUDIENCE_ID when VERCEL_ENV=production', async () => {
-    const original = process.env.VERCEL_ENV
-    process.env.VERCEL_ENV = 'production'
-    try {
-      verifyMock.mockReturnValueOnce({
-        type: 'email.bounced',
-        data: { to: ['user@example.com'], bounce: { type: 'Permanent' } },
-      })
-      const r = await POST(makeReq('{}', {
-        'svix-id': 'msg_test',
-        'svix-timestamp': '1700000000',
-        'svix-signature': 'v1,sig',
-      }))
-      expect(r.status).toBe(200)
-      expect(updateMock).toHaveBeenCalledWith({
-        audienceId: 'aud_prod',
-        email: 'user@example.com',
-        unsubscribed: true,
-      })
-    } finally {
-      if (original === undefined) delete process.env.VERCEL_ENV
-      else process.env.VERCEL_ENV = original
-    }
+    vi.stubEnv('VERCEL_ENV', 'production')
+    vi.stubEnv('RESEND_FROM_POSTAL_ADDRESS', '123 Production St, Realville, RV 99999')
+    vi.resetModules()
+    const mod = await import('@/app/api/webhooks/resend/route')
+    const ProductionPOST = mod.POST as unknown as (req: Request) => Promise<Response>
+    verifyMock.mockReturnValueOnce({
+      type: 'email.bounced',
+      data: { to: ['user@example.com'], bounce: { type: 'Permanent' } },
+    })
+    const r = await ProductionPOST(makeReq('{}', {
+      'svix-id': 'msg_test',
+      'svix-timestamp': '1700000000',
+      'svix-signature': 'v1,sig',
+    }))
+    expect(r.status).toBe(200)
+    expect(updateMock).toHaveBeenCalledWith({
+      audienceId: 'aud_prod',
+      email: 'user@example.com',
+      unsubscribed: true,
+    })
+    vi.unstubAllEnvs()
+    vi.resetModules()
   })
 
   it('does NOT mutate contact on email.bounced Temporary (D-08 soft bounce)', async () => {

@@ -36,7 +36,7 @@ describe('lib/env.ts — RESEND_FROM_POSTAL_ADDRESS placeholder guard (WR-01)', 
   it('accepts the .env.example placeholder when VERCEL_ENV is unset (dev/preview)', async () => {
     setBaseEnv()
     vi.stubEnv('RESEND_FROM_POSTAL_ADDRESS', 'YOUR-POSTAL-ADDRESS-HERE')
-    vi.stubEnv('VERCEL_ENV', '')
+    vi.stubEnv('VERCEL_ENV', 'development')
     const mod = await import('@/lib/env')
     expect(mod.env.RESEND_FROM_POSTAL_ADDRESS).toBe('YOUR-POSTAL-ADDRESS-HERE')
   })

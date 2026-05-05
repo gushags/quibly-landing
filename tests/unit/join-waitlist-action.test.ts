@@ -45,6 +45,16 @@ vi.mock('@/lib/rate-limit', () => ({
 // Mock the analytics shim.
 vi.mock('@/lib/analytics', () => ({ track: vi.fn(async () => {}) }))
 
+// Mock next/server — `after()` requires a Next.js request scope that does not
+// exist in vitest. Replace it with a pass-through that immediately awaits
+// the promise so post-response side-effects still run synchronously in tests.
+vi.mock('next/server', () => ({
+  after: vi.fn((fn: Promise<unknown> | (() => Promise<unknown>)) => {
+    const p = typeof fn === 'function' ? fn() : fn
+    return Promise.resolve(p).catch(() => {})
+  }),
+}))
+
 // Mock next/headers — Next 16.2 async headers().
 vi.mock('next/headers', () => ({
   headers: vi.fn(async () => ({
@@ -253,21 +263,27 @@ describe('joinWaitlistAction (Phase 4 real pipeline)', () => {
     }
   })
 
+  // lib/env.ts parses at module load, so changing process.env.VERCEL_ENV after import has
+  // no effect on env.VERCEL_ENV. This test re-imports the action after stubbing VERCEL_ENV
+  // so the frozen env object reflects the production value.
+  // RESEND_FROM_POSTAL_ADDRESS must also be a real address (not a placeholder) because
+  // lib/env.ts's .refine() guard rejects placeholder strings in production.
   it('routes to production audience when VERCEL_ENV === production (STORE-01)', async () => {
-    const prev = process.env.VERCEL_ENV
-    process.env.VERCEL_ENV = 'production'
-    try {
-      await joinWaitlistAction(null, fd({
-        email: 'real@example.com',
-        hp_field: '',
-        renderedAt: PAST_RENDERED_AT(),
-      }))
-      const callArg = vi.mocked(resend.contacts.create).mock.calls[0][0] as { audienceId: string }
-      expect(callArg.audienceId).toBe('aud_production_test_id')
-    } finally {
-      if (prev === undefined) delete process.env.VERCEL_ENV
-      else process.env.VERCEL_ENV = prev
-    }
+    vi.stubEnv('VERCEL_ENV', 'production')
+    vi.stubEnv('RESEND_FROM_POSTAL_ADDRESS', '123 Production St, Realville, RV 99999')
+    vi.resetModules()
+    const prodAction = await import('@/app/actions/join-waitlist')
+    const prodResend = await import('@/lib/resend')
+    await prodAction.joinWaitlistAction(null, fd({
+      email: 'real@example.com',
+      hp_field: '',
+      renderedAt: PAST_RENDERED_AT(),
+    }))
+    const createMock = vi.mocked(prodResend.resend.contacts.create)
+    const callArg = createMock.mock.calls[0][0] as { audienceId: string }
+    expect(callArg.audienceId).toBe('aud_production_test_id')
+    vi.unstubAllEnvs()
+    vi.resetModules()
   })
 
   it('sends welcome email with full RFC 8058 headers + locked from/subject (EMAIL-01/02/03)', async () => {
@@ -285,7 +301,7 @@ describe('joinWaitlistAction (Phase 4 real pipeline)', () => {
       react: { props: { postalAddress: string; unsubscribeUrl: string } }
       attachments: Array<{ filename: string; content: Buffer; contentId: string }>
     }
-    expect(sendArg.from).toBe('Quibly <hello@usequibly.com>')
+    expect(sendArg.from).toBe('Jeff at Quibly <hello@usequibly.com>')
     expect(sendArg.to).toBe('real@example.com')
     expect(sendArg.subject).toBe("You're on the Quibly list")
     expect(sendArg.headers['List-Unsubscribe-Post']).toBe('List-Unsubscribe=One-Click')
@@ -400,7 +416,8 @@ describe('joinWaitlistAction (Phase 4 real pipeline)', () => {
     }))
     // Fire-and-forget — wait a tick so the .catch() handler executes.
     await new Promise((resolve) => setTimeout(resolve, 10))
-    expect(track).toHaveBeenCalledWith('welcome_email_send_error', { email: 'real@example.com' })
+    // CR-02: track() is called without PII (email) — analytics must not log user emails.
+    expect(track).toHaveBeenCalledWith('welcome_email_send_error')
   })
 
   it('fires track(waitlist_signup, { duplicate: false }) on fresh successful signup (ANLY-03)', async () => {
@@ -495,15 +512,21 @@ describe('joinWaitlistAction (Phase 4 real pipeline)', () => {
 
     // WR-02: in production, refuse to emit a welcome email with a dead unsubscribe link.
     // Falling through to the apex fallback would point at NXDOMAIN/parking pre-Phase-6.
+    // lib/env.ts parses at module load, so this test re-imports the action after stubbing
+    // VERCEL_ENV=production so env.VERCEL_ENV reflects the production value.
+    // RESEND_FROM_POSTAL_ADDRESS must also be a real address (not a placeholder) because
+    // lib/env.ts's .refine() guard rejects placeholder strings in production.
     it('returns error in production when all three site-url env vars are unset', async () => {
       delete process.env.NEXT_PUBLIC_SITE_URL
       delete process.env.VERCEL_PROJECT_PRODUCTION_URL
       delete process.env.VERCEL_URL
-      const originalVercelEnv = process.env.VERCEL_ENV
-      process.env.VERCEL_ENV = 'production'
+      vi.stubEnv('VERCEL_ENV', 'production')
+      vi.stubEnv('RESEND_FROM_POSTAL_ADDRESS', '123 Production St, Realville, RV 99999')
+      vi.resetModules()
 
       try {
-        const result = await joinWaitlistAction(null, fd({
+        const prodAction = await import('@/app/actions/join-waitlist')
+        const result = await prodAction.joinWaitlistAction(null, fd({
           email: 'real@example.com',
           hp_field: '',
           renderedAt: PAST_RENDERED_AT(),
@@ -512,8 +535,8 @@ describe('joinWaitlistAction (Phase 4 real pipeline)', () => {
         expect(result.status).toBe('error')
         expect(resend.emails.send).not.toHaveBeenCalled()
       } finally {
-        if (originalVercelEnv === undefined) delete process.env.VERCEL_ENV
-        else process.env.VERCEL_ENV = originalVercelEnv
+        vi.unstubAllEnvs()
+        vi.resetModules()
       }
     })
   })
