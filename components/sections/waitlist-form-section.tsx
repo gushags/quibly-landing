@@ -34,8 +34,8 @@ import { WaitlistForm } from '@/components/waitlist/waitlist-form';
  *   is fully preserved.
  *
  * Locked copy (D-04 — DRAFT, founder reviews/edits in PR):
- *   - H2: "Be first when Quibly opens up." (5 words, conversational, addresses the reader)
- *   - Sub-copy: "Drop your email and we'll ping you the moment Quibly's ready."
+ *   - H2: "Be first when Zeremi opens up." (5 words, conversational, addresses the reader)
+ *   - Sub-copy: "Drop your email and we'll ping you the moment Zeremi's ready."
  *     (14 words, friendly upstart tone per PROJECT.md)
  */
 export async function WaitlistFormSection() {
@@ -62,10 +62,10 @@ export async function WaitlistFormSection() {
     <section id='waitlist' className='scroll-mt-16 py-16 md:py-24'>
       <div className='mx-auto max-w-prose px-6 text-center'>
         <h2 className='mb-4 font-heading text-3xl font-bold leading-tight text-foreground md:text-4xl'>
-          Be first when Quibly opens up.
+          Be first when Zeremi opens up.
         </h2>
         <p className='mb-8 font-sans text-base text-muted-foreground'>
-          Drop your email and we&apos;ll ping you the moment Quibly&apos;s
+          Drop your email and we&apos;ll ping you the moment Zeremi&apos;s
           ready.
         </p>
         <WaitlistForm renderedAt={renderedAt} />

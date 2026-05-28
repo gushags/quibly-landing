@@ -1,6 +1,6 @@
 import type { MetadataRoute } from 'next'
 
-const BASE_URL = 'https://useQuibly.com'
+const BASE_URL = 'https://zeremi.app'
 
 /**
  * Phase 5 SEO-07 — sitemap with 3 entries: /, /privacy, /terms.

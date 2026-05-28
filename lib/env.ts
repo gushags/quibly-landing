@@ -31,7 +31,7 @@ const envSchema = z.object({
     .string()
     .min(
       1,
-      'RESEND_AUDIENCE_ID is required (Resend Dashboard -> Audiences -> "Quibly Waitlist")',
+      'RESEND_AUDIENCE_ID is required (Resend Dashboard -> Audiences -> "Zeremi Waitlist")',
     ),
   // Preview/PR audience — separate from production (Phase 4)
   RESEND_AUDIENCE_PREVIEW_ID: z

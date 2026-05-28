@@ -54,11 +54,11 @@ const redis = isMock ? null : Redis.fromEnv()
 export const rateLimitPerMinute = (
   isMock
     ? makeMockLimiter()
-    : new Ratelimit({ redis: redis!, limiter: Ratelimit.slidingWindow(5, '60 s'), prefix: '@quibly/ratelimit/min' })
+    : new Ratelimit({ redis: redis!, limiter: Ratelimit.slidingWindow(5, '60 s'), prefix: '@zeremi/ratelimit/min' })
 ) as unknown as Ratelimit
 
 export const rateLimitPerDay = (
   isMock
     ? makeMockLimiter()
-    : new Ratelimit({ redis: redis!, limiter: Ratelimit.slidingWindow(50, '1 d'), prefix: '@quibly/ratelimit/day' })
+    : new Ratelimit({ redis: redis!, limiter: Ratelimit.slidingWindow(50, '1 d'), prefix: '@zeremi/ratelimit/day' })
 ) as unknown as Ratelimit

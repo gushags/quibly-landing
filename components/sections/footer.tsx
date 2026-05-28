@@ -32,9 +32,9 @@ export function Footer() {
   return (
     <footer className="py-12">
       <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-3 px-6 text-sm text-muted-foreground md:px-8">
-        <span className="font-heading text-base font-bold text-primary">Quibly</span>
+        <span className="font-heading text-base font-bold text-primary">zeremi</span>
         <span aria-hidden="true">·</span>
-        <span>© 2026</span>
+        <span>© 2026 Zeremi</span>
         <span aria-hidden="true">·</span>
         <a
           href="/privacy"

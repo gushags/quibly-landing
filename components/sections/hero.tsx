@@ -4,10 +4,10 @@ import { HeroMascot } from '@/components/sections/hero-mascot';
 // Draft copy — founder reviews/edits during PR (CONTEXT D-28).
 // 24 words — within the 15–25 range required by HERO-02 / D-05.
 const SUB_HEADLINE =
-  "Quibly is the strategy-first AI marketing platform built for solopreneurs and small teams who'd rather grow their business than figure out the funnel.";
+  "Zeremi is the strategy-first AI marketing platform built for solopreneurs and small teams who'd rather grow their business than figure out the funnel.";
 
 /**
- * Hero section for the Quibly waitlist landing page.
+ * Hero section for the Zeremi waitlist landing page.
  *
  * Decision references (see .planning/phases/02-static-landing-page-no-form/02-CONTEXT.md):
  *   D-03 / HERO-06 — DOM order guards LCP: headline element first in DOM, mascot second.
@@ -32,7 +32,7 @@ export function Hero() {
       />
       <div className='mx-auto flex max-w-6xl flex-col-reverse items-center gap-4 px-6 text-center md:px-8'>
         <h1 className='max-w-3xl font-heading font-bold leading-tight text-foreground text-3xl sm:text-4xl md:text-5xl lg:text-6xl'>
-          You know your business. Quibly knows how to market it.
+          You know your business. Zeremi knows how to market it.
         </h1>
         <HeroMascot />
       </div>

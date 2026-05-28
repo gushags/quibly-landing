@@ -85,7 +85,7 @@ const violations = allDeps.filter((dep) => {
 if (violations.length > 0) {
   console.error('ANLY-06 violation: prohibited tracking SDKs found in package.json:')
   for (const v of violations) console.error('  - ' + v)
-  console.error('\nQuibly Landing is cookieless by design. Use @vercel/analytics + @vercel/speed-insights only.')
+  console.error('\nZeremi Landing is cookieless by design. Use @vercel/analytics + @vercel/speed-insights only.')
   process.exit(1)
 }
 
