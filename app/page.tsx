@@ -2,13 +2,13 @@ import { Footer } from '@/components/sections/footer';
 import { Hero } from '@/components/sections/hero';
 import { WaitlistFormSection } from '@/components/sections/waitlist-form-section';
 import { SecondaryCTA } from '@/components/sections/secondary-cta';
-import { WhyQuibly } from '@/components/sections/why-quibly';
+import { WhyZeremi } from '@/components/sections/why-zeremi';
 
 /**
  * Quibly waitlist landing page (Phase 2).
  *
  * Section order is locked by CONTEXT D-16. Sections 1 through 5 (Hero,
- * WaitlistFormSection, WhyQuibly, FounderVoice, SecondaryCTA) render inside
+ * WaitlistFormSection, WhyZeremi, FounderVoice, SecondaryCTA) render inside
  * the page main landmark; the Footer renders outside it so the body flex layout
  * pins it to the bottom across short routes (UI-SPEC layout contract).
  *
@@ -37,6 +37,7 @@ function safeJsonLdScript(data: unknown): string {
 }
 
 // Phase 5 SEO-08: Schema.org JSON-LD — Organization + WebSite (CD-02: home page only)
+// NOTE: JSON-LD strings (name, url, logo) are updated in Wave 2 plan 03 (broader string sweep)
 const organizationJsonLd = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
@@ -71,7 +72,7 @@ export default function HomePage() {
       <main className='flex flex-col'>
         <Hero />
         <WaitlistFormSection />
-        <WhyQuibly />
+        <WhyZeremi />
         <SecondaryCTA />
       </main>
       <Footer />
