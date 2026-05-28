@@ -20,6 +20,7 @@
     "lh:ci": "lhci autorun --config=.lighthouserc.json",
     "prepare": "husky",
     "check:no-trackers": "node scripts/check-no-trackers.mjs",
+    "check:no-quibly": "node scripts/check-no-quibly.mjs",
     "import:brand": "node scripts/import-zeremi-brand.mjs"
   },
   "dependencies": {
