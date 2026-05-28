@@ -18,6 +18,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 4: Resend Wiring + Bot Protection + Welcome Email** - Live audience write-path, rate limit, disposable-domain block, and welcome email with one-click unsubscribe headers
 - [ ] **Phase 5: Legal + SEO + Analytics** - Privacy/terms, OG/social metadata, sitemap/robots/JSON-LD, and cookieless Vercel Analytics with server-side conversion events
 - [ ] **Phase 6: Production Deploy + Cutover Runbook** - Apex bound at Vercel team level with full DNS, mail-tester 10/10, dry-run cutover, and a written `docs/cutover.md`
+- [ ] **Phase 6.5: Quibly → Zeremi rebrand & domain cutover** (INSERTED 2026-05-28) - Rename app + character + domain to Zeremi / `zeremi.app`; swap Quicksand → Bree Serif for headings; import Z-mark assets; re-verify Resend sender on the new domain. Must complete before Phase 6 plans 06-04 (staging dry-run) and 06-05 (production go-live).
 
 ## Phase Details
 
@@ -133,6 +134,20 @@ Decimal phases appear between their surrounding integers in numeric order.
   - [ ] 06-04-PLAN.md — Cutover dry-run on staging.useQuibly.com: 4-screenshot transfer back-and-forth; updates docs/cutover.md Step 5 if observed UI labels differ (DEPLOY-09; Wave 3, autonomous: false)
   - [ ] 06-05-PLAN.md — Production go-live: privacy@useQuibly.com mailbox HARD launch-gate, apex bind verify, DNS dig, mail-tester 10/10, real-signup smoke, no-SW DevTools (DEPLOY-01..07; Wave 2, autonomous: false)
 
+### Phase 6.5: Quibly → Zeremi rebrand & domain cutover (INSERTED 2026-05-28)
+**Goal**: Every visible string, asset, font, component name, env var, metadata URL, sender domain, and test assertion reflects the new "Zeremi" brand on `zeremi.app` — atomically — so the production go-live (Phase 6 plans 06-04 and 06-05) launches as Zeremi and never as Quibly.
+**Depends on**: Phase 6 plans 06-01, 06-02, 06-03 (already complete). Must complete BEFORE Phase 6 plans 06-04 (staging dry-run) and 06-05 (production go-live) — both of those plans currently target `useQuibly.com` / `staging.useQuibly.com` and will need their target domain updated to `zeremi.app` / `staging.zeremi.app` as part of this phase.
+**Requirements**: To be derived during discuss/plan (no existing REQ-IDs cover the rename — this is net-new scope inserted post-requirements-lock).
+**Success Criteria** (what must be TRUE):
+  1. The landing page on `localhost` renders the wordmark `zeremi` (lowercase) in Bree Serif, all headings in Bree Serif, body in Figtree, and shows the gradient Z mark in the hero — no Quicksand font is loaded in the network panel, and no string `Quibly` or `Quibs` appears in the rendered DOM.
+  2. The `components/quibs/` folder is renamed to `components/zeremi/` with all imports updated; brand assets from `marketing-app/public/brand/zeremi/{src,png}` are copied into `quibly-landing/public/brand/zeremi/`; the OG image, favicon, and Apple touch icon all reference the Z-mark assets.
+  3. `useQuibly.com` is replaced with `zeremi.app` in every metadata canonical URL, sitemap entry, robots.txt host, env default, Schema.org JSON-LD, welcome-email From address, unsubscribe-link generator, and legal-page reference; the privacy policy explicitly notes the rename and the date.
+  4. Resend has a verified sender on `zeremi.app` (SPF + 3× DKIM + DMARC `p=none`) reaching ≥9/10 on `mail-tester.com`; the welcome email reuses the existing template visually but ships from `hello@zeremi.app` with the new wordmark inline-rendered.
+  5. The Vitest + Playwright suites pass with updated assertions; no test in `tests/` greps for `Quibly` or `Quibs`; Phase 6 plans 06-04 and 06-05 have been edited to target `zeremi.app` / `staging.zeremi.app` and their UAT checklists updated accordingly.
+**Plans**: TBD (to be created via `/gsd-plan-phase` after `/gsd-discuss-phase`)
+**UI hint**: yes
+**Notes**: See `.planning/notes/zeremi-brand-decisions-2026-05-28.md` for typography decisions, asset paths, and component rename map. The post-launch re-introduction email to existing Quibly contacts is tracked separately as a seed: `.planning/seeds/migrate-quibly-contacts-to-zeremi-audience.md` — do NOT bundle that into this phase; it can only fire after the new sender domain has warmed.
+
 ## Progress
 
 **Execution Order:**
@@ -146,3 +161,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | 4. Resend Wiring + Bot Protection + Welcome Email | 0/8 | Not started | - |
 | 5. Legal + SEO + Analytics | 0/6 | Not started | - |
 | 6. Production Deploy + Cutover Runbook | 0/5 | Not started | - |
+| 6.5. Quibly → Zeremi rebrand & domain cutover (INSERTED) | 0/TBD | Not started | - |
