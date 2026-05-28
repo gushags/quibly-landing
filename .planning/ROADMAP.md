@@ -147,7 +147,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 7 plans
   - [x] 06.5-01-PLAN.md — Foundation A: Bree Serif font swap + brand asset import (CD-03)
   - [x] 06.5-02-PLAN.md — Foundation B: ZeremiIcon/ZeremiAvatar components, HeroMascot/WhyZeremi rename, delete components/quibs/ (D-04, CD-04)
-  - [ ] 06.5-03-PLAN.md — String sweep: app/, sections, lib/, OG/favicon/Apple icon, legal pages with rename notice, delete stale assets (D-09, CD-04, CD-08)
+  - [x] 06.5-03-PLAN.md — String sweep: app/, sections, lib/, OG/favicon/Apple icon, legal pages with rename notice, delete stale assets (D-09, CD-04, CD-08)
   - [ ] 06.5-04-PLAN.md — Email send-path: Pattern D triplet, WelcomeEmail template, regenerate wordmark PNG, update 4 test files
   - [ ] 06.5-05-PLAN.md — CI grep guard activation (D-03, CD-05) + Wave 0 branding tests (VALIDATION.md)
   - [ ] 06.5-06-PLAN.md — Resend zeremi.app sender verify + mail-tester ≥9/10 + audience renames (autonomous: false, D-08, SC #4)
@@ -168,4 +168,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | 4. Resend Wiring + Bot Protection + Welcome Email | 0/8 | Not started | - |
 | 5. Legal + SEO + Analytics | 0/6 | Not started | - |
 | 6. Production Deploy + Cutover Runbook | 0/5 | Not started | - |
-| 6.5. Quibly → Zeremi rebrand & domain cutover (INSERTED) | 2/7 | In Progress|  |
+| 6.5. Quibly → Zeremi rebrand & domain cutover (INSERTED) | 3/7 | In Progress|  |
