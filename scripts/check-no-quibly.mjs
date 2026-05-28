@@ -55,8 +55,10 @@ const EXCLUDE_DIRS = new Set([
 
 // Relative paths (from repo root) of individual files to skip.
 const EXCLUDE_FILES = new Set([
-  'scripts/check-no-quibly.mjs',             // this script — self-exclusion
-  'app/(legal)/privacy/page.tsx',            // legally required Name change notice
+  'scripts/check-no-quibly.mjs',             // this script — self-exclusion (DENYLIST contains the patterns)
+  'app/(legal)/privacy/page.tsx',            // legally required Name change notice (GDPR Art-13)
+  'tests/branding.test.ts',                  // Wave 0 test that asserts absence of these strings — contains denylist as regex literals
+  'tests/e2e/brand-paint.spec.ts',           // Wave 0 e2e test that asserts Quicksand is absent — contains denylist as regex literals
 ])
 
 // Binary extensions — skip to avoid false matches on decoded bytes.
