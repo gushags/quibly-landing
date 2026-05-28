@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test'
 test.describe('Phase 5 — SEO surface (SEO-01..08)', () => {
   test('title-description (SEO-01): home <title> and meta description present', async ({ page }) => {
     await page.goto('/')
-    expect(await page.title()).toMatch(/Quibly/i)
+    expect(await page.title()).toMatch(/Zeremi/i)
     await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', /.+/)
   })
 
@@ -58,16 +58,16 @@ test.describe('Phase 5 — SEO surface (SEO-01..08)', () => {
     expect(text).toContain('Google-Extended')
     expect(text).toContain('PerplexityBot')
     expect(text).toContain('CCBot')
-    expect(text).toMatch(/Sitemap:\s*https:\/\/useQuibly\.com\/sitemap\.xml/i)
+    expect(text).toMatch(/Sitemap:\s*https:\/\/zeremi\.app\/sitemap\.xml/i)
   })
 
   test('sitemap (SEO-07): /sitemap.xml lists 3 URLs', async ({ request }) => {
     const s = await request.get('/sitemap.xml')
     expect(s.status()).toBe(200)
     const text = await s.text()
-    expect(text).toContain('https://useQuibly.com')
-    expect(text).toContain('https://useQuibly.com/privacy')
-    expect(text).toContain('https://useQuibly.com/terms')
+    expect(text).toContain('https://zeremi.app')
+    expect(text).toContain('https://zeremi.app/privacy')
+    expect(text).toContain('https://zeremi.app/terms')
   })
 
   test('json-ld (SEO-08): Organization + WebSite scripts parse without error', async ({ page }) => {

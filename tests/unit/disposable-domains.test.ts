@@ -11,8 +11,8 @@ describe('isDisposableDomain (SPAM-04)', () => {
   it('returns false for gmail.com', () => {
     expect(isDisposableDomain('user@gmail.com')).toBe(false)
   })
-  it('returns false for useQuibly.com', () => {
-    expect(isDisposableDomain('founder@useQuibly.com')).toBe(false)
+  it('returns false for zeremi.app', () => {
+    expect(isDisposableDomain('founder@zeremi.app')).toBe(false)
   })
   it('is case-insensitive on the domain', () => {
     expect(isDisposableDomain('USER@MAILINATOR.COM')).toBe(true)

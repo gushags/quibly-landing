@@ -18,7 +18,7 @@ import * as React from 'react';
  * this CID; the `<Img src="cid:..." />` below resolves to the embedded
  * binary at render time. Exported so the action and template stay in sync.
  */
-export const WORDMARK_CID = 'wordmark@quibly';
+export const WORDMARK_CID = 'wordmark@zeremi';
 
 /**
  * Phase 4 — Welcome email (EMAIL-07).
@@ -28,7 +28,7 @@ export const WORDMARK_CID = 'wordmark@quibly';
  * rendering only (typography, spacing, brand strip).
  *
  * Layout (top → bottom, per UI-SPEC.md §"Email Template Component Contract"):
- *   1. Teal header strip (#0D9488) — 48px tall, white "Quibly" wordmark
+ *   1. Teal header strip (#0D9488) — 48px tall, white "zeremi" wordmark
  *   2. Content zone — 32px/24px padding, body paragraphs
  *   3. Hr divider — #e5e5e5, 24px margin
  *   4. Footer zone — postal address (EMAIL-05 CAN-SPAM), unsubscribe link (EMAIL-04)
@@ -54,18 +54,18 @@ export function WelcomeEmail({
   return (
     <Html>
       <Head />
-      <Preview>Welcome to the Quibly waitlist — I&apos;ll be in touch.</Preview>
+      <Preview>Welcome to the Zeremi waitlist — I&apos;ll be in touch.</Preview>
       <Body style={main}>
         <Container style={container}>
           {/* Teal header strip — UI-SPEC #0D9488, 48px height. The wordmark
-              is rendered as an inline-attached PNG (Quicksand 600, white on
+              is rendered as an inline-attached PNG (Bree Serif 400, white on
               transparent) so brand typography survives Gmail/Outlook stripping
               of @font-face rules. The action body attaches the PNG with
               contentId === WORDMARK_CID. */}
           <Section style={header}>
             <Img
               src={`cid:${WORDMARK_CID}`}
-              alt='Quibly'
+              alt='zeremi'
               width='160'
               height='40'
               style={wordmark}
@@ -76,12 +76,12 @@ export function WelcomeEmail({
           <Section style={content}>
             <Text style={paragraph}>Hey —</Text>
             <Text style={paragraph}>
-              Thanks for joining the Quibly waitlist. I&apos;m a solopreneur
-              building Quibly for other solopreneurs and small operators who are
+              Thanks for joining the Zeremi waitlist. I&apos;m a solopreneur
+              building Zeremi for other solopreneurs and small operators who are
               experts at what they make but not necessarily at marketing it.
             </Text>
             <Text style={paragraph}>
-              Quibly is a strategy-first AI marketing tool that learns your
+              Zeremi is a strategy-first AI marketing tool that learns your
               business and runs the marketing loop with you (not at you).
               I&apos;ll send one more email when I open it up — no spam, no
               product-launch hype.
@@ -105,7 +105,7 @@ export function WelcomeEmail({
               {postalAddress}
             </Text>
             <Text style={footer}>
-              You&apos;re receiving this because you signed up for the Quibly
+              You&apos;re receiving this because you signed up for the Zeremi
               waitlist.
             </Text>
           </Section>
@@ -120,7 +120,7 @@ export function WelcomeEmail({
  * Phase 4; postal address placeholder kept benign for the preview UI).
  */
 WelcomeEmail.PreviewProps = {
-  unsubscribeUrl: 'https://useQuibly.com/unsubscribe?t=preview_token',
+  unsubscribeUrl: 'https://zeremi.app/unsubscribe?t=preview_token',
   postalAddress: '28106 Bouquet Canyon Road #1017, Santa Clarita, CA 91350',
 } satisfies WelcomeEmailProps;
 
@@ -153,6 +153,7 @@ const wordmark: React.CSSProperties = {
   // Image is rendered at 480x120 (3x retina), displayed at 160x40
   width: '160px',
   height: '40px',
+  fontFamily: "'Bree Serif', Georgia, 'Times New Roman', serif",
 };
 
 const content: React.CSSProperties = {

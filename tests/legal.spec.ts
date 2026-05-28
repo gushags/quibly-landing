@@ -40,9 +40,9 @@ test.describe('Phase 5 — legal pages (LEGAL-01..04, 06..08)', () => {
     await expect(page.locator('[data-testid="reassurance-copy"]')).toContainText('No spam')
   })
 
-  test('dsar mailto privacy@useQuibly.com (LEGAL-08)', async ({ page }) => {
+  test('dsar mailto privacy@zeremi.app (LEGAL-08)', async ({ page }) => {
     await page.goto('/privacy')
-    await expect(page.locator('a[href="mailto:privacy@useQuibly.com"]').first()).toBeVisible()
+    await expect(page.locator('a[href="mailto:privacy@zeremi.app"]').first()).toBeVisible()
   })
 
   // WR-03: cross-page invariants. The original LEGAL-04 suite asserted content
