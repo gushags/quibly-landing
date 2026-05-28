@@ -19,7 +19,8 @@
     "export:audience": "node --env-file=.env.local scripts/export-audience.mjs",
     "lh:ci": "lhci autorun --config=.lighthouserc.json",
     "prepare": "husky",
-    "check:no-trackers": "node scripts/check-no-trackers.mjs"
+    "check:no-trackers": "node scripts/check-no-trackers.mjs",
+    "import:brand": "node scripts/import-zeremi-brand.mjs"
   },
   "dependencies": {
     "@react-email/components": "^1.0.12",
