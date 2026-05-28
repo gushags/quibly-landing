@@ -145,8 +145,8 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. Resend has a verified sender on `zeremi.app` (SPF + 3× DKIM + DMARC `p=none`) reaching ≥9/10 on `mail-tester.com`; the welcome email reuses the existing template visually but ships from `hello@zeremi.app` with the new wordmark inline-rendered.
   5. The Vitest + Playwright suites pass with updated assertions; no test in `tests/` greps for `Quibly` or `Quibs`; Phase 6 plans 06-04 and 06-05 have been edited to target `zeremi.app` / `staging.zeremi.app` and their UAT checklists updated accordingly.
 **Plans**: 7 plans
-  - [ ] 06.5-01-PLAN.md — Foundation A: Bree Serif font swap + brand asset import (CD-03)
-  - [ ] 06.5-02-PLAN.md — Foundation B: ZeremiIcon/ZeremiAvatar components, HeroMascot/WhyZeremi rename, delete components/quibs/ (D-04, CD-04)
+  - [x] 06.5-01-PLAN.md — Foundation A: Bree Serif font swap + brand asset import (CD-03)
+  - [x] 06.5-02-PLAN.md — Foundation B: ZeremiIcon/ZeremiAvatar components, HeroMascot/WhyZeremi rename, delete components/quibs/ (D-04, CD-04)
   - [ ] 06.5-03-PLAN.md — String sweep: app/, sections, lib/, OG/favicon/Apple icon, legal pages with rename notice, delete stale assets (D-09, CD-04, CD-08)
   - [ ] 06.5-04-PLAN.md — Email send-path: Pattern D triplet, WelcomeEmail template, regenerate wordmark PNG, update 4 test files
   - [ ] 06.5-05-PLAN.md — CI grep guard activation (D-03, CD-05) + Wave 0 branding tests (VALIDATION.md)
@@ -168,4 +168,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | 4. Resend Wiring + Bot Protection + Welcome Email | 0/8 | Not started | - |
 | 5. Legal + SEO + Analytics | 0/6 | Not started | - |
 | 6. Production Deploy + Cutover Runbook | 0/5 | Not started | - |
-| 6.5. Quibly → Zeremi rebrand & domain cutover (INSERTED) | 0/TBD | Not started | - |
+| 6.5. Quibly → Zeremi rebrand & domain cutover (INSERTED) | 2/7 | In Progress|  |
