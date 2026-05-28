@@ -1,7 +1,7 @@
 import { LineChart, Target, Users, GitBranch } from 'lucide-react';
 
 /**
- * "Why Quibly" — three differentiator cards (FOLD-01).
+ * "Why Zeremi" — three differentiator cards (FOLD-01).
  * Single-column on mobile, 3-column at md: and up (D-13).
  *
  * Locked decisions:
@@ -50,12 +50,12 @@ const DIFFERENTIATORS = [
   },
 ] as const;
 
-export function WhyQuibly() {
+export function WhyZeremi() {
   return (
     <section className='py-16 md:py-24'>
       <div className='mx-auto max-w-6xl px-6 md:px-8'>
         <h2 className='mb-12 text-center font-heading text-3xl font-bold leading-tight text-foreground md:text-4xl'>
-          Why Quibly
+          Why Zeremi
         </h2>
         <div className='grid grid-cols-1 gap-8 md:grid-cols-2 md:ml-28 md:mr-28'>
           {DIFFERENTIATORS.map(({ icon: Icon, label, description }) => (

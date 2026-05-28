@@ -1,7 +1,7 @@
-import { QuibsIcon } from '@/components/quibs/quibs-icon'
+import { ZeremiIcon } from '@/components/zeremi/zeremi-icon'
 import { cn } from '@/lib/utils'
 
-interface QuibsAvatarProps {
+interface ZeremiAvatarProps {
   size: 'message' | 'header' | 'fab'
   /** White bg + teal icon. Use on teal surfaces (e.g. the widget popup header). */
   inverted?: boolean
@@ -9,19 +9,19 @@ interface QuibsAvatarProps {
 }
 
 const SIZE_CONFIG = {
-  message: { container: 'h-7 w-7 rounded-lg', icon: { width: 16, height: 19 } },
-  header: { container: 'h-9 w-9 rounded-lg', icon: { width: 22, height: 26 } },
-  fab: { container: 'h-14 w-14 rounded-full', icon: { width: 28, height: 33 } },
+  message: { container: 'h-7 w-7 rounded-lg', icon: { width: 16, height: 25 } },
+  header: { container: 'h-9 w-9 rounded-lg', icon: { width: 20, height: 31 } },
+  fab: { container: 'h-14 w-14 rounded-full', icon: { width: 28, height: 44 } },
 } as const
 
 /**
- * Sized, styled wrapper around `QuibsIcon`.
+ * Sized, styled wrapper around `ZeremiIcon`.
  *
- * Single source of truth for Quibs avatar visuals across chat surfaces. Defaults to
+ * Single source of truth for Zeremi Z mark avatar visuals across chat surfaces. Defaults to
  * a teal-gradient container with a white icon; `inverted` swaps to a white container
  * with a teal icon for use on teal-gradient backgrounds.
  */
-export function QuibsAvatar({ size, inverted = false, className }: QuibsAvatarProps) {
+export function ZeremiAvatar({ size, inverted = false, className }: ZeremiAvatarProps) {
   const { container, icon } = SIZE_CONFIG[size]
   const palette = inverted
     ? 'bg-white text-primary'
@@ -35,7 +35,7 @@ export function QuibsAvatar({ size, inverted = false, className }: QuibsAvatarPr
         className,
       )}
     >
-      <QuibsIcon width={icon.width} height={icon.height} />
+      <ZeremiIcon width={icon.width} height={icon.height} />
     </div>
   )
 }
