@@ -106,12 +106,12 @@ export async function GET(req: NextRequest) {
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="robots" content="noindex">
-  <title>Unsubscribed — Quibly</title>
+  <title>Unsubscribed — Zeremi</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-  <link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,400;0,500;0,600;1,400&family=Quicksand:wght@500;600&display=optional" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,400;0,500;0,600;1,400&family=Bree+Serif&display=swap" rel="stylesheet">
 
   <style>
     :root {
@@ -152,11 +152,9 @@ export async function GET(req: NextRequest) {
       font-weight: 600;
 
       font-family:
-        Quicksand,
-        "Nunito",
-        ui-sans-serif,
-        system-ui,
-        sans-serif;
+        "Bree Serif",
+        Georgia,
+        serif;
     }
 
     p {
@@ -178,7 +176,7 @@ export async function GET(req: NextRequest) {
 <body>
   <h1>Something went wrong</h1>
   <p>
-    We couldn't process your unsubscribe right now. Please email <a href="mailto:unsubscribe@usequibly.com">unsubscribe@useQuibly.com</a> and we'll remove you manually.
+    We couldn't process your unsubscribe right now. Please email <a href="mailto:unsubscribe@zeremi.app">unsubscribe@zeremi.app</a> and we'll remove you manually.
   </p>
 </body>
 </html>`,
@@ -194,12 +192,12 @@ export async function GET(req: NextRequest) {
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="robots" content="noindex">
-  <title>Unsubscribed — Quibly</title>
+  <title>Unsubscribed — Zeremi</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-  <link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,400;0,500;0,600;1,400&family=Quicksand:wght@500;600&display=optional" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,400;0,500;0,600;1,400&family=Bree+Serif&display=swap" rel="stylesheet">
 
   <style>
     :root {
@@ -240,11 +238,9 @@ export async function GET(req: NextRequest) {
       font-weight: 600;
 
       font-family:
-        Quicksand,
-        "Nunito",
-        ui-sans-serif,
-        system-ui,
-        sans-serif;
+        "Bree Serif",
+        Georgia,
+        serif;
     }
 
     p {
@@ -266,7 +262,7 @@ export async function GET(req: NextRequest) {
 <body>
   <h1>Unsubscribe link is invalid</h1>
   <p>
-    This link is missing or no longer valid. If you meant to unsubscribe, reply to any Quibly email or write to <a href="mailto:unsubscribe@usequibly.com">unsubscribe@useQuibly.com</a> and we'll handle it manually.
+    This link is missing or no longer valid. If you meant to unsubscribe, reply to any Zeremi email or write to <a href="mailto:unsubscribe@zeremi.app">unsubscribe@zeremi.app</a> and we'll handle it manually.
   </p>
 </body>
 </html>`,
@@ -284,12 +280,12 @@ export async function GET(req: NextRequest) {
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="robots" content="noindex">
-  <title>Unsubscribed — Quibly</title>
+  <title>Unsubscribed — Zeremi</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-  <link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,400;0,500;0,600;1,400&family=Quicksand:wght@500;600&display=optional" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,400;0,500;0,600;1,400&family=Bree+Serif&display=swap" rel="stylesheet">
 
   <style>
     :root {
@@ -330,11 +326,9 @@ export async function GET(req: NextRequest) {
       font-weight: 600;
 
       font-family:
-        Quicksand,
-        "Nunito",
-        ui-sans-serif,
-        system-ui,
-        sans-serif;
+        "Bree Serif",
+        Georgia,
+        serif;
     }
 
     p {
@@ -356,9 +350,9 @@ export async function GET(req: NextRequest) {
 <body>
   <h1>You're unsubscribed</h1>
   <p>
-    You won't receive any further Quibly emails.
+    You won't receive any further Zeremi emails.
     If this was a mistake, you can re-join the waitlist anytime at
-    <a href="https://usequibly.com">useQuibly.com</a>.
+    <a href="https://zeremi.app">zeremi.app</a>.
   </p>
 </body>
 </html>`,
