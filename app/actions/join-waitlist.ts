@@ -227,7 +227,7 @@ export async function joinWaitlistAction(
       (vercelProdHost ? `https://${vercelProdHost}` : undefined) ??
       (vercelDeployHost ? `https://${vercelDeployHost}` : undefined);
     // WR-02: in production, refuse to emit a welcome email with a dead unsubscribe link.
-    // The apex `usequibly.com` is not bound to Vercel pre-Phase-6, so falling through to it
+    // The apex `zeremi.app` is not bound to Vercel pre-Phase-6, so falling through to it
     // returns NXDOMAIN/parking and the recipient cannot unsubscribe (CAN-SPAM exposure).
     if (env.VERCEL_ENV === 'production' && !resolvedSiteUrl) {
       console.error('site_url_unresolved_in_production', {
@@ -240,7 +240,7 @@ export async function joinWaitlistAction(
         message: 'Service is being configured. Try again shortly.',
       };
     }
-    const siteUrl = resolvedSiteUrl ?? 'https://usequibly.com';
+    const siteUrl = resolvedSiteUrl ?? 'https://zeremi.app';
     const unsubscribeUrl = `${siteUrl}/unsubscribe?t=${await generateToken(email)}`;
 
     // CD-09: fire-and-forget — NOT awaited. .catch() handles EMAIL-08 observability.
@@ -267,15 +267,15 @@ export async function joinWaitlistAction(
     after(
       resend.emails
         .send({
-          from: 'Jeff at Quibly <hello@usequibly.com>',
+          from: 'Jeff at Zeremi <hello@zeremi.app>',
           to: email,
-          subject: "You're on the Quibly list",
+          subject: "You're on the Zeremi list",
           react: WelcomeEmail({
             unsubscribeUrl,
             postalAddress: env.RESEND_FROM_POSTAL_ADDRESS,
           }),
           headers: {
-            'List-Unsubscribe': `<${unsubscribeUrl}>, <mailto:unsubscribe@usequibly.com>`,
+            'List-Unsubscribe': `<${unsubscribeUrl}>, <mailto:unsubscribe@zeremi.app>`,
             'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
           },
           attachments: wordmark
