@@ -144,7 +144,14 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. `useQuibly.com` is replaced with `zeremi.app` in every metadata canonical URL, sitemap entry, robots.txt host, env default, Schema.org JSON-LD, welcome-email From address, unsubscribe-link generator, and legal-page reference; the privacy policy explicitly notes the rename and the date.
   4. Resend has a verified sender on `zeremi.app` (SPF + 3× DKIM + DMARC `p=none`) reaching ≥9/10 on `mail-tester.com`; the welcome email reuses the existing template visually but ships from `hello@zeremi.app` with the new wordmark inline-rendered.
   5. The Vitest + Playwright suites pass with updated assertions; no test in `tests/` greps for `Quibly` or `Quibs`; Phase 6 plans 06-04 and 06-05 have been edited to target `zeremi.app` / `staging.zeremi.app` and their UAT checklists updated accordingly.
-**Plans**: TBD (to be created via `/gsd-plan-phase` after `/gsd-discuss-phase`)
+**Plans**: 7 plans
+  - [ ] 06.5-01-PLAN.md — Foundation A: Bree Serif font swap + brand asset import (CD-03)
+  - [ ] 06.5-02-PLAN.md — Foundation B: ZeremiIcon/ZeremiAvatar components, HeroMascot/WhyZeremi rename, delete components/quibs/ (D-04, CD-04)
+  - [ ] 06.5-03-PLAN.md — String sweep: app/, sections, lib/, OG/favicon/Apple icon, legal pages with rename notice, delete stale assets (D-09, CD-04, CD-08)
+  - [ ] 06.5-04-PLAN.md — Email send-path: Pattern D triplet, WelcomeEmail template, regenerate wordmark PNG, update 4 test files
+  - [ ] 06.5-05-PLAN.md — CI grep guard activation (D-03, CD-05) + Wave 0 branding tests (VALIDATION.md)
+  - [ ] 06.5-06-PLAN.md — Resend zeremi.app sender verify + mail-tester ≥9/10 + audience renames (autonomous: false, D-08, SC #4)
+  - [ ] 06.5-07-PLAN.md — Phase 6 plan edits in-place (D-02): retarget 06-04/06-05/06-UAT to zeremi.app + add useQuibly.com unbind/delete steps (D-06, D-07, CD-07); STATE.md + PROJECT.md close-phase updates
 **UI hint**: yes
 **Notes**: See `.planning/notes/zeremi-brand-decisions-2026-05-28.md` for typography decisions, asset paths, and component rename map. The post-launch re-introduction email to existing Quibly contacts is tracked separately as a seed: `.planning/seeds/migrate-quibly-contacts-to-zeremi-audience.md` — do NOT bundle that into this phase; it can only fire after the new sender domain has warmed.
 
