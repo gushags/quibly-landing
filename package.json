@@ -44,6 +44,7 @@
     "zod": "^4.0.0"
   },
   "devDependencies": {
+    "@fontsource/bree-serif": "^5.2.8",
     "@fontsource/quicksand": "^5.2.10",
     "@lhci/cli": "^0.15.1",
     "@playwright/test": "^1.59.1",

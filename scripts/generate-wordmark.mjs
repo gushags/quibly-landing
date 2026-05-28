@@ -4,15 +4,15 @@ import wawoff from 'wawoff2'
 import React from 'react'
 
 // @vercel/og only accepts TTF/OTF (no variable fonts, no WOFF/WOFF2). We pull
-// Quicksand-SemiBold (weight 600) from @fontsource/quicksand (WOFF2) and
+// Bree Serif Regular (weight 400) from @fontsource/bree-serif (WOFF2) and
 // decompress it to TTF via wawoff2 before passing to @vercel/og.
-const WOFF2_PATH = 'node_modules/@fontsource/quicksand/files/quicksand-latin-600-normal.woff2'
+const WOFF2_PATH = 'node_modules/@fontsource/bree-serif/files/bree-serif-latin-400-normal.woff2'
 const OUT_PATH = 'public/email/wordmark.png'
 
 const woff2 = readFileSync(WOFF2_PATH)
 const ttfBytes = await wawoff.decompress(woff2)
 const fontData = Buffer.from(ttfBytes)
-console.log(`Decompressed Quicksand-600 WOFF2 -> TTF (${fontData.length} bytes)`)
+console.log(`Decompressed BreeSerif-400 WOFF2 -> TTF (${fontData.length} bytes)`)
 
 // Display dimensions: 160x40 in the email (centered in the 48px teal header strip).
 // Render at 3x for retina. Background transparent so the email's teal Section
@@ -39,20 +39,20 @@ const img = new ImageResponse(
       {
         style: {
           fontSize: 84,
-          fontWeight: 600,
+          fontWeight: 400,
           color: '#ffffff',
-          fontFamily: 'Quicksand',
+          fontFamily: 'Bree Serif',
           letterSpacing: '-0.02em',
           lineHeight: 1,
         },
       },
-      'Quibly'
+      'zeremi'
     )
   ),
   {
     width: DISPLAY_W * SCALE,
     height: DISPLAY_H * SCALE,
-    fonts: [{ name: 'Quicksand', data: fontData, weight: 600, style: 'normal' }],
+    fonts: [{ name: 'Bree Serif', data: fontData, weight: 400, style: 'normal' }],
   }
 )
 
