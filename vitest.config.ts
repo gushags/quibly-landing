@@ -20,7 +20,7 @@ export default defineConfig({
     // on the include glob already restricts to `tests/unit/**`, so the prior
     // exclusions of tests/visual/**, tests/form/**, tests/no-js/** were dead
     // config — Playwright runs those, vitest never matched them in the first place.
-    include: ['tests/unit/**/*.{test,spec}.{ts,tsx}'],
+    include: ['tests/unit/**/*.{test,spec}.{ts,tsx}', 'tests/*.test.{ts,tsx}'],
     exclude: ['node_modules/**'],
   },
 })

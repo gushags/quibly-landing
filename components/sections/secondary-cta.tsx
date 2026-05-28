@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
  * Bottom-of-page CTA (FOLD-03).
  *
  * Phase 3 (D-02): flipped to <Button asChild><a href="#waitlist">. The form lives
- * several thousand pixels above (Hero → WaitlistFormSection → WhyQuibly → FounderVoice
+ * several thousand pixels above (Hero → WaitlistFormSection → WhyZeremi → FounderVoice
  * → here), so scrolling UP to #waitlist is meaningful UX for visitors who scrolled
  * through the page and want to commit. Smooth-scroll behavior is provided by
  * globals.css:96 (Phase 2 D-08); prefers-reduced-motion override at globals.css:100-106.

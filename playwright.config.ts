@@ -51,5 +51,10 @@ export default defineConfig({
       name: "chromium",
       testMatch: /tests\/[^/]+\.spec\.ts/,
     },
+    {
+      // Phase 6.5 addition: covers tests/e2e/** specs (brand-paint, etc.)
+      name: "e2e",
+      testMatch: /tests\/e2e\/.*\.spec\.ts/,
+    },
   ],
 })

@@ -26,6 +26,8 @@ jobs:
           node-version: lts/*
           cache: npm
       - run: npm ci
+      - name: Check no Quibly/Quibs/useQuibly.com/Quicksand strings in source
+        run: node scripts/check-no-quibly.mjs
       - run: npx tsc --noEmit
       - run: npm run lint
       - run: npm run test:unit
