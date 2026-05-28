@@ -9,7 +9,7 @@ process.env.RESEND_WEBHOOK_SECRET = 'whsec_test_secret_unit_only_64_chars_padded
 process.env.UPSTASH_REDIS_REST_URL = 'https://test.upstash.io'
 process.env.UPSTASH_REDIS_REST_TOKEN = 'test_token_unit_only'
 process.env.RESEND_FROM_POSTAL_ADDRESS = 'Test Address, Test City, TS 99999'
-process.env.NEXT_PUBLIC_SITE_URL = 'https://test.useQuibly.com'
+process.env.NEXT_PUBLIC_SITE_URL = 'https://test.zeremi.app'
 
 // ─── Mocks ──────────────────────────────────────────────────────────────────
 
@@ -72,7 +72,7 @@ vi.mock('@/emails/WelcomeEmail', () => ({
     type: 'WelcomeEmailMock',
     props,
   })),
-  WORDMARK_CID: 'wordmark@quibly',
+  WORDMARK_CID: 'wordmark@zeremi',
 }))
 
 // Mock fs/promises.readFile so the action can fetch the wordmark PNG without
@@ -301,18 +301,18 @@ describe('joinWaitlistAction (Phase 4 real pipeline)', () => {
       react: { props: { postalAddress: string; unsubscribeUrl: string } }
       attachments: Array<{ filename: string; content: Buffer; contentId: string }>
     }
-    expect(sendArg.from).toBe('Jeff at Quibly <hello@usequibly.com>')
+    expect(sendArg.from).toBe('Jeff at Zeremi <hello@zeremi.app>')
     expect(sendArg.to).toBe('real@example.com')
-    expect(sendArg.subject).toBe("You're on the Quibly list")
+    expect(sendArg.subject).toBe("You're on the Zeremi list")
     expect(sendArg.headers['List-Unsubscribe-Post']).toBe('List-Unsubscribe=One-Click')
     expect(sendArg.headers['List-Unsubscribe']).toMatch(/<https?:\/\/[^>]+\/unsubscribe\?t=[^>]+>/)
-    expect(sendArg.headers['List-Unsubscribe']).toContain('<mailto:unsubscribe@usequibly.com>')
+    expect(sendArg.headers['List-Unsubscribe']).toContain('<mailto:unsubscribe@zeremi.app>')
     // Belt-and-suspenders: react arg carries postalAddress (covered in detail by the next test)
     expect(sendArg.react.props.postalAddress).toBeTruthy()
-    // Inline wordmark attachment — referenced from WelcomeEmail.tsx as cid:wordmark@quibly
+    // Inline wordmark attachment — referenced from WelcomeEmail.tsx as cid:wordmark@zeremi
     expect(sendArg.attachments).toHaveLength(1)
     expect(sendArg.attachments[0].filename).toBe('wordmark.png')
-    expect(sendArg.attachments[0].contentId).toBe('wordmark@quibly')
+    expect(sendArg.attachments[0].contentId).toBe('wordmark@zeremi')
     expect(Buffer.isBuffer(sendArg.attachments[0].content)).toBe(true)
   })
 
@@ -468,7 +468,7 @@ describe('joinWaitlistAction (Phase 4 real pipeline)', () => {
 
     it('falls back to VERCEL_PROJECT_PRODUCTION_URL when NEXT_PUBLIC_SITE_URL is unset', async () => {
       delete process.env.NEXT_PUBLIC_SITE_URL
-      process.env.VERCEL_PROJECT_PRODUCTION_URL = 'quibly-landing.vercel.app'
+      process.env.VERCEL_PROJECT_PRODUCTION_URL = 'zeremi-landing.vercel.app'
       delete process.env.VERCEL_URL
 
       await joinWaitlistAction(null, fd({
@@ -481,7 +481,7 @@ describe('joinWaitlistAction (Phase 4 real pipeline)', () => {
         expect.objectContaining({
           react: expect.objectContaining({
             props: expect.objectContaining({
-              unsubscribeUrl: expect.stringMatching(/^https:\/\/quibly-landing\.vercel\.app\/unsubscribe\?t=.+/),
+              unsubscribeUrl: expect.stringMatching(/^https:\/\/zeremi-landing\.vercel\.app\/unsubscribe\?t=.+/),
             }),
           }),
         })
@@ -491,7 +491,7 @@ describe('joinWaitlistAction (Phase 4 real pipeline)', () => {
     it('falls back to VERCEL_URL when both NEXT_PUBLIC_SITE_URL and VERCEL_PROJECT_PRODUCTION_URL are unset', async () => {
       delete process.env.NEXT_PUBLIC_SITE_URL
       delete process.env.VERCEL_PROJECT_PRODUCTION_URL
-      process.env.VERCEL_URL = 'quibly-landing-git-test-team.vercel.app'
+      process.env.VERCEL_URL = 'zeremi-landing-git-test-team.vercel.app'
 
       await joinWaitlistAction(null, fd({
         email: 'real@example.com',
@@ -503,7 +503,7 @@ describe('joinWaitlistAction (Phase 4 real pipeline)', () => {
         expect.objectContaining({
           react: expect.objectContaining({
             props: expect.objectContaining({
-              unsubscribeUrl: expect.stringMatching(/^https:\/\/quibly-landing-git-test-team\.vercel\.app\/unsubscribe\?t=.+/),
+              unsubscribeUrl: expect.stringMatching(/^https:\/\/zeremi-landing-git-test-team\.vercel\.app\/unsubscribe\?t=.+/),
             }),
           }),
         })
