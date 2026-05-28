@@ -2,21 +2,21 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Terms',
-  description: 'Quibly terms — waitlist participation agreement.',
+  description: 'Zeremi terms — waitlist participation agreement.',
 }
 
 export default function TermsPage() {
   return (
     <div className="max-w-3xl mx-auto px-6 py-16">
       <h1 className="font-heading text-4xl font-bold mb-2">Terms</h1>
-      <p className="text-sm text-muted-foreground mb-10">Last updated: April 29, 2026</p>
+      <p className="text-sm text-muted-foreground mb-10">Last updated: 2026-05-28</p>
 
       <section className="space-y-4 mb-10">
         <h2 className="font-heading text-xl font-semibold">Acceptance</h2>
         <p className="text-foreground leading-relaxed">
-          By joining the Quibly waitlist — that is, by submitting your email address through the
+          By joining the Zeremi waitlist — that is, by submitting your email address through the
           sign-up form at{' '}
-          <a href="https://useQuibly.com" className="text-primary hover:underline">useQuibly.com</a>{' '}
+          <a href="https://zeremi.app" className="text-primary hover:underline">zeremi.app</a>{' '}
           — you agree to these terms. If you do not agree, please do not submit your email address.
         </p>
       </section>
@@ -24,8 +24,8 @@ export default function TermsPage() {
       <section className="space-y-4 mb-10">
         <h2 className="font-heading text-xl font-semibold">Nature of the Waitlist</h2>
         <p className="text-foreground leading-relaxed">
-          Quibly is currently in pre-launch development. Joining the waitlist signals your interest
-          in Quibly and authorizes us to email you when we launch. The waitlist is not a purchase,
+          Zeremi is currently in pre-launch development. Joining the waitlist signals your interest
+          in Zeremi and authorizes us to email you when we launch. The waitlist is not a purchase,
           subscription, or contract for services of any kind.
         </p>
       </section>
@@ -34,9 +34,9 @@ export default function TermsPage() {
         <h2 className="font-heading text-xl font-semibold">No Service Guarantees</h2>
         <p className="text-foreground leading-relaxed">
           Launch timing, feature scope, and pricing are subject to change without notice. Joining
-          the waitlist creates no guarantee of access to Quibly, no entitlement to any particular
+          the waitlist creates no guarantee of access to Zeremi, no entitlement to any particular
           features or pricing, and no priority position beyond receiving an email notification when
-          we launch. We make no representations or warranties regarding when or whether Quibly will
+          we launch. We make no representations or warranties regarding when or whether Zeremi will
           launch.
         </p>
       </section>
@@ -68,8 +68,8 @@ export default function TermsPage() {
         <h2 className="font-heading text-xl font-semibold">Contact</h2>
         <p className="text-foreground leading-relaxed">
           Questions about these terms? Email{' '}
-          <a href="mailto:privacy@useQuibly.com" className="text-primary hover:underline">
-            privacy@useQuibly.com
+          <a href="mailto:privacy@zeremi.app" className="text-primary hover:underline">
+            privacy@zeremi.app
           </a>
           .
         </p>

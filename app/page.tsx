@@ -5,7 +5,7 @@ import { SecondaryCTA } from '@/components/sections/secondary-cta';
 import { WhyZeremi } from '@/components/sections/why-zeremi';
 
 /**
- * Quibly waitlist landing page (Phase 2).
+ * Zeremi waitlist landing page (Phase 2).
  *
  * Section order is locked by CONTEXT D-16. Sections 1 through 5 (Hero,
  * WaitlistFormSection, WhyZeremi, FounderVoice, SecondaryCTA) render inside
@@ -37,13 +37,12 @@ function safeJsonLdScript(data: unknown): string {
 }
 
 // Phase 5 SEO-08: Schema.org JSON-LD — Organization + WebSite (CD-02: home page only)
-// NOTE: JSON-LD strings (name, url, logo) are updated in Wave 2 plan 03 (broader string sweep)
 const organizationJsonLd = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
-  name: 'Quibly',
-  url: 'https://useQuibly.com',
-  logo: 'https://useQuibly.com/quibs-icon.svg',
+  name: 'Zeremi',
+  url: 'https://zeremi.app',
+  logo: 'https://zeremi.app/brand/zeremi/png/zeremi-mark-512.png',
   description: 'Strategy-first AI marketing for solopreneurs and small teams.',
   // No sameAs — no social handles published yet (CD-02)
 };
@@ -51,8 +50,8 @@ const organizationJsonLd = {
 const webSiteJsonLd = {
   '@context': 'https://schema.org',
   '@type': 'WebSite',
-  name: 'Quibly',
-  url: 'https://useQuibly.com',
+  name: 'Zeremi',
+  url: 'https://zeremi.app',
 };
 
 export default function HomePage() {

@@ -23,6 +23,6 @@ export default function robots(): MetadataRoute.Robots {
       { userAgent: 'Perplexity-User',  allow: '/' },
       { userAgent: 'CCBot',            allow: '/' },
     ],
-    sitemap: 'https://useQuibly.com/sitemap.xml',
+    sitemap: 'https://zeremi.app/sitemap.xml',
   }
 }

@@ -5,26 +5,27 @@ import { join } from 'node:path'
 export const runtime = 'nodejs'              // MUST be nodejs — Edge cannot use node:fs (Pitfall 7)
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
-export const alt = 'Quibly — You know your business. Quibly knows how to market it.'
+export const alt = 'Zeremi — You know your business. Zeremi knows how to market it.'
 
 export default async function OgImage() {
-  const [quicksandBold, figtreeMedium, mascotPng] = await Promise.all([
-    // WOFF1 files used because Satori does not support variable font tables (fvar/gvar)
-    // present in the downloaded Google Fonts TTF. Static-weight WOFF1 from @fontsource
-    // is fully supported by Satori/resvg-js.
-    readFile(join(process.cwd(), 'public/fonts/Quicksand-Bold.woff')),
+  const [breeSerifRegular, figtreeMedium, markPng] = await Promise.all([
+    // TTF file used because Satori does not support variable font tables (fvar/gvar).
+    // BreeSerif-Regular.ttf is a static-weight (400) TTF copied from
+    // marketing-app/public/fonts/bree-serif-regular.ttf — fully supported by Satori/resvg-js.
+    // Weight 400 only — Bree Serif is a single-axis font (RESEARCH Pitfall 2).
+    readFile(join(process.cwd(), 'public/fonts/BreeSerif-Regular.ttf')),
     readFile(join(process.cwd(), 'public/fonts/Figtree-Medium.woff')),
-    // Pre-rasterized mascot PNG; see scripts/rasterize-mascot.mjs and Plan 05-05.
+    // Pre-composited Zeremi Z mark PNG (512×~804).
     // Satori 0.11.x supports PNG via data URI but NOT SVG via data URI.
-    readFile(join(process.cwd(), 'public/quibs-icon.png')),
+    readFile(join(process.cwd(), 'public/brand/zeremi/png/zeremi-mark-512.png')),
   ])
 
-  const mascotDataUri = `data:image/png;base64,${mascotPng.toString('base64')}`
+  const markDataUri = `data:image/png;base64,${markPng.toString('base64')}`
 
   return new ImageResponse(
     (
       <div style={{ display: 'flex', width: '100%', height: '100%' }}>
-        {/* Left column: teal gradient + Quibs mascot (40%) */}
+        {/* Left column: teal gradient + Zeremi Z mark (40%) */}
         <div
           style={{
             display: 'flex',
@@ -35,9 +36,8 @@ export default async function OgImage() {
             justifyContent: 'center',
           }}
         >
-          {/* Quibs mascot — pre-rasterized PNG from public/quibs-icon.svg.
-              Satori 0.11.x supports PNG via data URI but NOT SVG via data URI
-              (see scripts/rasterize-mascot.mjs and 05-02-SUMMARY.md). */}
+          {/* Zeremi Z mark — pre-rasterized PNG from public/brand/zeremi/png/zeremi-mark-512.png.
+              Satori 0.11.x supports PNG via data URI but NOT SVG via data URI. */}
           <div
             style={{
               display: 'flex',
@@ -50,11 +50,11 @@ export default async function OgImage() {
             }}
           >
             <img
-              src={mascotDataUri}
+              src={markDataUri}
               alt=""
-              width={180}
-              height={180}
-              style={{ width: 180, height: 180 }}
+              width={130}
+              height={204}
+              style={{ width: 130, height: 204 }}
             />
           </div>
         </div>
@@ -74,14 +74,14 @@ export default async function OgImage() {
           <div
             style={{
               fontSize: 64,
-              fontFamily: 'Quicksand',
-              fontWeight: 700,
+              fontFamily: 'Bree Serif',
+              fontWeight: 400,
               color: '#0a0a0a',
               lineHeight: 1.15,
               marginBottom: 16,
             }}
           >
-            You know your business. Quibly knows how to market it.
+            You know your business. Zeremi knows how to market it.
           </div>
           <div
             style={{
@@ -91,7 +91,7 @@ export default async function OgImage() {
               color: '#555555',
             }}
           >
-            useQuibly.com
+            zeremi.app
           </div>
         </div>
       </div>
@@ -99,7 +99,7 @@ export default async function OgImage() {
     {
       ...size,
       fonts: [
-        { name: 'Quicksand', data: quicksandBold, style: 'normal', weight: 700 },
+        { name: 'Bree Serif', data: breeSerifRegular, style: 'normal', weight: 400 },
         { name: 'Figtree', data: figtreeMedium, style: 'normal', weight: 500 },
       ],
     }

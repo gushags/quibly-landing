@@ -3,28 +3,33 @@ import { env } from '@/lib/env'
 
 export const metadata: Metadata = {
   title: 'Privacy Policy',
-  description: 'Quibly privacy policy — how we handle and protect your data.',
+  description: 'Zeremi privacy policy — how we handle and protect your data.',
 }
 
 export default function PrivacyPage() {
   return (
     <div className="max-w-3xl mx-auto px-6 py-16">
       <h1 className="font-heading text-4xl font-bold mb-2">Privacy Policy</h1>
-      <p className="text-sm text-muted-foreground mb-10">Last updated: April 29, 2026</p>
+      <p className="text-sm text-muted-foreground mb-10">Last updated: 2026-05-28</p>
 
       <section className="space-y-4 mb-10">
         <h2 className="font-heading text-xl font-semibold">Introduction</h2>
         <p className="text-foreground leading-relaxed">
-          Quibly (&ldquo;we,&rdquo; &ldquo;our,&rdquo; or &ldquo;us&rdquo;) operates the pre-launch waitlist at{' '}
-          <a href="https://useQuibly.com" className="text-primary hover:underline">useQuibly.com</a>.
+          Zeremi (&ldquo;we,&rdquo; &ldquo;our,&rdquo; or &ldquo;us&rdquo;) operates the pre-launch waitlist at{' '}
+          <a href="https://zeremi.app" className="text-primary hover:underline">zeremi.app</a>.
           This privacy policy applies exclusively to the email data we collect through the waitlist sign-up
           form on this page.
         </p>
         <p className="text-foreground leading-relaxed">
           We collect and process your email address on the lawful basis of <strong>consent</strong> under
           Article 6(1)(a) of the General Data Protection Regulation (GDPR). By submitting your email
-          address, you give us permission to contact you when Quibly launches. You can withdraw your consent
+          address, you give us permission to contact you when Zeremi launches. You can withdraw your consent
           at any time by unsubscribing via the link in any email we send you.
+        </p>
+        <p className="text-foreground leading-relaxed">
+          <strong>Name change notice (2026-05-28):</strong> This product was previously known as Quibly and
+          operated at useQuibly.com. It has been renamed to Zeremi and now operates at zeremi.app. The data
+          controller, contact details, and your rights remain unchanged.
         </p>
       </section>
 
@@ -45,7 +50,7 @@ export default function PrivacyPage() {
       <section className="space-y-4 mb-10">
         <h2 className="font-heading text-xl font-semibold">How We Use It</h2>
         <p className="text-foreground leading-relaxed">
-          We use your email address solely to notify you when Quibly launches. That is the only purpose.
+          We use your email address solely to notify you when Zeremi launches. That is the only purpose.
           We will not use your email for advertising, third-party marketing, or any purpose other than
           the launch notification you signed up for.
         </p>
@@ -83,7 +88,7 @@ export default function PrivacyPage() {
           </li>
           <li>
             <strong>Resend</strong> — provides email delivery and audience storage. Your email address
-            is stored in a Resend audience and used to send a welcome email and, when Quibly launches,
+            is stored in a Resend audience and used to send a welcome email and, when Zeremi launches,
             a launch notification. See{' '}
             <a href="https://resend.com/legal/privacy-policy" className="text-primary hover:underline">
               Resend&rsquo;s Privacy Policy
@@ -99,7 +104,7 @@ export default function PrivacyPage() {
       <section className="space-y-4 mb-10">
         <h2 className="font-heading text-xl font-semibold">Retention</h2>
         <p className="text-foreground leading-relaxed">
-          We retain your email until Quibly launches plus 12 months thereafter, or until you
+          We retain your email until Zeremi launches plus 12 months thereafter, or until you
           unsubscribe — whichever comes first. After that period, your email address will be deleted
           from our Resend audience.
         </p>
@@ -126,8 +131,8 @@ export default function PrivacyPage() {
         </p>
         <p className="text-foreground leading-relaxed">
           To exercise any of these rights, email{' '}
-          <a href="mailto:privacy@useQuibly.com" className="text-primary hover:underline">
-            privacy@useQuibly.com
+          <a href="mailto:privacy@zeremi.app" className="text-primary hover:underline">
+            privacy@zeremi.app
           </a>
           .
         </p>
@@ -147,8 +152,8 @@ export default function PrivacyPage() {
         <p className="text-foreground leading-relaxed">
           For data-subject requests (access, deletion, correction, portability) or any privacy
           questions, email{' '}
-          <a href="mailto:privacy@useQuibly.com" className="text-primary hover:underline">
-            privacy@useQuibly.com
+          <a href="mailto:privacy@zeremi.app" className="text-primary hover:underline">
+            privacy@zeremi.app
           </a>
           .
         </p>
