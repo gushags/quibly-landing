@@ -38,12 +38,26 @@ note: |
 expected: |
   After production deploy + apex bind: from a fresh terminal, run:
     curl -sI https://zeremi.app | head -1
-  Expected: HTTP/2 200
-  Then: curl -s https://zeremi.app | grep -c Zeremi
-  Expected: a count > 0 (Zeremi brand markers present in body)
-  Record both command outputs in this test's `note:` field.
+  Expected: HTTP/2 200 OR HTTP/2 308 redirect to https://www.zeremi.app/
+  (apex is intentionally a redirect to canonical www; see test 7).
+  Then verify canonical serves content:
+    curl -s https://www.zeremi.app | grep -c Zeremi
+  Expected: a count > 0 (Zeremi brand markers present in body).
+  Browser smoke test: opening https://zeremi.app in a browser should redirect
+  to https://www.zeremi.app and render the landing page (Quibs mascot, form, etc.).
+  Record outputs in this test's `note:` field.
   Requirement: DEPLOY-01.
-result: pending
+result: pass
+note: |
+  Verified 2026-06-08 via openssl s_client (local LibreSSL curl is broken
+  against modern TLS — used openssl HEAD bypass instead).
+  Apex: HTTP/1.1 308 Permanent Redirect → https://www.zeremi.app/
+    Server: Vercel; X-Vercel-Id: sfo1::4nwhr-1780973993608-77adcf365d43
+    Strict-Transport-Security: max-age=63072000 (Vercel platform HSTS on
+    redirect response — expected; app-level HSTS on canonical www only).
+  Browser smoke (founder): https://zeremi.app redirects to
+    https://www.zeremi.app and renders Zeremi landing page (form + Quibs).
+  DNS: zeremi.app → 216.150.1.1, 216.198.79.1, 64.29.17.1 (Vercel anycast).
 
 ### 3. Apex domain bound at Vercel team level (DEPLOY-02)
 expected: |
@@ -54,7 +68,18 @@ expected: |
     .planning/phases/06-production-deploy-cutover-runbook/screenshots/06-uat-03-team-domains.png
   Record screenshot path in this test's `note:` field.
   Requirement: DEPLOY-02.
-result: pending
+result: pass
+note: |
+  Verified 2026-06-08. Screenshot saved at
+  .planning/phases/06-production-deploy-cutover-runbook/screenshots/06-uat-03-team-domains.png
+  Screenshot shows team-level Domains page for zeremi.app with:
+    - Vercel CDN: Active
+    - Connected Projects: zeremi.app (Redirects to www.zeremi.app) →
+      zeremi-landing; www.zeremi.app → zeremi-landing
+    - Nameservers: Third Party (Porkbun retained; no NS migration needed)
+    - Registrar: Third Party
+  Team binding semantics satisfied per 06-RESEARCH.md DEPLOY-02 finding:
+  team ownership inherits from project ownership when project owner is the team.
 
 ### 4. SPF + DKIM + DMARC p=none + Return-Path DNS records resolve (DEPLOY-03, DEPLOY-04)
 expected: |
@@ -176,8 +201,20 @@ result: pass
 note: |
   Verified 2026-05-04 via debug session phase-6-uat-failures. www.zeremi.app
   returns HTTP/2 200 with all 5 headers at exact configured values. apex returns
-  HTTP/2 307 → www, carrying Vercel platform HSTS (expected on edge redirect).
+  HTTP/2 308 → www, carrying Vercel platform HSTS (expected on edge redirect).
   next.config.ts headers() config is correct and deployed.
+  Re-verified 2026-06-08 (post Phase-6.5 rebrand cutover, apex now Vercel-bound):
+    www.zeremi.app → HTTP/1.1 200 OK
+    strict-transport-security: max-age=300   (exact, no preload, no includeSubDomains)
+    x-content-type-options: nosniff
+    x-frame-options: DENY
+    referrer-policy: strict-origin-when-cross-origin
+    permissions-policy: camera=(), microphone=(), geolocation=(), interest-cohort=()
+    X-Vercel-Id: sfo1::iad1::k6f65-1780973993818-b6d55198f469
+  Sub-route HSTS (all 200 + max-age=300): /robots.txt, /sitemap.xml,
+    /opengraph-image, /privacy, /terms.
+  Apex redirect sanity: HTTP/1.1 308 → https://www.zeremi.app/ with Vercel
+    platform HSTS max-age=63072000 (edge-layer, not app-layer — expected).
 
 ### 8. No Service Worker registered on production load (DEPLOY-07)
 expected: |
@@ -198,15 +235,33 @@ result: pending
 
 ### 9. Production OG / sitemap / robots / favicon smoke (Phase 5 carryover re-verify against prod)
 expected: |
+  Test against the canonical serving URL (www.zeremi.app); apex is a 308
+  redirect by design (see test 7 canonical-URL note).
   From a fresh terminal, run:
-    curl -sI https://zeremi.app/opengraph-image | head -1   # → HTTP/2 200
-    curl -s https://zeremi.app/sitemap.xml                  # → valid XML, includes zeremi.app/, /privacy, /terms
-    curl -s https://zeremi.app/robots.txt                   # → 10 AI-crawler Allow rules + Sitemap line
-    curl -sI https://zeremi.app/icon | head -1              # → HTTP/2 200
-    curl -sI https://zeremi.app/apple-icon | head -1        # → HTTP/2 200
+    curl -sI https://www.zeremi.app/opengraph-image | head -1   # → HTTP/2 200
+    curl -s  https://www.zeremi.app/sitemap.xml                 # → valid XML, includes zeremi.app/, /privacy, /terms
+    curl -s  https://www.zeremi.app/robots.txt                  # → 10 AI-crawler Allow rules + Sitemap line
+    curl -sI https://www.zeremi.app/icon | head -1              # → HTTP/2 200
+    curl -sI https://www.zeremi.app/apple-icon | head -1        # → HTTP/2 200
   Paste each command's output in this test's `note:` field.
   Requirement: Phase 5 SEO-04 / SEO-06 / SEO-07 carryover re-verify on production apex.
-result: pending
+result: pass
+note: |
+  Verified 2026-06-08 via openssl s_client against canonical www.zeremi.app
+  (local LibreSSL curl broken against modern TLS; openssl HEAD/GET bypass used).
+  /opengraph-image: HTTP/1.1 200 OK (Accept-Ranges: bytes; Access-Control-Allow-Origin: *)
+  /icon:            HTTP/1.1 200 OK (Accept-Ranges: bytes)
+  /apple-icon:      HTTP/1.1 200 OK (Accept-Ranges: bytes)
+  /sitemap.xml:     HTTP/1.1 200 OK, Content-Length: 556, X-Vercel-Cache: HIT,
+    all 5 hardening headers present. <loc> entries:
+      - https://zeremi.app           (priority 1, weekly)
+      - https://zeremi.app/privacy   (priority 0.3, monthly)
+      - https://zeremi.app/terms     (priority 0.3, monthly)
+  /robots.txt:      HTTP/1.1 200 OK, Content-Length: 385, X-Vercel-Cache: HIT,
+    all 5 hardening headers present. Body contains 10 AI-crawler rules:
+      GPTBot, OAI-SearchBot, ChatGPT-User, ClaudeBot, Claude-SearchBot,
+      Claude-User, Google-Extended, PerplexityBot, Perplexity-User, CCBot
+      — all "Allow: /". Sitemap: https://zeremi.app/sitemap.xml line present.
 
 ### 10. Resend Audience CSV export includes consent_version column (Pitfall 6 / A1 empirical)
 expected: |
