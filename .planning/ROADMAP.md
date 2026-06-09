@@ -150,7 +150,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   - [x] 06.5-03-PLAN.md — String sweep: app/, sections, lib/, OG/favicon/Apple icon, legal pages with rename notice, delete stale assets (D-09, CD-04, CD-08)
   - [x] 06.5-04-PLAN.md — Email send-path: Pattern D triplet, WelcomeEmail template, regenerate wordmark PNG, update 4 test files
   - [x] 06.5-05-PLAN.md — CI grep guard activation (D-03, CD-05) + Wave 0 branding tests (VALIDATION.md)
-  - [ ] 06.5-06-PLAN.md — Resend zeremi.app sender verify + mail-tester ≥9/10 + audience renames (autonomous: false, D-08, SC #4)
+  - [x] 06.5-06-PLAN.md — Resend zeremi.app sender verify + mail-tester ≥9/10 + audience renames (autonomous: false, D-08, SC #4)
   - [ ] 06.5-07-PLAN.md — Phase 6 plan edits in-place (D-02): retarget 06-04/06-05/06-UAT to zeremi.app + add useQuibly.com unbind/delete steps (D-06, D-07, CD-07); STATE.md + PROJECT.md close-phase updates
 **UI hint**: yes
 **Notes**: See `.planning/notes/zeremi-brand-decisions-2026-05-28.md` for typography decisions, asset paths, and component rename map. The post-launch re-introduction email to existing Quibly contacts is tracked separately as a seed: `.planning/seeds/migrate-quibly-contacts-to-zeremi-audience.md` — do NOT bundle that into this phase; it can only fire after the new sender domain has warmed.
@@ -168,4 +168,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | 4. Resend Wiring + Bot Protection + Welcome Email | 0/8 | Not started | - |
 | 5. Legal + SEO + Analytics | 0/6 | Not started | - |
 | 6. Production Deploy + Cutover Runbook | 0/5 | Not started | - |
-| 6.5. Quibly → Zeremi rebrand & domain cutover (INSERTED) | 5/7 | In Progress|  |
+| 6.5. Quibly → Zeremi rebrand & domain cutover (INSERTED) | 6/7 | In Progress|  |
