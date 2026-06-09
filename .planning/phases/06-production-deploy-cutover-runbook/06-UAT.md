@@ -242,7 +242,20 @@ expected: |
   Take a screenshot of the empty Service Workers panel. Save at:
     .planning/phases/06-production-deploy-cutover-runbook/screenshots/06-uat-08-no-sw.png
   Requirement: DEPLOY-07.
-result: pending
+result: pass
+note: |
+  Verified 2026-06-08. Both halves clean.
+  Source grep (belt-and-suspenders): zero matches.
+    Command: grep -rEn "navigator\.serviceWorker|register\s*\(.*sw\.|register\s*\(.*service-worker" app/ lib/ components/
+    Result: (no output) — no SW registration code in app source.
+  DevTools (manual): incognito Arc browser, navigated to https://zeremi.app
+    (308 → www.zeremi.app), opened Application tab → Service Workers panel.
+    Panel shows only the standard checkboxes (Offline / Update on reload /
+    Bypass for network) and the "Service workers from other origins" header
+    with no entries beneath. No registered SW for zeremi.app or www.zeremi.app.
+    Screenshot saved at screenshots/06-uat-08-no-sw.png.
+  CD-03 (manual DevTools checkpoint) satisfied; no SW persistence layer
+  exists that could break the future marketing-app cutover atomicity.
 
 ### 9. Production OG / sitemap / robots / favicon smoke (Phase 5 carryover re-verify against prod)
 expected: |
