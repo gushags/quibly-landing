@@ -138,6 +138,17 @@ note: |
   which is intentional pre-launch policy. Per debug session phase-6-uat-failures:
   SPF, DKIM, alignment, and content all clean. DMARC tightening (p=quarantine)
   deferred to post-warmup follow-up.
+  Re-verified 2026-06-08 against today's freshly-deployed apex: 9.2/10
+  ("Wow! Perfect, you can send"). Subject "You're on the Zeremi list",
+  received 1 minute after signup. Breakdown:
+    - You're properly authenticated ✓
+    - Your message is safe and well formatted ✓
+    - You're not blocklisted ✓
+    - No broken links ✓
+    - SpamAssassin thinks you can improve: −0.8 (the only deduction)
+  Screenshot saved at .planning/phases/06-production-deploy-cutover-runbook/screenshots/06-uat-05-mailtester.png.
+  Note: mail-tester contact will appear in production Zeremi Waitlist audience —
+  mark unsubscribed in Resend Dashboard if you don't want it to receive future broadcasts.
 
 ### 6. Production real-signup writes to production audience + welcome arrives in Gmail (DEPLOY-08)
 expected: |
