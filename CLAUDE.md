@@ -1,7 +1,7 @@
 <!-- GSD:project-start source:PROJECT.md -->
 ## Project
 
-**Quibly Landing**
+**Zeremi Landing**
 
 A pre-launch waitlist landing page for **Quibly** (strategy-first AI marketing for solopreneurs and small teams) at `useQuibly.com`. A single-screen page that introduces the brand and captures email addresses from people who want to be notified when the app launches. It replaces the full `marketing-app` landing page during the pre-launch window; once Quibly ships, the full marketing site at `marketing-app` takes over the domain.
 
