@@ -3,7 +3,7 @@ status: pending
 phase: 06-production-deploy-cutover-runbook
 source: [06-01-SUMMARY.md, 06-02-SUMMARY.md, 06-04-SUMMARY.md, 06-05-SUMMARY.md]
 started: 2026-04-29T00:00:00Z
-updated: 2026-04-29T00:00:00Z
+updated: 2026-06-08T00:00:00Z
 ---
 
 ## Current Test
@@ -24,7 +24,15 @@ expected: |
   HARD LAUNCH-GATE — production form MUST NOT be exposed to public traffic
   until this test is `pass`. Privacy-policy DSAR contract violation otherwise.
   Requirement: LEGAL-08 (Phase 5 carryover).
-result: pending
+result: pass
+note: |
+  Provider: Google Workspace. privacy@zeremi.app and hello@zeremi.app both
+  provisioned as Google Workspace mailboxes on zeremi.app (founder confirmed
+  pre-existing setup 2026-06-08). Receipt tested by founder prior to Phase 6
+  go-live; both mailboxes confirmed delivering. No apex DNS records modified
+  beyond the MX rows Google Workspace requires, which are additive (SPF
+  include for Resend still resolves; DKIM/DMARC for Resend send-side
+  untouched).
 
 ### 2. Production apex resolves to zeremi-landing prod deploy (DEPLOY-01)
 expected: |
