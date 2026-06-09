@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Phase 6.5 UI-SPEC approved
-last_updated: "2026-05-28T19:35:31.005Z"
-last_activity: 2026-05-28 -- Phase 06.5 execution started
+stopped_at: Phase 6.5 plans 1–7 complete, ready for merge to main
+last_updated: "2026-06-08T17:59:00.000Z"
+last_activity: 2026-05-28 -- Phase 6.5 (Quibly → Zeremi rebrand) ready to merge to main
 progress:
   total_phases: 7
   completed_phases: 5
@@ -69,6 +69,7 @@ Recent decisions affecting current work:
 - Initialization: No marketing cookies, no consent banner — Vercel Web Analytics is cookieless by design.
 - Initialization: Welcome email is fire-and-forget; the Resend Audience write is the load-bearing operation.
 - [Phase ?]: Wired @/lib/env into app/layout.tsx via side-effect import — closes Phase 1 SC #4 gap (boot-crash on missing env now observable from production code path)
+- [Phase 6.5]: Quibly → Zeremi rebrand and domain cutover; new apex zeremi.app, new sender hello@zeremi.app, audience renamed in lockstep (D-08); useQuibly.com Vercel unbind + Resend sender delete deferred to edited 06-05 plan (D-06/D-07).
 
 ### Pending Todos
 
@@ -108,6 +109,6 @@ Items acknowledged and carried forward as v2 / post-launch:
 
 ## Session Continuity
 
-Last session: 2026-05-28T18:15:03.766Z
-Stopped at: Phase 6.5 UI-SPEC approved
-Resume file: .planning/phases/06.5-quibly-zeremi-rebrand-domain-cutover-inserted-2026-05-28/06.5-UI-SPEC.md
+Last session: 2026-06-08T17:59:00.000Z
+Stopped at: Phase 6.5 plans 1–7 complete, ready for merge to main
+Resume file: None

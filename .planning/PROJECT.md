@@ -2,11 +2,11 @@
 
 ## What This Is
 
-A pre-launch waitlist landing page for **Quibly** (strategy-first AI marketing for solopreneurs and small teams) at `useQuibly.com`. A single-screen page that introduces the brand and captures email addresses from people who want to be notified when the app launches. It replaces the full `marketing-app` landing page during the pre-launch window; once Quibly ships, the full marketing site at `marketing-app` takes over the domain.
+A pre-launch waitlist landing page for **Zeremi** (strategy-first AI marketing for solopreneurs and small teams) at `zeremi.app`. A single-screen page that introduces the brand and captures email addresses from people who want to be notified when the app launches. It replaces the full `marketing-app` landing page during the pre-launch window; once Zeremi ships, the full marketing site at `marketing-app` takes over the domain.
 
 ## Core Value
 
-Convert visitors who land at `useQuibly.com` into a list of warm, opted-in waitlist contacts that can be notified when Quibly launches — without needing product screenshots, demos, or full marketing copy that don't exist yet.
+Convert visitors who land at `zeremi.app` into a list of warm, opted-in waitlist contacts that can be notified when Zeremi launches — without needing product screenshots, demos, or full marketing copy that don't exist yet.
 
 ## Requirements
 
@@ -20,15 +20,15 @@ Convert visitors who land at `useQuibly.com` into a list of warm, opted-in waitl
 - [x] Email-only capture form (one field — single-field forms convert ~2–3× higher than multi-field) — *Validated in Phase 3: `<WaitlistForm>` Client Component with single `email` field, `useActionState`-bound to a Server Action with Zod 4 validation; 14 unit tests + 12 form e2e + 1 no-JS spec all green*
 - [x] Graceful "thanks, you're on the list" success state (handles already-subscribed gracefully) — *Validated in Phase 3 against a stub Server Action: in-place success block (POST-01), verbatim copy (POST-02), three-layer enumeration defense for duplicates (POST-03), idempotent retry (POST-04). Resend wiring lands in Phase 4.*
 - [x] Spam / bot protection on the form (rate-limit or hidden honeypot — simplest viable) — *Validated in Phase 3 (honeypot SPAM-01 + time-trap SPAM-02). Phase 4 added the second tier: 5/min/IP + 50/day/IP Upstash rate-limit (SPAM-03) and a 25-entry disposable-domain blocklist (SPAM-04), both silent-rejection. UAT Tests 5+6 passed: mailinator silently rejected, 6th burst-rejected.*
-- [x] Submit emails to Resend Audience (matches `marketing-app` stack) — *Validated in Phase 4: `app/actions/join-waitlist.ts` writes via `resend.contacts.create({ audienceId, email, properties: { consent_version } })` to "Quibly Waitlist" production audience; consent_version tagged with the privacy-policy git SHA. UAT Test 1 confirmed audience row creation. CSV export round-trip working via shipped per-contact GET workaround (`npm run export:audience`).*
-- [x] Single opt-in: capture email → success state → automatic welcome email confirming waitlist spot — *Validated in Phase 4: deliverability-correct welcome email from `Quibly <hello@usequibly.com>` with both List-Unsubscribe + List-Unsubscribe-Post one-click headers, DKIM coverage of both, body-link unsubscribe round-trip flips contact in Resend. Mail-tester score: 10/10. Verified empirically in Gmail; Outlook/iCloud spot-check tracked in 04-HUMAN-UAT for pre-launch.*
+- [x] Submit emails to Resend Audience (matches `marketing-app` stack) — *Validated in Phase 4: `app/actions/join-waitlist.ts` writes via `resend.contacts.create({ audienceId, email, properties: { consent_version } })` to "Zeremi Waitlist" production audience (renamed from "Quibly Waitlist" in Phase 6.5); consent_version tagged with the privacy-policy git SHA. UAT Test 1 confirmed audience row creation. CSV export round-trip working via shipped per-contact GET workaround (`npm run export:audience`).*
+- [x] Single opt-in: capture email → success state → automatic welcome email confirming waitlist spot — *Validated in Phase 4 (originally from `Quibly <hello@usequibly.com>`); updated in Phase 6.5: sender is now `Jeff at Zeremi <hello@zeremi.app>`. Both List-Unsubscribe + List-Unsubscribe-Post one-click headers, DKIM coverage of both, body-link unsubscribe round-trip flips contact in Resend. Mail-tester score: 9.2/10 (p=none DMARC warmup cap). Verified in production 2026-06-08.*
 
 ### Active
 
 - [ ] Live signup counter / "N people on the waitlist" social proof (once signups exist)
 - [ ] Footer with privacy policy + terms links
 - [ ] Privacy policy and terms pages (legal compliance for email collection — required before going live)
-- [ ] Deploy at `useQuibly.com` on Vercel
+- [ ] Deploy at `zeremi.app` on Vercel
 - [ ] Basic page-level analytics (visits + conversion rate)
 - [ ] Open Graph / metadata for social sharing
 
@@ -48,10 +48,10 @@ Convert visitors who land at `useQuibly.com` into a list of warm, opted-in waitl
 
 ## Context
 
-- **Quibly brand is already fully established** in the `marketing-app` repo (`/Users/jeff/repos/marketing-app`) — design system, fonts, color tokens, mascot SVG, tone of voice, tagline, target audience, privacy/terms templates all exist and should be reused, not re-invented.
-- The full Quibly marketing site (hero with screenshots, differentiators, pricing, FAQ, blog, guides) is *planned* in `marketing-app/.planning/` (Phases 16–18) but cannot ship yet because the product itself isn't launched and screenshots/demo material don't exist.
-- This separate `quibly-landing` repo exists so the public-facing pre-launch page can ship and iterate independently from the full app codebase, on its own deployment lifecycle.
-- **Tagline (existing):** "You know your business. Quibly knows how to market it."
+- **Zeremi brand is already fully established** in the `marketing-app` repo (`/Users/jeff/repos/marketing-app`) — design system, fonts, color tokens, mascot SVG, tone of voice, tagline, target audience, privacy/terms templates all exist and should be reused, not re-invented.
+- The full Zeremi marketing site (hero with screenshots, differentiators, pricing, FAQ, blog, guides) is *planned* in `marketing-app/.planning/` (Phases 16–18) but cannot ship yet because the product itself isn't launched and screenshots/demo material don't exist.
+- This separate `zeremi-landing` repo (formerly `quibly-landing`) exists so the public-facing pre-launch page can ship and iterate independently from the full app codebase, on its own deployment lifecycle.
+- **Tagline (existing):** "You know your business. Zeremi knows how to market it."
 - **Audience:** Solopreneurs and small-team operators who are experts at what they build/sell but not at marketing.
 - **Tone:** Conversational, modern, friendly, confident — playful and energetic, "upstart" not corporate.
 - **Key brand assets to pull from `marketing-app`:**
@@ -65,23 +65,23 @@ Convert visitors who land at `useQuibly.com` into a list of warm, opted-in waitl
 ## Constraints
 
 - **Tech stack**: Next.js 16+ on the App Router (matches `marketing-app`'s Next 16.2.1 / React 19.2.4 baseline). TypeScript. Tailwind v4 with shadcn/ui tokens — same as `marketing-app` so design tokens transfer cleanly.
-- **Email infrastructure**: Resend (Audiences API for storage, transactional API for welcome email). Reuse the existing `marketing-app` Resend account and Quibly sender domain.
-- **Domain**: `useQuibly.com` apex (production). Once the full app ships, this repo's deployment must be cleanly replaceable by `marketing-app`'s deployment at the same domain.
+- **Email infrastructure**: Resend (Audiences API for storage, transactional API for welcome email). Reuse the existing `marketing-app` Resend account and Zeremi sender domain (`hello@zeremi.app`).
+- **Domain**: `zeremi.app` apex (production). Once the full app ships, this repo's deployment must be cleanly replaceable by `marketing-app`'s deployment at the same domain.
 - **Hosting**: Vercel.
 - **Legal**: Email collection requires a published privacy policy + terms before going live (CAN-SPAM, GDPR-friendly minimum). Welcome email must include unsubscribe / mailto contact.
 - **Performance**: Landing page must hit Lighthouse mobile performance ≥90 (mobile traffic is the majority).
-- **Lifecycle**: Pre-launch only. When `marketing-app` launches at `useQuibly.com`, captured emails must be exportable / portable so the waitlist can be migrated cleanly.
+- **Lifecycle**: Pre-launch only. When `marketing-app` launches at `zeremi.app`, captured emails must be exportable / portable so the waitlist can be migrated cleanly.
 
 ## Key Decisions
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
 | Separate `quibly-landing` repo (vs. shipping a `pre-launch` route inside `marketing-app`) | Independent deployment lifecycle; can iterate without touching the full app codebase; smaller surface area to deploy and secure | — Pending |
-| Replaces `marketing-app` landing page pre-launch (single tenant on `useQuibly.com`) | Avoids duplicate domains; clean cutover at launch | — Pending |
+| Replaces `marketing-app` landing page pre-launch (single tenant on `zeremi.app`) | Avoids duplicate domains; clean cutover at launch | — Pending |
 | Minimal-with-personality (vs. bare email box or feature-detailed) | No screenshots/demos exist yet; brand assets carry the weight; minimal forms convert higher in 2026 benchmarks | — Pending |
 | Resend Audiences for email storage (vs. Supabase, ConvertKit, Mailchimp) | Already used by `marketing-app`; one account, one sender domain; transactional + audience API in one product | — Pending |
 | Single opt-in (vs. double opt-in) | Industry standard for waitlists; lower friction → higher conversion; clean the list later if needed | — Pending |
-| Below-the-fold "Why Quibly" text-only block (vs. nothing, or full screenshot section) | Gives curious visitors more before they commit, without requiring screenshot assets that don't exist | — Pending |
+| Below-the-fold "Why Zeremi" text-only block (vs. nothing, or full screenshot section) | Gives curious visitors more before they commit, without requiring screenshot assets that don't exist | — Pending |
 | Live signup counter as social proof (only when signups > some threshold) | Strongest mobile-friendly form of social proof short of testimonials; no logos / press exist yet | — Pending |
 
 ## Evolution
